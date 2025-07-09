@@ -3,3 +3,22 @@
 /workspace.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+# WebStorm files
+.idea/
+*.iml
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
