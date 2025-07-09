@@ -410,37 +410,48 @@
           <button class="filter-btn" [class.active]="selectedFilter === 'year'" (click)="selectedFilter = 'year'">
             Cette année
           </button>
+          <button class="filter-btn" [class.active]="selectedFilter === 'custom'" (click)="selectedFilter = 'custom'">
+            Plage personnalisée
+          </button>
+        </div>
+        <div class="ca-custom-range" *ngIf="selectedFilter === 'custom'">
+          <label>Du
+            <input type="date" [(ngModel)]="customDateRange.start" class="form-input ca-date-input">
+          </label>
+          <label>au
+            <input type="date" [(ngModel)]="customDateRange.end" class="form-input ca-date-input">
+          </label>
+          <button class="btn btn-primary btn-ca-validate">Valider</button>
         </div>
       </header>
-
       <div class="ca-content">
-        <div class="ca-summary">
-          <div class="ca-card">
-            <h2>CA Total</h2>
-            <div class="ca-amount">€{{ getCurrentCA().toFixed(2) }}</div>
-            <p class="ca-period">
-              {{ selectedFilter === 'today' ? 'Aujourd\'hui' :
-                 selectedFilter === 'week' ? 'Cette semaine' :
-                 selectedFilter === 'month' ? 'Ce mois' : 'Cette année' }}
-            </p>
-          </div>
-        </div>
-
-        <div class="ca-chart">
-          <div class="chart-placeholder">
-            <h3>Graphique d'évolution</h3>
-            <div class="chart-bars">
-              <div class="chart-bar" style="height: 60%"></div>
-              <div class="chart-bar" style="height: 80%"></div>
-              <div class="chart-bar" style="height: 45%"></div>
-              <div class="chart-bar" style="height: 90%"></div>
-              <div class="chart-bar" style="height: 70%"></div>
-              <div class="chart-bar" style="height: 85%"></div>
-              <div class="chart-bar" style="height: 95%"></div>
+          <div class="ca-summary">
+            <div class="ca-card">
+              <h2>CA Total</h2>
+              <div class="ca-amount">
+                €{{ selectedFilter === 'custom' ? getCAForCustomRange().toFixed(2) : getCurrentCA().toFixed(2) }}
+              </div>
+              <p class="ca-period">
+                {{ selectedFilter === 'today' ? 'Aujourd\'hui' :
+                   selectedFilter === 'week' ? 'Cette semaine' :
+                   selectedFilter === 'month' ? 'Ce mois' :
+                   selectedFilter === 'year' ? 'Cette année' :
+                   (customDateRange.start && customDateRange.end ? (customDateRange.start + ' au ' + customDateRange.end) : 'Plage personnalisée') }}
+              </p>
             </div>
-            <p>Évolution du CA sur la période sélectionnée</p>
           </div>
-        </div>
+
+          <div class="ca-chart">
+            <div class="chart-placeholder">
+              <h3>Graphique d'évolution</h3>
+              <div class="chart-bars">
+                <div class="chart-bar" *ngFor="let entry of (selectedFilter === 'custom' ? getCAHistoryForCustomRange() : caHistory.slice(-7))"
+                  [style.height.%]="(entry.amount / 250) * 100" title="{{ entry.date }}: €{{ entry.amount }}">
+                </div>
+              </div>
+              <p>Évolution du CA sur la période sélectionnée</p>
+            </div>
+          </div>
 
         <div class="ca-details">
           <h3>Détails par période</h3>
@@ -463,6 +474,35 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page historique des ventes -->
+  <div class="page" *ngIf="currentPage === 'sales-history'">
+    <div class="sales-history-bg">
+      <div class="sales-history-container">
+        <header class="sales-history-header">
+          <h1>🧾 Historique des ventes</h1>
+        </header>
+        <section class="sales-history-section">
+          <div class="sales-list">
+            <div class="sale-card" *ngFor="let sale of getSortedSalesHistory(); let i = index">
+              <div class="sale-card-header" (click)="toggleSaleDetail(i)">
+                <span class="sale-date">{{ sale.date | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span class="sale-total">€{{ sale.total.toFixed(2) }}</span>
+                <span class="sale-toggle-icon">{{ openedSaleIndex === i ? '▲' : '▼' }}</span>
+              </div>
+              <div class="sale-card-detail" *ngIf="openedSaleIndex === i">
+                <div class="sale-mocktail-detail" *ngFor="let m of sale.mocktails">
+                  <span class="mocktail-name">{{ m.name }}</span>
+                  <span class="mocktail-qty">x{{ m.quantity }}</span>
+                  <span class="mocktail-price">€{{ getMocktailUnitPrice(sale, m) | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>

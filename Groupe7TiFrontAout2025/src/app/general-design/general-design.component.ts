@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './general-design.component.css'
 })
 export class GeneralDesignComponent {
-  currentPage: 'login' | 'client-menu' | 'mocktails-management' | 'ingredients-management' | 'ca-visualization' = 'login';
+  currentPage: 'login' | 'client-menu' | 'mocktails-management' | 'ingredients-management' | 'ca-visualization' | 'sales-history' = 'login';
   
   // Données pour les mocktails
   mocktails = [
@@ -266,20 +266,139 @@ export class GeneralDesignComponent {
     thisYear: 15678.90
   };
 
+  // Historique du CA (exemple sur 30 jours)
+  caHistory = [
+    { date: '2024-07-01', amount: 120 },
+    { date: '2024-07-02', amount: 150 },
+    { date: '2024-07-03', amount: 180 },
+    { date: '2024-07-04', amount: 90 },
+    { date: '2024-07-05', amount: 210 },
+    { date: '2024-07-06', amount: 170 },
+    { date: '2024-07-07', amount: 200 },
+    { date: '2024-07-08', amount: 130 },
+    { date: '2024-07-09', amount: 160 },
+    { date: '2024-07-10', amount: 140 },
+    { date: '2024-07-11', amount: 220 },
+    { date: '2024-07-12', amount: 190 },
+    { date: '2024-07-13', amount: 175 },
+    { date: '2024-07-14', amount: 210 },
+    { date: '2024-07-15', amount: 160 },
+    { date: '2024-07-16', amount: 180 },
+    { date: '2024-07-17', amount: 200 },
+    { date: '2024-07-18', amount: 150 },
+    { date: '2024-07-19', amount: 170 },
+    { date: '2024-07-20', amount: 190 },
+    { date: '2024-07-21', amount: 210 },
+    { date: '2024-07-22', amount: 160 },
+    { date: '2024-07-23', amount: 180 },
+    { date: '2024-07-24', amount: 200 },
+    { date: '2024-07-25', amount: 150 },
+    { date: '2024-07-26', amount: 170 },
+    { date: '2024-07-27', amount: 190 },
+    { date: '2024-07-28', amount: 210 },
+    { date: '2024-07-29', amount: 160 },
+    { date: '2024-07-30', amount: 180 }
+  ];
+
+  // Historique des ventes (exemple)
+  salesHistory = [
+    {
+      date: '2024-07-30T15:42:00',
+      total: 24.50,
+      mocktails: [
+        { name: 'Mojito sans alcool', quantity: 2 },
+        { name: 'Berry Fizz', quantity: 1 }
+      ]
+    },
+    {
+      date: '2024-07-30T14:10:00',
+      total: 16.00,
+      mocktails: [
+        { name: 'Virgin Colada', quantity: 1 },
+        { name: 'Pink Lemonade', quantity: 1 }
+      ]
+    },
+    {
+      date: '2024-07-29T19:05:00',
+      total: 8.50,
+      mocktails: [
+        { name: 'Mojito sans alcool', quantity: 1 }
+      ]
+    },
+    {
+      date: '2024-07-29T12:30:00',
+      total: 18.00,
+      mocktails: [
+        { name: 'Sunset Spritz', quantity: 2 }
+      ]
+    },
+    {
+      date: '2024-07-28T17:55:00',
+      total: 27.70,
+      mocktails: [
+        { name: 'Tropical Dream', quantity: 2 },
+        { name: 'Green Detox', quantity: 1 }
+      ]
+    }
+  ];
+
   // Filtres pour le CA
   selectedFilter: 'today' | 'week' | 'month' | 'year' | 'custom' = 'today';
+  // Plage personnalisée
   customDateRange = { start: '', end: '' };
+
+  getCAForCustomRange() {
+    if (!this.customDateRange.start || !this.customDateRange.end) return 0;
+    const start = new Date(this.customDateRange.start);
+    const end = new Date(this.customDateRange.end);
+    return this.caHistory
+      .filter(entry => {
+        const d = new Date(entry.date);
+        return d >= start && d <= end;
+      })
+      .reduce((sum, entry) => sum + entry.amount, 0);
+  }
+
+  getCAHistoryForCustomRange() {
+    if (!this.customDateRange.start || !this.customDateRange.end) return [];
+    const start = new Date(this.customDateRange.start);
+    const end = new Date(this.customDateRange.end);
+    return this.caHistory.filter(entry => {
+      const d = new Date(entry.date);
+      return d >= start && d <= end;
+    });
+  }
+
+  getSortedSalesHistory() {
+    return this.salesHistory.slice().sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  // Ajout pour l'affichage interactif des détails de vente
+  openedSaleIndex: number | null = null;
+
+  // Ouvre/ferme le détail d'une vente
+  toggleSaleDetail(index: number): void {
+    this.openedSaleIndex = this.openedSaleIndex === index ? null : index;
+  }
+
+  // Utilitaire pour récupérer le prix unitaire d'un mocktail vendu
+  getMocktailUnitPrice(sale: any, m: any): number {
+    if (m.price !== undefined) return m.price;
+    // Si pas de prix, on tente de le calculer (total divisé par la somme des quantités)
+    const totalQty = sale.mocktails.reduce((sum: number, mk: any) => sum + (mk.quantity || 1), 0);
+    return totalQty ? sale.total / totalQty : 0;
+  }
 
   // Navigation
   nextPage() {
-    const pages = ['login', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization'];
+    const pages = ['login', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization', 'sales-history'];
     const currentIndex = pages.indexOf(this.currentPage);
     const nextIndex = (currentIndex + 1) % pages.length;
     this.currentPage = pages[nextIndex] as any;
   }
 
   prevPage() {
-    const pages = ['login', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization'];
+    const pages = ['login', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization', 'sales-history'];
     const currentIndex = pages.indexOf(this.currentPage);
     const prevIndex = currentIndex === 0 ? pages.length - 1 : currentIndex - 1;
     this.currentPage = pages[prevIndex] as any;
