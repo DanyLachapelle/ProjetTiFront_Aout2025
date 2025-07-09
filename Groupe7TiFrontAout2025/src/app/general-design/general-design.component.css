@@ -1073,23 +1073,104 @@ body, .design-container {
 }
 
 @media (max-width: 900px) {
-  .login-card {
+  .login-card, .helha-fresh-card {
+    padding: 2rem 0.7rem 1.5rem 0.7rem;
     min-width: unset;
-    padding: 2rem 1rem 1.5rem 1rem;
+    border-radius: 22px;
+  }
+  .login-title {
+    font-size: 1.6rem;
   }
   .login-container {
     max-width: 98vw;
+    padding: 0 0.5rem;
   }
-}
-
-@media (max-width: 1100px) {
-  .mocktails-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .management-container, .sales-history-bg, .ca-container {
+    padding: 1.2rem 0.5rem;
+    max-width: 98vw;
+    border-radius: 18px;
   }
 }
 @media (max-width: 700px) {
-  .mocktails-grid {
-    grid-template-columns: 1fr;
+  .login-card, .helha-fresh-card {
+    padding: 1rem 0.2rem 0.7rem 0.2rem;
+    border-radius: 14px;
+  }
+  .login-title {
+    font-size: 1.2rem;
+  }
+  .login-form, .login-header {
+    gap: 0.7rem;
+  }
+  .form-input {
+    font-size: 0.98rem;
+    padding: 0.7rem 0.7rem;
+  }
+  .btn-login {
+    font-size: 1rem;
+    padding: 0.8rem 0;
+  }
+  .management-container, .sales-history-bg, .ca-container {
+    padding: 0.5rem 0.1rem;
+    max-width: 100vw;
+    border-radius: 10px;
+  }
+  .mocktail-card, .ingredient-card, .sale-card {
+    padding: 0.7rem 0.2rem 0.5rem 0.2rem;
+    border-radius: 10px;
+  }
+  .mocktail-header h3, .ingredient-header h3 {
+    font-size: 1rem;
+  }
+  .mocktail-content p, .ingredient-name, .ingredient-quantity {
+    font-size: 0.95rem;
+  }
+  .btn, .btn-primary, .btn-secondary {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 16px;
+  }
+  .page-title {
+    font-size: 1rem;
+  }
+  .page-navigation {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0.5rem;
+  }
+}
+@media (max-width: 500px) {
+  .login-card, .helha-fresh-card {
+    padding: 0.5rem 0.1rem 0.3rem 0.1rem;
+    border-radius: 7px;
+  }
+  .login-title {
+    font-size: 1rem;
+  }
+  .form-input {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.5rem;
+  }
+  .btn-login {
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+    border-radius: 12px;
+  }
+  .management-container, .sales-history-bg, .ca-container {
+    padding: 0.2rem 0.05rem;
+    border-radius: 5px;
+  }
+  .mocktail-card, .ingredient-card, .sale-card {
+    padding: 0.3rem 0.05rem 0.2rem 0.05rem;
+    border-radius: 5px;
+  }
+  .btn, .btn-primary, .btn-secondary {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 10px;
+  }
+  .page-title {
+    font-size: 0.85rem;
   }
 }
 
