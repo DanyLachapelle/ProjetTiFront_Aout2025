@@ -158,14 +158,17 @@
   <div class="page" *ngIf="currentPage === 'mocktails-management'">
     <div class="management-container">
       <header class="management-header">
-        <h1>🍹 Gestion des Mocktails</h1>
-        <button class="btn btn-primary">+ Nouveau Mocktail</button>
+        <h1 class="management-title">
+          <img src="assets/favicon.png" alt="Logo Helha Fresh" class="management-logo" />
+          Gestion des Mocktails
+        </h1>
+        <button class="btn btn-primary" (click)="openMocktailModal()">+ Nouveau Mocktail</button>
       </header>
 
       <div class="management-content">
         <div class="mocktails-list">
           <div class="mocktail-item" *ngFor="let mocktail of mocktails">
-            <div class="mocktail-info">
+            <div class="mocktail-info" (click)="toggleIngredients(mocktail.id)">
               <div class="mocktail-header">
                 <span class="mocktail-emoji">{{ mocktail.image }}</span>
                 <h3>{{ mocktail.name }}</h3>
@@ -177,10 +180,73 @@
               <div class="mocktail-details">
                 <span class="price">€{{ mocktail.price.toFixed(2) }}</span>
                 <div class="actions">
-                  <button class="btn btn-small btn-outline">Modifier</button>
-                  <button class="btn btn-small btn-secondary">Voir recette</button>
+                  <button class="btn btn-small btn-secondary" (click)="$event.stopPropagation(); openMocktailModal(mocktail)">Modifier</button>
                 </div>
               </div>
+            </div>
+            <!-- Section ingrédients dépliable -->
+            <div class="ingredients-section" *ngIf="expandedMocktailId === mocktail.id">
+              <div class="ingredients-header">
+                <h4>Ingrédients :</h4>
+              </div>
+              <div class="ingredients-list">
+                <div class="ingredient-item" *ngFor="let ingredient of mocktail.ingredients">
+                  <span class="ingredient-name">{{ ingredient.name }}</span>
+                  <span class="ingredient-quantity">{{ ingredient.quantity }}{{ ingredient.unit }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal d'édition/création de mocktail -->
+      <div class="order-modal-backdrop" *ngIf="showMocktailModal">
+        <div class="order-modal">
+          <button class="modal-close" (click)="closeMocktailModal()" title="Fermer">✕</button>
+          <div class="order-modal-content">
+            <h2>{{ editingMocktail ? 'Modifier le Mocktail' : 'Nouveau Mocktail' }}</h2>
+            
+            <div class="form-group">
+              <label for="mocktail-name">Nom du mocktail</label>
+              <input type="text" id="mocktail-name" [(ngModel)]="mocktailForm.name" class="form-input" placeholder="Nom du mocktail">
+            </div>
+            
+            <div class="form-group">
+              <label for="mocktail-description">Description</label>
+              <textarea id="mocktail-description" [(ngModel)]="mocktailForm.description" class="form-input" rows="3" placeholder="Description du mocktail"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="mocktail-price">Prix (€)</label>
+              <input type="number" id="mocktail-price" [(ngModel)]="mocktailForm.price" class="form-input" step="0.01" min="0" placeholder="0.00">
+            </div>
+            
+            <div class="form-group">
+              <label for="mocktail-emoji">Emoji</label>
+              <input type="text" id="mocktail-emoji" [(ngModel)]="mocktailForm.image" class="form-input" maxlength="2" placeholder="Ex: 🍹">
+            </div>
+            <!-- Champ statut supprimé ici -->
+            
+            <div class="form-group">
+              <label>Ingrédients</label>
+              <div class="ingredients-form">
+                <div class="ingredient-form-item" *ngFor="let ingredient of mocktailForm.ingredients; let i = index">
+                  <input type="text" [(ngModel)]="ingredient.name" class="form-input ingredient-name" placeholder="Nom de l'ingrédient">
+                  <input type="number" [(ngModel)]="ingredient.quantity" class="form-input ingredient-quantity" step="0.1" min="0" placeholder="Qté">
+                  <select [(ngModel)]="ingredient.unit" class="form-input ingredient-unit">
+                    <option value="cl">cl</option>
+                    <option value="g">g</option>
+                  </select>
+                  <button type="button" class="btn btn-small btn-outline" (click)="removeIngredient(i)">Supprimer</button>
+                </div>
+                <button type="button" class="btn btn-small btn-secondary" (click)="addIngredient()">+ Ajouter un ingrédient</button>
+              </div>
+            </div>
+            
+            <div class="modal-actions">
+              <button class="btn btn-primary" (click)="saveMocktail()">{{ editingMocktail ? 'Modifier' : 'Créer' }}</button>
+              <button class="btn btn-outline" (click)="closeMocktailModal()">Annuler</button>
             </div>
           </div>
         </div>

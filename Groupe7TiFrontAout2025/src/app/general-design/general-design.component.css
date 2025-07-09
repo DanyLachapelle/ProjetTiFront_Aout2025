@@ -183,6 +183,12 @@ body, .design-container {
   box-shadow: 0 0 0 2px #ff7e5f33;
 }
 
+.form-input[type="textarea"], textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+  font-family: 'Quicksand', Arial, sans-serif;
+}
+
 .btn-login {
   width: 80%;
   margin: 0.7rem auto 0 auto;
@@ -401,6 +407,21 @@ body, .design-container {
   font-size: 2rem;
 }
 
+.management-title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #000 !important;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.management-logo {
+  height: 32px;
+  width: 32px;
+  object-fit: contain;
+}
+
 .management-content {
   padding: 2rem;
 }
@@ -423,6 +444,96 @@ body, .design-container {
 .mocktail-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.mocktail-info {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.mocktail-info:hover {
+  background: rgba(255, 126, 95, 0.05);
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+  margin: -0.5rem;
+}
+
+/* Section ingrédients dépliable */
+.ingredients-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(67, 206, 162, 0.1);
+  border-radius: 12px;
+  border-left: 4px solid var(--secondary-color);
+}
+
+.ingredients-header h4 {
+  color: var(--dark-color);
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+.ingredients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ingredient-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ingredient-name {
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+.ingredient-quantity {
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(255, 126, 95, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+/* Formulaire d'ingrédients dans la modal */
+.ingredients-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.ingredient-form-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ingredient-name {
+  grid-column: 1;
+}
+
+.ingredient-quantity {
+  grid-column: 2;
+}
+
+.ingredient-unit {
+  grid-column: 3;
+}
+
+.ingredient-form-item .btn {
+  grid-column: 4;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.8rem;
 }
 
 .mocktail-header {
@@ -768,8 +879,11 @@ body, .design-container {
 }
 
 .status-badge.error {
-  background: var(--error-color);
-  color: white;
+  background: none;
+  color: var(--error-color);
+  padding: 0;
+  border-radius: 0;
+  font-weight: 700;
 }
 
 .status-badge.warning {
@@ -1191,4 +1305,13 @@ body, .design-container {
     min-width: 90vw;
     padding: 1.2rem 0.7rem 1.2rem 0.7rem;
   }
+}
+
+.ingredients-form .btn.btn-small.btn-secondary {
+  width: auto;
+  min-width: unset;
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+  align-self: flex-start;
+  margin-top: 0.2rem;
 }

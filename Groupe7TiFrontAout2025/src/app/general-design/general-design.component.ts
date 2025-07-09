@@ -20,7 +20,13 @@ export class GeneralDesignComponent {
       description: 'Rafraîchissant avec menthe fraîche et citron vert',
       price: 8.50,
       available: true,
-      image: '🍹'
+      image: '🍹',
+      ingredients: [
+        { name: 'Menthe fraîche', quantity: 5, unit: 'g' },
+        { name: 'Citron vert', quantity: 20, unit: 'g' }, // 2 pcs => 20g
+        { name: 'Sirop de sucre', quantity: 1.5, unit: 'cl' }, // 15ml => 1.5cl
+        { name: 'Eau gazeuse', quantity: 20, unit: 'cl' }
+      ]
     },
     {
       id: 2,
@@ -28,7 +34,12 @@ export class GeneralDesignComponent {
       description: 'Exotique avec noix de coco et ananas',
       price: 9.00,
       available: true,
-      image: '🥤'
+      image: '🥤',
+      ingredients: [
+        { name: 'Jus d\'ananas', quantity: 15, unit: 'cl' },
+        { name: 'Lait de coco', quantity: 8, unit: 'cl' },
+        { name: 'Sirop de sucre', quantity: 1, unit: 'cl' } // 10ml => 1cl
+      ]
     },
     {
       id: 3,
@@ -36,7 +47,12 @@ export class GeneralDesignComponent {
       description: 'Orange sanguine, grenadine et eau gazeuse',
       price: 7.50,
       available: false,
-      image: '🌅'
+      image: '🌅',
+      ingredients: [
+        { name: 'Jus d\'orange sanguine', quantity: 12, unit: 'cl' },
+        { name: 'Grenadine', quantity: 3, unit: 'cl' },
+        { name: 'Eau gazeuse', quantity: 10, unit: 'cl' }
+      ]
     },
     {
       id: 4,
@@ -44,7 +60,12 @@ export class GeneralDesignComponent {
       description: 'Fruits rouges, citron et eau pétillante',
       price: 8.00,
       available: true,
-      image: '🍓'
+      image: '🍓',
+      ingredients: [
+        { name: 'Fruits rouges', quantity: 8, unit: 'g' },
+        { name: 'Jus de citron', quantity: 5, unit: 'cl' },
+        { name: 'Eau pétillante', quantity: 15, unit: 'cl' }
+      ]
     },
     {
       id: 5,
@@ -52,7 +73,12 @@ export class GeneralDesignComponent {
       description: 'Mangue, passion et lait de coco',
       price: 9.20,
       available: true,
-      image: '🥭'
+      image: '🥭',
+      ingredients: [
+        { name: 'Jus de mangue', quantity: 10, unit: 'cl' },
+        { name: 'Jus de fruit de la passion', quantity: 5, unit: 'cl' },
+        { name: 'Lait de coco', quantity: 8, unit: 'cl' }
+      ]
     },
     {
       id: 6,
@@ -60,7 +86,12 @@ export class GeneralDesignComponent {
       description: 'Concombre, pomme verte et menthe',
       price: 8.80,
       available: true,
-      image: '🥒'
+      image: '🥒',
+      ingredients: [
+        { name: 'Concombre', quantity: 10, unit: 'g' }, // 1 pcs => 10g
+        { name: 'Pomme verte', quantity: 10, unit: 'g' }, // 1 pcs => 10g
+        { name: 'Menthe fraîche', quantity: 3, unit: 'g' }
+      ]
     },
     {
       id: 7,
@@ -68,9 +99,87 @@ export class GeneralDesignComponent {
       description: 'Citron, framboise et sirop d’agave',
       price: 7.80,
       available: true,
-      image: '🍋'
+      image: '🍋',
+      ingredients: [
+        { name: 'Jus de citron', quantity: 8, unit: 'cl' },
+        { name: 'Framboises', quantity: 6, unit: 'g' },
+        { name: 'Sirop d\'agave', quantity: 1.2, unit: 'cl' } // 12ml => 1.2cl
+      ]
     }
   ];
+
+  // --- Gestion des mocktails (édition/création) ---
+  showMocktailModal = false;
+  editingMocktail: any = null;
+  expandedMocktailId: number | null = null;
+  mocktailForm = {
+    name: '',
+    description: '',
+    price: 0,
+    image: '',
+    available: true,
+    ingredients: [{ name: '', quantity: 0, unit: 'cl' }]
+  };
+
+  toggleIngredients(mocktailId: number) {
+    this.expandedMocktailId = this.expandedMocktailId === mocktailId ? null : mocktailId;
+  }
+
+  openMocktailModal(mocktail?: any) {
+    this.editingMocktail = mocktail || null;
+    if (mocktail) {
+      // Mode édition - pré-remplir le formulaire
+      this.mocktailForm = {
+        name: mocktail.name,
+        description: mocktail.description,
+        price: mocktail.price,
+        image: mocktail.image,
+        available: mocktail.available,
+        ingredients: [...mocktail.ingredients]
+      };
+    } else {
+      // Mode création - formulaire vide
+      this.mocktailForm = {
+        name: '',
+        description: '',
+        price: 0,
+        image: '',
+        available: true,
+        ingredients: [{ name: '', quantity: 0, unit: 'cl' }]
+      };
+    }
+    this.showMocktailModal = true;
+  }
+
+  closeMocktailModal() {
+    this.showMocktailModal = false;
+    this.editingMocktail = null;
+  }
+
+  addIngredient() {
+    this.mocktailForm.ingredients.push({ name: '', quantity: 0, unit: 'cl' });
+  }
+
+  removeIngredient(index: number) {
+    if (this.mocktailForm.ingredients.length > 1) {
+      this.mocktailForm.ingredients.splice(index, 1);
+    }
+  }
+
+  saveMocktail() {
+    if (this.editingMocktail) {
+      // Mode édition - mettre à jour le mocktail existant
+      Object.assign(this.editingMocktail, this.mocktailForm);
+    } else {
+      // Mode création - ajouter un nouveau mocktail
+      const newMocktail = {
+        id: Math.max(...this.mocktails.map(m => m.id)) + 1,
+        ...this.mocktailForm
+      };
+      this.mocktails.push(newMocktail);
+    }
+    this.closeMocktailModal();
+  }
 
   // --- Gestion du panier et de la modal ---
   showOrderModal = false;
