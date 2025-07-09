@@ -58,24 +58,43 @@
         <div class="order-cart" *ngIf="currentPage === 'client-menu'">
           <div class="cart-header">
             <span class="cart-title">🧾 Commande</span>
-            <button class="cart-clear" *ngIf="orderList.length" (click)="clearOrder()" title="Vider le panier">✕</button>
+            <button class="cart-clear" *ngIf="orderList.length" (click)="$event.stopPropagation(); clearOrder();" title="Vider le panier">✕</button>
           </div>
-          <div class="cart-list" *ngIf="orderList.length; else emptyCart">
-            <div class="cart-item" *ngFor="let item of orderList">
-              <span class="cart-item-name">{{ item.mocktail.name }}</span>
-              <span class="cart-item-qty">x{{ item.quantity }}</span>
-              <span class="cart-item-price">€{{ (item.mocktail.price * item.quantity).toFixed(2) }}</span>
-              <button class="cart-remove" (click)="removeOrderItem(item.mocktail.id)" title="Retirer">🗑️</button>
-            </div>
+          <div *ngIf="!orderList.length" class="cart-empty">Aucune commande</div>
+          <div class="cart-footer" *ngIf="orderList.length">
             <div class="cart-total">
               <span>Total :</span>
               <span class="cart-total-price">€{{ getOrderTotal().toFixed(2) }}</span>
             </div>
-            <button class="btn btn-primary cart-pay">Payer</button>
+            <button class="btn btn-primary cart-pay" (click)="$event.stopPropagation(); openFullOrderModal();">Payer</button>
           </div>
-          <ng-template #emptyCart>
-            <div class="cart-empty">Aucune commande</div>
-          </ng-template>
+        </div>
+
+        <!-- Modal toutes les commandes -->
+        <div class="order-modal-backdrop" *ngIf="showFullOrderModal">
+          <div class="order-modal order-modal-large">
+            <button class="modal-close" (click)="closeFullOrderModal()" title="Fermer">✕</button>
+            <div class="order-modal-content">
+              <h2 style="margin-bottom:1.2rem; color: #111;">Toutes les commandes</h2>
+              <div class="cart-list-full">
+                <div class="cart-item" *ngFor="let item of orderList">
+                  <span class="cart-item-name">{{ item.mocktail.name }}</span>
+                  <div class="cart-qty-controls">
+                    <button class="qty-btn" (click)="decreaseQuantity(item)">-</button>
+                    <span class="cart-item-qty">x{{ item.quantity }}</span>
+                    <button class="qty-btn" (click)="increaseQuantity(item)">+</button>
+                  </div>
+                  <span class="cart-item-price">€{{ (item.mocktail.price * item.quantity).toFixed(2) }}</span>
+                  <button class="cart-remove" (click)="removeOrderItem(item.mocktail.id)" title="Retirer">🗑️</button>
+                </div>
+              </div>
+              <div class="cart-total">
+                <span>Total :</span>
+                <span class="cart-total-price">€{{ getOrderTotal().toFixed(2) }}</span>
+              </div>
+              <button class="btn btn-primary cart-pay" style="margin-top:1.2rem;">Payer</button>
+            </div>
+          </div>
         </div>
       </header>
 

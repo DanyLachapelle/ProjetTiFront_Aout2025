@@ -114,6 +114,24 @@ export class GeneralDesignComponent {
     this.orderList = this.orderList.filter(item => item.mocktail.id !== id);
   }
 
+  increaseQuantity(item: {mocktail: any, quantity: number}) {
+    item.quantity++;
+  }
+  decreaseQuantity(item: {mocktail: any, quantity: number}) {
+    if (item.quantity > 1) {
+      item.quantity--;
+    }
+  }
+
+  showFullOrderModal = false;
+
+  openFullOrderModal() {
+    this.showFullOrderModal = true;
+  }
+  closeFullOrderModal() {
+    this.showFullOrderModal = false;
+  }
+
   // Données pour les ingrédients
   ingredients = [
     { id: 1, name: 'Menthe fraîche', stock: 40, limit: 50, unit: 'g', status: 'warning' },
