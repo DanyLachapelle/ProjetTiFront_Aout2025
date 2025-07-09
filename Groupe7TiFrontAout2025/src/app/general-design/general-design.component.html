@@ -1,126 +1,232 @@
 <div class="design-container">
-  <!-- Header avec navigation -->
-  <header class="header">
-    <div class="logo">
-      <h1>🍹 MocktailBar</h1>
+  <!-- Navigation entre les pages -->
+  <div class="page-navigation">
+    <button class="nav-btn" (click)="prevPage()">← Précédent</button>
+    <div class="page-indicator">
+      <span class="page-title">{{ currentPage === 'login' ? 'Connexion Gérant' : 
+                                  currentPage === 'client-menu' ? 'Menu Client' :
+                                  currentPage === 'mocktails-management' ? 'Gestion Mocktails' :
+                                  currentPage === 'ingredients-management' ? 'Gestion Ingrédients' :
+                                  'Visualisation CA' }}</span>
     </div>
-    <nav class="nav">
-      <a href="#" class="nav-link active">Accueil</a>
-      <a href="#" class="nav-link">Menu</a>
-      <a href="#" class="nav-link">À propos</a>
-    </nav>
-  </header>
+    <button class="nav-btn" (click)="nextPage()">Suivant →</button>
+  </div>
 
-  <!-- Section principale -->
-  <main class="main-content">
-    <!-- Section couleurs -->
-    <section class="color-palette">
-      <h2>Palette de couleurs</h2>
-      <div class="colors-grid">
-        <div class="color-card primary">
-          <div class="color-swatch"></div>
-          <p>Primaire</p>
-          <code>#2C5530</code>
+  <!-- Page de connexion gérant -->
+  <div class="page" *ngIf="currentPage === 'login'">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo">🍹</div>
+          <h1 class="login-title">MocktailBar</h1>
+          <p class="login-subtitle">Espace Gérant</p>
         </div>
-        <div class="color-card secondary">
-          <div class="color-swatch"></div>
-          <p>Secondaire</p>
-          <code>#F4A261</code>
-        </div>
-        <div class="color-card accent">
-          <div class="color-swatch"></div>
-          <p>Accent</p>
-          <code>#E76F51</code>
-        </div>
-        <div class="color-card light">
-          <div class="color-swatch"></div>
-          <p>Clair</p>
-          <code>#F8F9FA</code>
-        </div>
-        <div class="color-card dark">
-          <div class="color-swatch"></div>
-          <p>Sombre</p>
-          <code>#212529</code>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section typographie -->
-    <section class="typography">
-      <h2>Typographie</h2>
-      <div class="text-samples">
-        <h1 class="title">Titre principal - H1</h1>
-        <h2 class="subtitle">Sous-titre - H2</h2>
-        <h3 class="section-title">Titre de section - H3</h3>
-        <p class="body-text">Ceci est un exemple de texte de corps. Il utilise une police lisible et une taille confortable pour la lecture.</p>
-        <p class="small-text">Texte plus petit pour les détails et informations secondaires.</p>
-      </div>
-    </section>
-
-    <!-- Section boutons -->
-    <section class="buttons">
-      <h2>Boutons</h2>
-      <div class="button-group">
-        <button class="btn btn-primary">Bouton Principal</button>
-        <button class="btn btn-secondary">Bouton Secondaire</button>
-        <button class="btn btn-outline">Bouton Contour</button>
-        <button class="btn btn-small">Petit Bouton</button>
-      </div>
-    </section>
-
-    <!-- Section cartes -->
-    <section class="cards">
-      <h2>Cartes</h2>
-      <div class="cards-grid">
-        <div class="card">
-          <div class="card-image">
-            <div class="mocktail-placeholder">🍹</div>
+        <form class="login-form">
+          <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" placeholder="Entrez votre nom d'utilisateur" class="form-input">
           </div>
-          <div class="card-content">
-            <h3>Mojito sans alcool</h3>
-            <p>Rafraîchissant avec menthe fraîche et citron vert</p>
-            <div class="card-footer">
-              <span class="price">€8.50</span>
-              <button class="btn btn-primary">Commander</button>
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" placeholder="Entrez votre mot de passe" class="form-input">
+          </div>
+          <button type="submit" class="btn-login">
+            Se connecter
+          </button>
+        </form>
+        <div class="login-footer">
+          <p>Mot de passe oublié?</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page menu client -->
+  <div class="page" *ngIf="currentPage === 'client-menu'">
+    <div class="client-container">
+      <header class="client-header">
+        <div class="client-info">
+          <h1>🍹 MocktailBar</h1>
+          <p>Table n°12 • QR Code valide jusqu'à 14:25</p>
+        </div>
+        <div class="location-status">
+          <span class="status-badge success">📍 Localisation confirmée</span>
+        </div>
+      </header>
+
+      <main class="client-menu">
+        <h2>Notre carte de mocktails</h2>
+        <p class="menu-subtitle">Découvrez nos délicieuses boissons sans alcool</p>
+        
+        <div class="mocktails-grid">
+          <div class="mocktail-card" *ngFor="let mocktail of mocktails" [class.unavailable]="!mocktail.available">
+            <div class="mocktail-image">
+              <span class="mocktail-emoji">{{ mocktail.image }}</span>
+              <div class="availability-badge" *ngIf="!mocktail.available">
+                Indisponible
+              </div>
+            </div>
+            <div class="mocktail-content">
+              <h3>{{ mocktail.name }}</h3>
+              <p>{{ mocktail.description }}</p>
+              <div class="mocktail-footer">
+                <span class="price">€{{ mocktail.price.toFixed(2) }}</span>
+                <button class="btn btn-primary" [disabled]="!mocktail.available">
+                  {{ mocktail.available ? 'Commander' : 'Indisponible' }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-image">
-            <div class="mocktail-placeholder">🥤</div>
-          </div>
-          <div class="card-content">
-            <h3>Virgin Colada</h3>
-            <p>Exotique avec noix de coco et ananas</p>
-            <div class="card-footer">
-              <span class="price">€9.00</span>
-              <button class="btn btn-primary">Commander</button>
+      </main>
+    </div>
+  </div>
+
+  <!-- Page gestion des mocktails -->
+  <div class="page" *ngIf="currentPage === 'mocktails-management'">
+    <div class="management-container">
+      <header class="management-header">
+        <h1>🍹 Gestion des Mocktails</h1>
+        <button class="btn btn-primary">+ Nouveau Mocktail</button>
+      </header>
+
+      <div class="management-content">
+        <div class="mocktails-list">
+          <div class="mocktail-item" *ngFor="let mocktail of mocktails">
+            <div class="mocktail-info">
+              <div class="mocktail-header">
+                <span class="mocktail-emoji">{{ mocktail.image }}</span>
+                <h3>{{ mocktail.name }}</h3>
+                <span class="status-badge" [class.success]="mocktail.available" [class.error]="!mocktail.available">
+                  {{ mocktail.available ? 'Disponible' : 'Indisponible' }}
+                </span>
+              </div>
+              <p>{{ mocktail.description }}</p>
+              <div class="mocktail-details">
+                <span class="price">€{{ mocktail.price.toFixed(2) }}</span>
+                <div class="actions">
+                  <button class="btn btn-small btn-outline">Modifier</button>
+                  <button class="btn btn-small btn-secondary">Voir recette</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Section alertes -->
-    <section class="alerts">
-      <h2>Alertes et notifications</h2>
-      <div class="alert alert-success">
-        <span class="alert-icon">✅</span>
-        <p>Commande confirmée ! Votre mocktail arrive dans 5 minutes.</p>
-      </div>
-      <div class="alert alert-warning">
-        <span class="alert-icon">⚠️</span>
-        <p>Stock faible : menthe fraîche (40g restants)</p>
-      </div>
-      <div class="alert alert-error">
-        <span class="alert-icon">❌</span>
-        <p>Erreur : impossible de traiter votre commande.</p>
-      </div>
-    </section>
-  </main>
+  <!-- Page gestion des ingrédients -->
+  <div class="page" *ngIf="currentPage === 'ingredients-management'">
+    <div class="management-container">
+      <header class="management-header">
+        <h1>🥬 Gestion des Ingrédients</h1>
+        <button class="btn btn-primary">+ Nouvel Ingrédient</button>
+      </header>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <p>&copy; 2024 MocktailBar - Tous droits réservés</p>
-  </footer>
+      <div class="management-content">
+        <div class="ingredients-grid">
+          <div class="ingredient-card" *ngFor="let ingredient of ingredients" [class]="'status-' + ingredient.status">
+            <div class="ingredient-header">
+              <h3>{{ ingredient.name }}</h3>
+              <span class="status-badge" [class]="ingredient.status">
+                {{ ingredient.status === 'good' ? 'OK' : 
+                   ingredient.status === 'warning' ? 'Attention' : 'Critique' }}
+              </span>
+            </div>
+            
+            <div class="stock-info">
+              <div class="stock-bar">
+                <div class="stock-fill" [style.width.%]="(ingredient.stock / ingredient.limit) * 100"></div>
+              </div>
+              <div class="stock-details">
+                <span class="current-stock">{{ ingredient.stock }}{{ ingredient.unit }}</span>
+                <span class="stock-limit">/ {{ ingredient.limit }}{{ ingredient.unit }}</span>
+              </div>
+            </div>
+            
+            <div class="ingredient-actions">
+              <button class="btn btn-small btn-primary">Réapprovisionner</button>
+              <button class="btn btn-small btn-outline">Modifier</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page visualisation CA -->
+  <div class="page" *ngIf="currentPage === 'ca-visualization'">
+    <div class="ca-container">
+      <header class="ca-header">
+        <h1>📊 Chiffre d'Affaires</h1>
+        <div class="ca-filters">
+          <button class="filter-btn" [class.active]="selectedFilter === 'today'" (click)="selectedFilter = 'today'">
+            Aujourd'hui
+          </button>
+          <button class="filter-btn" [class.active]="selectedFilter === 'week'" (click)="selectedFilter = 'week'">
+            Cette semaine
+          </button>
+          <button class="filter-btn" [class.active]="selectedFilter === 'month'" (click)="selectedFilter = 'month'">
+            Ce mois
+          </button>
+          <button class="filter-btn" [class.active]="selectedFilter === 'year'" (click)="selectedFilter = 'year'">
+            Cette année
+          </button>
+        </div>
+      </header>
+
+      <div class="ca-content">
+        <div class="ca-summary">
+          <div class="ca-card">
+            <h2>CA Total</h2>
+            <div class="ca-amount">€{{ getCurrentCA().toFixed(2) }}</div>
+            <p class="ca-period">
+              {{ selectedFilter === 'today' ? 'Aujourd\'hui' :
+                 selectedFilter === 'week' ? 'Cette semaine' :
+                 selectedFilter === 'month' ? 'Ce mois' : 'Cette année' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="ca-chart">
+          <div class="chart-placeholder">
+            <h3>Graphique d'évolution</h3>
+            <div class="chart-bars">
+              <div class="chart-bar" style="height: 60%"></div>
+              <div class="chart-bar" style="height: 80%"></div>
+              <div class="chart-bar" style="height: 45%"></div>
+              <div class="chart-bar" style="height: 90%"></div>
+              <div class="chart-bar" style="height: 70%"></div>
+              <div class="chart-bar" style="height: 85%"></div>
+              <div class="chart-bar" style="height: 95%"></div>
+            </div>
+            <p>Évolution du CA sur la période sélectionnée</p>
+          </div>
+        </div>
+
+        <div class="ca-details">
+          <h3>Détails par période</h3>
+          <div class="ca-breakdown">
+            <div class="breakdown-item">
+              <span>Aujourd'hui</span>
+              <span class="amount">€{{ caData.today.toFixed(2) }}</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Cette semaine</span>
+              <span class="amount">€{{ caData.thisWeek.toFixed(2) }}</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Ce mois</span>
+              <span class="amount">€{{ caData.thisMonth.toFixed(2) }}</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Cette année</span>
+              <span class="amount">€{{ caData.thisYear.toFixed(2) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
