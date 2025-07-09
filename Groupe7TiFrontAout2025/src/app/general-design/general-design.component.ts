@@ -181,6 +181,14 @@ export class GeneralDesignComponent {
     this.closeMocktailModal();
   }
 
+  onIngredientNameChange(i: number) {
+    const selectedName = this.mocktailForm.ingredients[i].name;
+    const found = this.ingredients.find(ing => ing.name === selectedName);
+    if (found) {
+      this.mocktailForm.ingredients[i].unit = found.unit;
+    }
+  }
+
   // --- Gestion du panier et de la modal ---
   showOrderModal = false;
   selectedMocktail: any = null;
@@ -293,5 +301,77 @@ export class GeneralDesignComponent {
       case 'year': return this.caData.thisYear;
       default: return this.caData.today;
     }
+  }
+
+  // --- Gestion modals réapprovisionnement et ajout ingrédient ---
+  showRestockModal = false;
+  restockIngredient: any = null;
+  restockQuantity: number = 1;
+
+  openRestockModal(ingredient: any) {
+    this.restockIngredient = ingredient;
+    this.restockQuantity = 1;
+    this.showRestockModal = true;
+  }
+  closeRestockModal() {
+    this.showRestockModal = false;
+    this.restockIngredient = null;
+    this.restockQuantity = 1;
+  }
+  validateRestock() {
+    if (this.restockIngredient && this.restockQuantity > 0) {
+      this.restockIngredient.stock += Number(this.restockQuantity);
+    }
+    this.closeRestockModal();
+  }
+
+  showAddIngredientModal = false;
+  newIngredientForm = {
+    name: '',
+    type: 'liquide',
+    stock: 0,
+    limit: 1
+  };
+  openAddIngredientModal() {
+    this.newIngredientForm = { name: '', type: 'liquide', stock: 0, limit: 1 };
+    this.showAddIngredientModal = true;
+  }
+  closeAddIngredientModal() {
+    this.showAddIngredientModal = false;
+  }
+  validateAddIngredient() {
+    if (!this.newIngredientForm.name || this.newIngredientForm.limit <= 0) return;
+    this.ingredients.push({
+      id: Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
+      name: this.newIngredientForm.name,
+      stock: Number(this.newIngredientForm.stock),
+      limit: Number(this.newIngredientForm.limit),
+      unit: this.newIngredientForm.type === 'liquide' ? 'cl' : 'g',
+      status: this.getStockStatus(Number(this.newIngredientForm.stock), Number(this.newIngredientForm.limit))
+    });
+    this.closeAddIngredientModal();
+  }
+
+  showEditLimitModal = false;
+  editLimitIngredient: any = null;
+  editLimitValue: number = 1;
+
+  openEditLimitModal(ingredient: any) {
+    this.editLimitIngredient = ingredient;
+    this.editLimitValue = ingredient.limit;
+    this.showEditLimitModal = true;
+  }
+  closeEditLimitModal() {
+    this.showEditLimitModal = false;
+    this.editLimitIngredient = null;
+    this.editLimitValue = 1;
+  }
+  validateEditLimit() {
+    if (this.editLimitIngredient && this.editLimitValue > 0) {
+      this.editLimitIngredient.limit = Number(this.editLimitValue);
+      // Met à jour le statut si besoin
+      this.editLimitIngredient.status = this.getStockStatus(this.editLimitIngredient.stock, this.editLimitIngredient.limit);
+    }
+    this.closeEditLimitModal();
   }
 }
