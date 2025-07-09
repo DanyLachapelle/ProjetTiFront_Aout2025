@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-general-design',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './general-design.component.html',
   styleUrl: './general-design.component.css'
 })
@@ -36,8 +37,82 @@ export class GeneralDesignComponent {
       price: 7.50,
       available: false,
       image: '🌅'
+    },
+    {
+      id: 4,
+      name: 'Berry Fizz',
+      description: 'Fruits rouges, citron et eau pétillante',
+      price: 8.00,
+      available: true,
+      image: '🍓'
+    },
+    {
+      id: 5,
+      name: 'Tropical Dream',
+      description: 'Mangue, passion et lait de coco',
+      price: 9.20,
+      available: true,
+      image: '🥭'
+    },
+    {
+      id: 6,
+      name: 'Green Detox',
+      description: 'Concombre, pomme verte et menthe',
+      price: 8.80,
+      available: true,
+      image: '🥒'
+    },
+    {
+      id: 7,
+      name: 'Pink Lemonade',
+      description: 'Citron, framboise et sirop d’agave',
+      price: 7.80,
+      available: true,
+      image: '🍋'
     }
   ];
+
+  // --- Gestion du panier et de la modal ---
+  showOrderModal = false;
+  selectedMocktail: any = null;
+  selectedQuantity = 1;
+  orderList: {mocktail: any, quantity: number}[] = [];
+
+  openOrderModal(mocktail: any) {
+    this.selectedMocktail = mocktail;
+    this.selectedQuantity = 1;
+    this.showOrderModal = true;
+  }
+
+  closeOrderModal() {
+    this.showOrderModal = false;
+    this.selectedMocktail = null;
+    this.selectedQuantity = 1;
+  }
+
+  addToOrder() {
+    if (!this.selectedMocktail) return;
+    // Chercher si le mocktail est déjà dans la liste
+    const found = this.orderList.find(item => item.mocktail.id === this.selectedMocktail.id);
+    if (found) {
+      found.quantity += this.selectedQuantity;
+    } else {
+      this.orderList.push({mocktail: this.selectedMocktail, quantity: this.selectedQuantity});
+    }
+    this.closeOrderModal();
+  }
+
+  getOrderTotal() {
+    return this.orderList.reduce((sum, item) => sum + item.mocktail.price * item.quantity, 0);
+  }
+
+  clearOrder() {
+    this.orderList = [];
+  }
+
+  removeOrderItem(id: number) {
+    this.orderList = this.orderList.filter(item => item.mocktail.id !== id);
+  }
 
   // Données pour les ingrédients
   ingredients = [

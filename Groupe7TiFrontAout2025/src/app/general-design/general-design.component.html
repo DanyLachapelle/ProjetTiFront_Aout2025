@@ -17,8 +17,10 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <div class="login-logo">🍹</div>
-          <h1 class="login-title">MocktailBar</h1>
+          <div class="login-logo-img">
+            <img src="assets/favicon.png" alt="Logo Helha Fresh" />
+          </div>
+          <h1 class="login-title">Helha Fresh</h1>
           <p class="login-subtitle">Espace Gérant</p>
         </div>
         <form class="login-form">
@@ -46,11 +48,34 @@
     <div class="client-container">
       <header class="client-header">
         <div class="client-info">
-          <h1>🍹 MocktailBar</h1>
-          <p>Table n°12 • QR Code valide jusqu'à 14:25</p>
+          <div class="client-logo-title">
+            <img src="assets/favicon.png" alt="Logo Helha Fresh" class="client-logo-img" />
+            <h1 style="color: #111;">Helha Fresh</h1>
+          </div>
+          <p style="color: #111; font-weight: 500;">Savoure chaque gorgée, l’été est trop court pour s’ennuyer. </p>
         </div>
-        <div class="location-status">
-          <span class="status-badge success">📍 Localisation confirmée</span>
+        <!-- Panier en haut à droite -->
+        <div class="order-cart" *ngIf="currentPage === 'client-menu'">
+          <div class="cart-header">
+            <span class="cart-title">🧾 Commande</span>
+            <button class="cart-clear" *ngIf="orderList.length" (click)="clearOrder()" title="Vider le panier">✕</button>
+          </div>
+          <div class="cart-list" *ngIf="orderList.length; else emptyCart">
+            <div class="cart-item" *ngFor="let item of orderList">
+              <span class="cart-item-name">{{ item.mocktail.name }}</span>
+              <span class="cart-item-qty">x{{ item.quantity }}</span>
+              <span class="cart-item-price">€{{ (item.mocktail.price * item.quantity).toFixed(2) }}</span>
+              <button class="cart-remove" (click)="removeOrderItem(item.mocktail.id)" title="Retirer">🗑️</button>
+            </div>
+            <div class="cart-total">
+              <span>Total :</span>
+              <span class="cart-total-price">€{{ getOrderTotal().toFixed(2) }}</span>
+            </div>
+            <button class="btn btn-primary cart-pay">Payer</button>
+          </div>
+          <ng-template #emptyCart>
+            <div class="cart-empty">Aucune commande</div>
+          </ng-template>
         </div>
       </header>
 
@@ -71,9 +96,37 @@
               <p>{{ mocktail.description }}</p>
               <div class="mocktail-footer">
                 <span class="price">€{{ mocktail.price.toFixed(2) }}</span>
-                <button class="btn btn-primary" [disabled]="!mocktail.available">
+                <button class="btn btn-primary" [disabled]="!mocktail.available" (click)="openOrderModal(mocktail)">
                   {{ mocktail.available ? 'Commander' : 'Indisponible' }}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Bouton Quitter sous la grille -->
+        <div style="display: flex; justify-content: center; margin-top: 2.5rem;">
+          <button class="btn btn-primary btn-quit">Quitter</button>
+        </div>
+
+        <!-- Modal de commande -->
+        <div class="order-modal-backdrop" *ngIf="showOrderModal">
+          <div class="order-modal">
+            <button class="modal-close" (click)="closeOrderModal()" title="Fermer">✕</button>
+            <div class="order-modal-content">
+              <img [src]="'assets/favicon.png'" alt="Mocktail" class="modal-mocktail-img" *ngIf="selectedMocktail">
+              <h2 *ngIf="selectedMocktail">{{ selectedMocktail.name }}</h2>
+              <p *ngIf="selectedMocktail">{{ selectedMocktail.description }}</p>
+              <div class="modal-row">
+                <span>Prix :</span>
+                <span class="modal-price">€{{ selectedMocktail?.price.toFixed(2) }}</span>
+              </div>
+              <div class="modal-row">
+                <label for="quantity">Quantité :</label>
+                <input id="quantity" type="number" min="1" max="10" [(ngModel)]="selectedQuantity" class="modal-qty-input" />
+              </div>
+              <div class="modal-actions">
+                <button class="btn btn-primary" (click)="addToOrder()">Ajouter à la commande</button>
+                <button class="btn btn-outline" (click)="closeOrderModal()">Annuler</button>
               </div>
             </div>
           </div>
