@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './general-design.component.css'
 })
 export class GeneralDesignComponent {
-  currentPage: 'login' | 'client-menu' | 'mocktails-management' | 'ingredients-management' | 'ca-visualization' | 'sales-history' = 'login';
+  currentPage: 'login' | 'helha-fresh' | 'client-menu' | 'mocktails-management' | 'ingredients-management' | 'ca-visualization' | 'sales-history' = 'login';
   
   // Données pour les mocktails
   mocktails = [
@@ -258,52 +258,10 @@ export class GeneralDesignComponent {
     { id: 5, name: 'Noix de coco', stock: 30, limit: 50, unit: 'g', status: 'critical' }
   ];
 
-  // Données pour le CA
-  caData = {
-    today: 245.50,
-    thisWeek: 1247.80,
-    thisMonth: 5234.20,
-    thisYear: 15678.90
-  };
-
-  // Historique du CA (exemple sur 30 jours)
-  caHistory = [
-    { date: '2024-07-01', amount: 120 },
-    { date: '2024-07-02', amount: 150 },
-    { date: '2024-07-03', amount: 180 },
-    { date: '2024-07-04', amount: 90 },
-    { date: '2024-07-05', amount: 210 },
-    { date: '2024-07-06', amount: 170 },
-    { date: '2024-07-07', amount: 200 },
-    { date: '2024-07-08', amount: 130 },
-    { date: '2024-07-09', amount: 160 },
-    { date: '2024-07-10', amount: 140 },
-    { date: '2024-07-11', amount: 220 },
-    { date: '2024-07-12', amount: 190 },
-    { date: '2024-07-13', amount: 175 },
-    { date: '2024-07-14', amount: 210 },
-    { date: '2024-07-15', amount: 160 },
-    { date: '2024-07-16', amount: 180 },
-    { date: '2024-07-17', amount: 200 },
-    { date: '2024-07-18', amount: 150 },
-    { date: '2024-07-19', amount: 170 },
-    { date: '2024-07-20', amount: 190 },
-    { date: '2024-07-21', amount: 210 },
-    { date: '2024-07-22', amount: 160 },
-    { date: '2024-07-23', amount: 180 },
-    { date: '2024-07-24', amount: 200 },
-    { date: '2024-07-25', amount: 150 },
-    { date: '2024-07-26', amount: 170 },
-    { date: '2024-07-27', amount: 190 },
-    { date: '2024-07-28', amount: 210 },
-    { date: '2024-07-29', amount: 160 },
-    { date: '2024-07-30', amount: 180 }
-  ];
-
   // Historique des ventes (exemple)
   salesHistory = [
     {
-      date: '2024-07-30T15:42:00',
+      date: '2025-01-10T15:42:00',
       total: 24.50,
       mocktails: [
         { name: 'Mojito sans alcool', quantity: 2 },
@@ -311,7 +269,7 @@ export class GeneralDesignComponent {
       ]
     },
     {
-      date: '2024-07-30T14:10:00',
+      date: '2025-02-05T14:10:00',
       total: 16.00,
       mocktails: [
         { name: 'Virgin Colada', quantity: 1 },
@@ -319,25 +277,40 @@ export class GeneralDesignComponent {
       ]
     },
     {
-      date: '2024-07-29T19:05:00',
+      date: '2025-03-18T19:05:00',
       total: 8.50,
       mocktails: [
         { name: 'Mojito sans alcool', quantity: 1 }
       ]
     },
     {
-      date: '2024-07-29T12:30:00',
+      date: '2025-04-22T12:30:00',
       total: 18.00,
       mocktails: [
         { name: 'Sunset Spritz', quantity: 2 }
       ]
     },
     {
-      date: '2024-07-28T17:55:00',
+      date: '2025-05-15T17:55:00',
       total: 27.70,
       mocktails: [
         { name: 'Tropical Dream', quantity: 2 },
         { name: 'Green Detox', quantity: 1 }
+      ]
+    },
+    {
+      date: '2025-06-03T20:10:00',
+      total: 32.00,
+      mocktails: [
+        { name: 'Berry Fizz', quantity: 2 },
+        { name: 'Sunset Spritz', quantity: 2 }
+      ]
+    },
+    {
+      date: '2025-06-25T13:20:00',
+      total: 12.50,
+      mocktails: [
+        { name: 'Virgin Colada', quantity: 1 }
       ]
     }
   ];
@@ -347,30 +320,69 @@ export class GeneralDesignComponent {
   // Plage personnalisée
   customDateRange = { start: '', end: '' };
 
-  getCAForCustomRange() {
-    if (!this.customDateRange.start || !this.customDateRange.end) return 0;
-    const start = new Date(this.customDateRange.start);
-    const end = new Date(this.customDateRange.end);
-    return this.caHistory
-      .filter(entry => {
-        const d = new Date(entry.date);
-        return d >= start && d <= end;
-      })
-      .reduce((sum, entry) => sum + entry.amount, 0);
-  }
+  // NOUVELLES MÉTHODES CA BASÉES SUR salesHistory
 
-  getCAHistoryForCustomRange() {
-    if (!this.customDateRange.start || !this.customDateRange.end) return [];
-    const start = new Date(this.customDateRange.start);
-    const end = new Date(this.customDateRange.end);
-    return this.caHistory.filter(entry => {
-      const d = new Date(entry.date);
+  // Retourne la liste des ventes filtrée selon le filtre sélectionné
+  getFilteredSales() {
+    const now = new Date();
+    let start: Date, end: Date;
+    switch (this.selectedFilter) {
+      case 'today':
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case 'week': {
+        // Commence lundi (ISO)
+        const day = (now.getDay() + 6) % 7; // 0=dimanche, 1=lundi...
+        start = new Date(now);
+        start.setDate(now.getDate() - day);
+        start.setHours(0,0,0,0);
+        end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23,59,59,999);
+        break;
+      }
+      case 'month':
+        start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        break;
+      case 'year':
+        start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+        end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+        break;
+      case 'custom':
+        if (!this.customDateRange.start || !this.customDateRange.end) return [];
+        start = new Date(this.customDateRange.start);
+        start.setHours(0,0,0,0);
+        end = new Date(this.customDateRange.end);
+        end.setHours(23,59,59,999);
+        break;
+      default:
+        return [];
+    }
+    return this.salesHistory.filter(sale => {
+      const d = new Date(sale.date);
       return d >= start && d <= end;
     });
   }
 
-  getSortedSalesHistory() {
-    return this.salesHistory.slice().sort((a, b) => b.date.localeCompare(a.date));
+  // Calcule le CA total sur la période filtrée
+  getCurrentCA(): number {
+    return this.getFilteredSales().reduce((sum, sale) => sum + sale.total, 0);
+  }
+
+  // Calcule l'évolution du CA (par jour) sur la période filtrée
+  getCAEvolutionData(): {date: string, amount: number}[] {
+    const filtered = this.getFilteredSales();
+    if (!filtered.length) return [];
+    // Regroupement par jour
+    const map = new Map<string, number>();
+    filtered.forEach(sale => {
+      const d = sale.date.slice(0,10); // 'YYYY-MM-DD'
+      map.set(d, (map.get(d) || 0) + sale.total);
+    });
+    // Génère la liste triée par date croissante
+    return Array.from(map.entries()).sort((a,b) => a[0].localeCompare(b[0])).map(([date, amount]) => ({date, amount}));
   }
 
   // Ajout pour l'affichage interactif des détails de vente
@@ -389,16 +401,28 @@ export class GeneralDesignComponent {
     return totalQty ? sale.total / totalQty : 0;
   }
 
+  // Pour l'échelle du graphique CA
+  getMaxCAForChart(): number {
+    const data = this.getCAEvolutionData();
+    if (!data.length) return 100;
+    // On arrondit au 10 supérieur pour un rendu plus joli
+    return Math.ceil(Math.max(...data.map(e => e.amount)) / 10) * 10;
+  }
+  // Pour la page historique des ventes
+  getSortedSalesHistory() {
+    return this.salesHistory.slice().sort((a, b) => b.date.localeCompare(a.date));
+  }
+
   // Navigation
   nextPage() {
-    const pages = ['login', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization', 'sales-history'];
+    const pages = ['login', 'helha-fresh', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization', 'sales-history'];
     const currentIndex = pages.indexOf(this.currentPage);
     const nextIndex = (currentIndex + 1) % pages.length;
     this.currentPage = pages[nextIndex] as any;
   }
 
   prevPage() {
-    const pages = ['login', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization', 'sales-history'];
+    const pages = ['login', 'helha-fresh', 'client-menu', 'mocktails-management', 'ingredients-management', 'ca-visualization', 'sales-history'];
     const currentIndex = pages.indexOf(this.currentPage);
     const prevIndex = currentIndex === 0 ? pages.length - 1 : currentIndex - 1;
     this.currentPage = pages[prevIndex] as any;
@@ -409,17 +433,6 @@ export class GeneralDesignComponent {
     if (stock <= limit * 0.6) return 'critical';
     if (stock <= limit * 0.8) return 'warning';
     return 'good';
-  }
-
-  // Calcul du CA selon le filtre
-  getCurrentCA(): number {
-    switch (this.selectedFilter) {
-      case 'today': return this.caData.today;
-      case 'week': return this.caData.thisWeek;
-      case 'month': return this.caData.thisMonth;
-      case 'year': return this.caData.thisYear;
-      default: return this.caData.today;
-    }
   }
 
   // --- Gestion modals réapprovisionnement et ajout ingrédient ---

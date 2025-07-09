@@ -696,9 +696,10 @@ body, .design-container {
   cursor: pointer;
   margin-bottom: 0.5rem;
 }
-.filter-btn.active, .filter-btn:hover {
+.filter-btn.active,
+.filter-btn:hover {
   background: var(--primary-color);
-  color: #fff;
+  color: #222 !important;
   border-color: var(--primary-color);
   box-shadow: 0 4px 18px #ff7e5f33;
 }
@@ -798,12 +799,53 @@ body, .design-container {
   margin-bottom: 0.7rem;
 }
 .chart-bar {
-  width: 22px;
+  width: 32px;
   border-radius: 8px 8px 0 0;
   background: linear-gradient(180deg, #43cea2 0%, #ffb347 100%);
   box-shadow: 0 2px 8px #43cea233;
   transition: height 0.3s;
   cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+.chart-bar-label {
+  position: absolute;
+  top: -1.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  background: #fffbe9;
+  border-radius: 8px;
+  padding: 0.1rem 0.5rem;
+  box-shadow: 0 1px 4px #ffb34722;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.chart-bar-date {
+  position: absolute;
+  bottom: -1.3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  color: var(--dark-color);
+  font-weight: 600;
+  background: #fffbe9;
+  border-radius: 6px;
+  padding: 0.05rem 0.4rem;
+  box-shadow: 0 1px 4px #ffb34722;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.chart-empty {
+  color: var(--error-color);
+  font-weight: 700;
+  margin-top: 1.2rem;
+  text-align: center;
 }
 .chart-bar:hover {
   background: linear-gradient(180deg, #ffb347 0%, #43cea2 100%);
@@ -1645,4 +1687,50 @@ body, .design-container {
   .sales-history-container {
     padding: 0 0.1rem;
   }
+}
+
+.helha-fresh-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: url('/assets/Helha_Fresh.png') center center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.helha-fresh-card {
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 8px 32px rgba(255, 126, 95, 0.13);
+  border-radius: 32px;
+  border: 2.5px solid #ffe0b2;
+  padding: 4rem 4.5rem 3rem 4.5rem;
+  text-align: center;
+  min-width: 520px;
+}
+@media (max-width: 900px) {
+  .helha-fresh-card {
+    padding: 2rem 1rem 1.5rem 1rem;
+    min-width: unset;
+  }
+}
+
+.page.helha-fresh-bg {
+  background: url('/assets/Helha_Fresh.png') center center/cover no-repeat !important;
+  min-height: 100vh !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page.helha-fresh-bg .login-container,
+.page.helha-fresh-bg .login-card,
+.page.helha-fresh-bg .design-container {
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.page.helha-fresh-bg .login-card {
+  background: rgba(255,255,255,0.85) !important;
+  box-shadow: 0 8px 32px rgba(34,34,34,0.18) !important;
+  border: 2.5px solid #ffe0b2;
 }

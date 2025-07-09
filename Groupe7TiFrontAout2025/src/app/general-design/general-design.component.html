@@ -421,7 +421,6 @@
           <label>au
             <input type="date" [(ngModel)]="customDateRange.end" class="form-input ca-date-input">
           </label>
-          <button class="btn btn-primary btn-ca-validate">Valider</button>
         </div>
       </header>
       <div class="ca-content">
@@ -429,7 +428,7 @@
             <div class="ca-card">
               <h2>CA Total</h2>
               <div class="ca-amount">
-                €{{ selectedFilter === 'custom' ? getCAForCustomRange().toFixed(2) : getCurrentCA().toFixed(2) }}
+                €{{ getCurrentCA().toFixed(2) }}
               </div>
               <p class="ca-period">
                 {{ selectedFilter === 'today' ? 'Aujourd\'hui' :
@@ -443,37 +442,18 @@
 
           <div class="ca-chart">
             <div class="chart-placeholder">
-              <h3>Graphique d'évolution</h3>
+              <h3>Évolution du chiffre d'affaires</h3>
               <div class="chart-bars">
-                <div class="chart-bar" *ngFor="let entry of (selectedFilter === 'custom' ? getCAHistoryForCustomRange() : caHistory.slice(-7))"
-                  [style.height.%]="(entry.amount / 250) * 100" title="{{ entry.date }}: €{{ entry.amount }}">
+                <div class="chart-bar" *ngFor="let entry of getCAEvolutionData()"
+                  [style.height.%]="(entry.amount / getMaxCAForChart()) * 100"
+                  [title]="entry.date + ': €' + entry.amount.toFixed(2)">
+                  <span class="chart-bar-label">{{ entry.amount | number:'1.0-0' }}€</span>
+                  <span class="chart-bar-date">{{ entry.date | date:'dd/MM' }}</span>
                 </div>
               </div>
-              <p>Évolution du CA sur la période sélectionnée</p>
+              <p *ngIf="!getCAEvolutionData().length" class="chart-empty">Aucune vente sur la période sélectionnée</p>
             </div>
           </div>
-
-        <div class="ca-details">
-          <h3>Détails par période</h3>
-          <div class="ca-breakdown">
-            <div class="breakdown-item">
-              <span>Aujourd'hui</span>
-              <span class="amount">€{{ caData.today.toFixed(2) }}</span>
-            </div>
-            <div class="breakdown-item">
-              <span>Cette semaine</span>
-              <span class="amount">€{{ caData.thisWeek.toFixed(2) }}</span>
-            </div>
-            <div class="breakdown-item">
-              <span>Ce mois</span>
-              <span class="amount">€{{ caData.thisMonth.toFixed(2) }}</span>
-            </div>
-            <div class="breakdown-item">
-              <span>Cette année</span>
-              <span class="amount">€{{ caData.thisYear.toFixed(2) }}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -506,4 +486,36 @@
       </div>
     </div>
   </div>
+
+  <!-- Page Helha Fresh -->
+  <div class="page helha-fresh-bg" *ngIf="currentPage === 'helha-fresh'">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo-img">
+            <img src="assets/favicon.png" alt="Logo Helha Fresh" />
+          </div>
+          <h1 class="login-title">Helha Fresh</h1>
+          <p class="login-subtitle">Espace Gérant</p>
+        </div>
+        <form class="login-form">
+          <div class="form-group">
+            <label for="username2">Nom d'utilisateur</label>
+            <input type="text" id="username2" placeholder="Entrez votre nom d'utilisateur" class="form-input">
+          </div>
+          <div class="form-group">
+            <label for="password2">Mot de passe</label>
+            <input type="password" id="password2" placeholder="Entrez votre mot de passe" class="form-input">
+          </div>
+          <button type="submit" class="btn-login">
+            Se connecter
+          </button>
+        </form>
+        <div class="login-footer">
+          <p>Mot de passe oublié?</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
