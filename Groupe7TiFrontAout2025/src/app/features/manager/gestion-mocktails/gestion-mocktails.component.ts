@@ -48,135 +48,135 @@ interface MocktailForm {
 })
 export class GestionMocktailsComponent implements OnInit {
   constructor(private router: Router) {}
-  // Données des mocktails
+  // Mocktails data
   mocktails: Mocktail[] = [
     {
       id: 1,
-      name: 'Mojito sans alcool',
-      description: 'Rafraîchissant avec menthe fraîche et citron vert',
+      name: 'Virgin Mojito',
+      description: 'Refreshing with fresh mint and lime',
       price: 8.50,
       available: true,
       image: '🍹',
       ingredients: [
-        { name: 'Menthe fraîche', quantity: 5, unit: 'g' },
-        { name: 'Citron vert', quantity: 20, unit: 'g' },
-        { name: 'Sirop de sucre', quantity: 1.5, unit: 'cl' },
-        { name: 'Eau gazeuse', quantity: 20, unit: 'cl' }
+        { name: 'Fresh mint', quantity: 5, unit: 'g' },
+        { name: 'Lime', quantity: 20, unit: 'g' },
+        { name: 'Sugar syrup', quantity: 1.5, unit: 'cl' },
+        { name: 'Sparkling water', quantity: 20, unit: 'cl' }
       ]
     },
     {
       id: 2,
       name: 'Virgin Colada',
-      description: 'Exotique avec noix de coco et ananas',
+      description: 'Exotic with coconut and pineapple',
       price: 9.00,
       available: true,
       image: '🥤',
       ingredients: [
-        { name: 'Jus d\'ananas', quantity: 15, unit: 'cl' },
-        { name: 'Lait de coco', quantity: 8, unit: 'cl' },
-        { name: 'Sirop de sucre', quantity: 1, unit: 'cl' }
+        { name: 'Pineapple juice', quantity: 15, unit: 'cl' },
+        { name: 'Coconut milk', quantity: 8, unit: 'cl' },
+        { name: 'Sugar syrup', quantity: 1, unit: 'cl' }
       ]
     },
     {
       id: 3,
       name: 'Sunset Spritz',
-      description: 'Orange sanguine, grenadine et eau gazeuse',
+      description: 'Blood orange, grenadine and sparkling water',
       price: 7.50,
       available: false,
       image: '🌅',
       ingredients: [
-        { name: 'Jus d\'orange sanguine', quantity: 12, unit: 'cl' },
+        { name: 'Blood orange juice', quantity: 12, unit: 'cl' },
         { name: 'Grenadine', quantity: 3, unit: 'cl' },
-        { name: 'Eau gazeuse', quantity: 10, unit: 'cl' }
+        { name: 'Sparkling water', quantity: 10, unit: 'cl' }
       ]
     },
     {
       id: 4,
       name: 'Berry Fizz',
-      description: 'Fruits rouges, citron et eau pétillante',
+      description: 'Red berries, lemon and sparkling water',
       price: 8.00,
       available: true,
       image: '🍓',
       ingredients: [
-        { name: 'Fruits rouges', quantity: 8, unit: 'g' },
-        { name: 'Jus de citron', quantity: 5, unit: 'cl' },
-        { name: 'Eau pétillante', quantity: 15, unit: 'cl' }
+        { name: 'Red berries', quantity: 8, unit: 'g' },
+        { name: 'Lemon juice', quantity: 5, unit: 'cl' },
+        { name: 'Sparkling water', quantity: 15, unit: 'cl' }
       ]
     },
     {
       id: 5,
       name: 'Tropical Dream',
-      description: 'Mangue, passion et lait de coco',
+      description: 'Mango, passion fruit and coconut milk',
       price: 9.20,
       available: true,
       image: '🥭',
       ingredients: [
-        { name: 'Jus de mangue', quantity: 10, unit: 'cl' },
-        { name: 'Jus de fruit de la passion', quantity: 5, unit: 'cl' },
-        { name: 'Lait de coco', quantity: 8, unit: 'cl' }
+        { name: 'Mango juice', quantity: 10, unit: 'cl' },
+        { name: 'Passion fruit juice', quantity: 5, unit: 'cl' },
+        { name: 'Coconut milk', quantity: 8, unit: 'cl' }
       ]
     },
     {
       id: 6,
       name: 'Green Detox',
-      description: 'Concombre, pomme verte et menthe',
+      description: 'Cucumber, green apple and mint',
       price: 8.80,
       available: true,
       image: '🥒',
       ingredients: [
-        { name: 'Concombre', quantity: 10, unit: 'g' },
-        { name: 'Pomme verte', quantity: 10, unit: 'g' },
-        { name: 'Menthe fraîche', quantity: 3, unit: 'g' }
+        { name: 'Cucumber', quantity: 10, unit: 'g' },
+        { name: 'Green apple', quantity: 10, unit: 'g' },
+        { name: 'Fresh mint', quantity: 3, unit: 'g' }
       ]
     },
     {
       id: 7,
       name: 'Pink Lemonade',
-      description: 'Citron, framboise et sirop d\'agave',
+      description: 'Lemon, raspberry and agave syrup',
       price: 7.80,
       available: true,
       image: '🍋',
       ingredients: [
-        { name: 'Jus de citron', quantity: 8, unit: 'cl' },
-        { name: 'Framboises', quantity: 6, unit: 'g' },
-        { name: 'Sirop d\'agave', quantity: 1.2, unit: 'cl' }
+        { name: 'Lemon juice', quantity: 8, unit: 'cl' },
+        { name: 'Raspberries', quantity: 6, unit: 'g' },
+        { name: 'Agave syrup', quantity: 1.2, unit: 'cl' }
       ]
     }
   ];
 
-  // Données des ingrédients
+  // Ingredients data
   ingredients: Ingredient[] = [
-    { id: 1, name: 'Menthe fraîche', stock: 40, limit: 50, unit: 'g', status: 'warning' },
-    { id: 2, name: 'Citron vert', stock: 120, limit: 100, unit: 'g', status: 'good' },
-    { id: 3, name: 'Sirop de sucre', stock: 800, limit: 500, unit: 'cl', status: 'good' },
-    { id: 4, name: 'Jus d\'ananas', stock: 200, limit: 300, unit: 'cl', status: 'warning' },
-    { id: 5, name: 'Lait de coco', stock: 30, limit: 50, unit: 'cl', status: 'critical' },
-    { id: 6, name: 'Jus d\'orange sanguine', stock: 150, limit: 200, unit: 'cl', status: 'good' },
+    { id: 1, name: 'Fresh mint', stock: 40, limit: 50, unit: 'g', status: 'warning' },
+    { id: 2, name: 'Lime', stock: 120, limit: 100, unit: 'g', status: 'good' },
+    { id: 3, name: 'Sugar syrup', stock: 800, limit: 500, unit: 'cl', status: 'good' },
+    { id: 4, name: 'Pineapple juice', stock: 200, limit: 300, unit: 'cl', status: 'warning' },
+    { id: 5, name: 'Coconut milk', stock: 30, limit: 50, unit: 'cl', status: 'critical' },
+    { id: 6, name: 'Blood orange juice', stock: 150, limit: 200, unit: 'cl', status: 'good' },
     { id: 7, name: 'Grenadine', stock: 80, limit: 100, unit: 'cl', status: 'warning' },
-    { id: 8, name: 'Eau gazeuse', stock: 1000, limit: 800, unit: 'cl', status: 'good' },
-    { id: 9, name: 'Fruits rouges', stock: 60, limit: 80, unit: 'g', status: 'warning' },
-    { id: 10, name: 'Jus de citron', stock: 200, limit: 250, unit: 'cl', status: 'good' },
-    { id: 11, name: 'Eau pétillante', stock: 800, limit: 600, unit: 'cl', status: 'good' },
-    { id: 12, name: 'Jus de mangue', stock: 120, limit: 150, unit: 'cl', status: 'warning' },
-    { id: 13, name: 'Jus de fruit de la passion', stock: 80, limit: 100, unit: 'cl', status: 'warning' },
-    { id: 14, name: 'Concombre', stock: 200, limit: 150, unit: 'g', status: 'good' },
-    { id: 15, name: 'Pomme verte', stock: 300, limit: 250, unit: 'g', status: 'good' },
-    { id: 16, name: 'Framboises', stock: 100, limit: 120, unit: 'g', status: 'warning' },
-    { id: 17, name: 'Sirop d\'agave', stock: 150, limit: 200, unit: 'cl', status: 'warning' }
+    { id: 8, name: 'Sparkling water', stock: 1000, limit: 800, unit: 'cl', status: 'good' },
+    { id: 9, name: 'Red berries', stock: 60, limit: 80, unit: 'g', status: 'warning' },
+    { id: 10, name: 'Lemon juice', stock: 200, limit: 250, unit: 'cl', status: 'good' },
+    { id: 11, name: 'Sparkling water', stock: 800, limit: 600, unit: 'cl', status: 'good' },
+    { id: 12, name: 'Mango juice', stock: 120, limit: 150, unit: 'cl', status: 'warning' },
+    { id: 13, name: 'Passion fruit juice', stock: 80, limit: 100, unit: 'cl', status: 'warning' },
+    { id: 14, name: 'Cucumber', stock: 200, limit: 150, unit: 'g', status: 'good' },
+    { id: 15, name: 'Green apple', stock: 300, limit: 250, unit: 'g', status: 'good' },
+    { id: 16, name: 'Raspberries', stock: 100, limit: 120, unit: 'g', status: 'warning' },
+    { id: 17, name: 'Agave syrup', stock: 150, limit: 200, unit: 'cl', status: 'warning' }
   ];
 
-  // Filtres et recherche
+  // Filters and search
   filteredMocktails: Mocktail[] = [];
   searchTerm: string = '';
   statusFilter: string = 'all';
   priceSort: string = 'none';
   
-  // Autocomplétion
+  // Autocompletion
   showSuggestions: boolean = false;
   filteredSuggestions: string[] = [];
   allIngredients: string[] = [];
 
-  // Gestion des modals
+  // Modal management
   showMocktailModal = false;
   showDeleteModal = false;
   editingMocktail: Mocktail | null = null;
@@ -185,7 +185,7 @@ export class GestionMocktailsComponent implements OnInit {
   isSaving = false;
   showErrors = false;
 
-  // Formulaire
+  // Form
   mocktailForm: MocktailForm = {
     name: '',
     description: '',
@@ -206,9 +206,9 @@ export class GestionMocktailsComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  // --- Initialisation des ingrédients ---
+  // --- Ingredients initialization ---
   initializeIngredients() {
-    // Récupérer tous les ingrédients uniques depuis les mocktails
+    // Get all unique ingredients from mocktails
     const ingredientSet = new Set<string>();
     this.mocktails.forEach(mocktail => {
       mocktail.ingredients.forEach(ingredient => {
@@ -218,7 +218,7 @@ export class GestionMocktailsComponent implements OnInit {
     this.allIngredients = Array.from(ingredientSet).sort();
   }
 
-  // --- Statistiques ---
+  // --- Statistics ---
   getTotalMocktails(): number {
     return this.mocktails.length;
   }
@@ -231,10 +231,10 @@ export class GestionMocktailsComponent implements OnInit {
     return this.mocktails.filter(m => !m.available).length;
   }
 
-  // --- Filtrage et recherche ---
+  // --- Filtering and search ---
   filterMocktails() {
     this.filteredMocktails = this.mocktails.filter(mocktail => {
-      // Recherche par ingrédient
+      // Search by ingredient
       const matchesSearch = !this.searchTerm || 
         mocktail.ingredients.some(ingredient => 
           ingredient.name.toLowerCase().includes(this.searchTerm.toLowerCase())
@@ -247,7 +247,7 @@ export class GestionMocktailsComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    // Tri par prix
+    // Sort by price
     if (this.priceSort !== 'none') {
       this.filteredMocktails.sort((a, b) => {
         if (this.priceSort === 'asc') {
@@ -259,14 +259,14 @@ export class GestionMocktailsComponent implements OnInit {
     }
   }
 
-  // --- Autocomplétion ---
+  // --- Autocompletion ---
   onSearchInput() {
     this.filterSuggestions();
     this.filterMocktails();
   }
 
   onSearchBlur() {
-    // Délai pour permettre le clic sur une suggestion
+    // Delay to allow clicking on a suggestion
     setTimeout(() => {
       this.showSuggestions = false;
     }, 200);
@@ -274,13 +274,13 @@ export class GestionMocktailsComponent implements OnInit {
 
   filterSuggestions() {
     if (!this.searchTerm.trim()) {
-      this.filteredSuggestions = this.allIngredients.slice(0, 10); // Afficher les 10 premiers
+      this.filteredSuggestions = this.allIngredients.slice(0, 10); // Show first 10
     } else {
       this.filteredSuggestions = this.allIngredients
         .filter(ingredient => 
           ingredient.toLowerCase().includes(this.searchTerm.toLowerCase())
         )
-        .slice(0, 8); // Limiter à 8 suggestions
+        .slice(0, 8); // Limit to 8 suggestions
     }
   }
 
@@ -290,7 +290,7 @@ export class GestionMocktailsComponent implements OnInit {
     this.filterMocktails();
   }
 
-  // --- Gestion des mocktails ---
+  // --- Mocktails management ---
   toggleIngredients(mocktailId: number) {
     this.expandedMocktailId = this.expandedMocktailId === mocktailId ? null : mocktailId;
   }
@@ -320,13 +320,13 @@ export class GestionMocktailsComponent implements OnInit {
     this.mocktailToDelete = null;
   }
 
-  // --- Gestion des modals ---
+  // --- Modal management ---
   openMocktailModal(mocktail?: Mocktail) {
     this.editingMocktail = mocktail || null;
     this.showErrors = false;
     
     if (mocktail) {
-      // Mode édition - pré-remplir le formulaire
+      // Edit mode - pre-fill the form
       this.mocktailForm = {
         name: mocktail.name,
         description: mocktail.description,
@@ -336,7 +336,7 @@ export class GestionMocktailsComponent implements OnInit {
         ingredients: [...mocktail.ingredients]
       };
     } else {
-      // Mode création - formulaire vide
+      // Create mode - empty form
       this.mocktailForm = {
         name: '',
         description: '',
@@ -355,7 +355,7 @@ export class GestionMocktailsComponent implements OnInit {
     this.showErrors = false;
   }
 
-  // --- Gestion des ingrédients dans le formulaire ---
+  // --- Ingredients management in form ---
   addIngredient() {
     this.mocktailForm.ingredients.push({ name: '', quantity: 0, unit: 'cl' });
   }
@@ -391,7 +391,7 @@ export class GestionMocktailsComponent implements OnInit {
     );
   }
 
-  // --- Sauvegarde ---
+  // --- Save ---
   saveMocktail() {
     this.showErrors = true;
     
@@ -401,13 +401,13 @@ export class GestionMocktailsComponent implements OnInit {
 
     this.isSaving = true;
 
-    // Simulation d'une sauvegarde
+    // Save simulation
     setTimeout(() => {
       if (this.editingMocktail) {
-        // Mode édition - mettre à jour le mocktail existant
+        // Edit mode - update existing mocktail
         Object.assign(this.editingMocktail, this.mocktailForm);
       } else {
-        // Mode création - ajouter un nouveau mocktail
+        // Create mode - add new mocktail
         const newMocktail: Mocktail = {
           id: Math.max(...this.mocktails.map(m => m.id)) + 1,
           ...this.mocktailForm
@@ -422,12 +422,12 @@ export class GestionMocktailsComponent implements OnInit {
     }, 500);
   }
 
-  // --- Persistance ---
+  // --- Persistence ---
   private saveMocktailsToStorage() {
     try {
       localStorage.setItem('helha-fresh-mocktails', JSON.stringify(this.mocktails));
     } catch (error) {
-      console.warn('Impossible de sauvegarder les mocktails:', error);
+      console.warn('Unable to save mocktails:', error);
     }
   }
 
@@ -439,7 +439,7 @@ export class GestionMocktailsComponent implements OnInit {
         this.filterMocktails();
       }
     } catch (error) {
-      console.warn('Impossible de charger les mocktails:', error);
+      console.warn('Unable to load mocktails:', error);
     }
   }
 }

@@ -29,109 +29,109 @@ interface OrderItem {
   styleUrl: './menu.component.css'
 })
 export class MenuComponent implements OnInit, OnDestroy {
-  // Données pour les mocktails
+  // Mocktails data
   mocktails: Mocktail[] = [
     {
       id: 1,
-      name: 'Mojito sans alcool',
-      description: 'Rafraîchissant avec menthe fraîche et citron vert',
+      name: 'Virgin Mojito',
+      description: 'Refreshing with fresh mint and lime',
       price: 8.50,
       available: true,
       image: '🍹',
       ingredients: [
-        { name: 'Menthe fraîche', quantity: 5, unit: 'g' },
-        { name: 'Citron vert', quantity: 20, unit: 'g' },
-        { name: 'Sirop de sucre', quantity: 1.5, unit: 'cl' },
-        { name: 'Eau gazeuse', quantity: 20, unit: 'cl' }
+        { name: 'Fresh mint', quantity: 5, unit: 'g' },
+        { name: 'Lime', quantity: 20, unit: 'g' },
+        { name: 'Sugar syrup', quantity: 1.5, unit: 'cl' },
+        { name: 'Sparkling water', quantity: 20, unit: 'cl' }
       ]
     },
     {
       id: 2,
       name: 'Virgin Colada',
-      description: 'Exotique avec noix de coco et ananas',
+      description: 'Exotic with coconut and pineapple',
       price: 9.00,
       available: true,
       image: '🥤',
       ingredients: [
-        { name: 'Jus d\'ananas', quantity: 15, unit: 'cl' },
-        { name: 'Lait de coco', quantity: 8, unit: 'cl' },
-        { name: 'Sirop de sucre', quantity: 1, unit: 'cl' }
+        { name: 'Pineapple juice', quantity: 15, unit: 'cl' },
+        { name: 'Coconut milk', quantity: 8, unit: 'cl' },
+        { name: 'Sugar syrup', quantity: 1, unit: 'cl' }
       ]
     },
     {
       id: 3,
       name: 'Sunset Spritz',
-      description: 'Orange sanguine, grenadine et eau gazeuse',
+      description: 'Blood orange, grenadine and sparkling water',
       price: 7.50,
       available: false,
       image: '🌅',
       ingredients: [
-        { name: 'Jus d\'orange sanguine', quantity: 12, unit: 'cl' },
+        { name: 'Blood orange juice', quantity: 12, unit: 'cl' },
         { name: 'Grenadine', quantity: 3, unit: 'cl' },
-        { name: 'Eau gazeuse', quantity: 10, unit: 'cl' }
+        { name: 'Sparkling water', quantity: 10, unit: 'cl' }
       ]
     },
     {
       id: 4,
       name: 'Berry Fizz',
-      description: 'Fruits rouges, citron et eau pétillante',
+      description: 'Red berries, lemon and sparkling water',
       price: 8.00,
       available: true,
       image: '🍓',
       ingredients: [
-        { name: 'Fruits rouges', quantity: 8, unit: 'g' },
-        { name: 'Jus de citron', quantity: 5, unit: 'cl' },
-        { name: 'Eau pétillante', quantity: 15, unit: 'cl' }
+        { name: 'Red berries', quantity: 8, unit: 'g' },
+        { name: 'Lemon juice', quantity: 5, unit: 'cl' },
+        { name: 'Sparkling water', quantity: 15, unit: 'cl' }
       ]
     },
     {
       id: 5,
       name: 'Tropical Dream',
-      description: 'Mangue, passion et lait de coco',
+      description: 'Mango, passion fruit and coconut milk',
       price: 9.20,
       available: true,
       image: '🥭',
       ingredients: [
-        { name: 'Jus de mangue', quantity: 10, unit: 'cl' },
-        { name: 'Jus de fruit de la passion', quantity: 5, unit: 'cl' },
-        { name: 'Lait de coco', quantity: 8, unit: 'cl' }
+        { name: 'Mango juice', quantity: 10, unit: 'cl' },
+        { name: 'Passion fruit juice', quantity: 5, unit: 'cl' },
+        { name: 'Coconut milk', quantity: 8, unit: 'cl' }
       ]
     },
     {
       id: 6,
       name: 'Green Detox',
-      description: 'Concombre, pomme verte et menthe',
+      description: 'Cucumber, green apple and mint',
       price: 8.80,
       available: true,
       image: '🥒',
       ingredients: [
-        { name: 'Concombre', quantity: 10, unit: 'g' },
-        { name: 'Pomme verte', quantity: 10, unit: 'g' },
-        { name: 'Menthe fraîche', quantity: 3, unit: 'g' }
+        { name: 'Cucumber', quantity: 10, unit: 'g' },
+        { name: 'Green apple', quantity: 10, unit: 'g' },
+        { name: 'Fresh mint', quantity: 3, unit: 'g' }
       ]
     },
     {
       id: 7,
       name: 'Pink Lemonade',
-      description: 'Citron, framboise et sirop d\'agave',
+      description: 'Lemon, raspberry and agave syrup',
       price: 7.80,
       available: true,
       image: '🍋',
       ingredients: [
-        { name: 'Jus de citron', quantity: 8, unit: 'cl' },
-        { name: 'Framboises', quantity: 6, unit: 'g' },
-        { name: 'Sirop d\'agave', quantity: 1.2, unit: 'cl' }
+        { name: 'Lemon juice', quantity: 8, unit: 'cl' },
+        { name: 'Raspberries', quantity: 6, unit: 'g' },
+        { name: 'Agave syrup', quantity: 1.2, unit: 'cl' }
       ]
     }
   ];
 
-  // --- Gestion du panier et des modals ---
+  // --- Cart and modals management ---
   showOrderModal = false;
   selectedMocktail: Mocktail | null = null;
   selectedQuantity = 1;
   orderList: OrderItem[] = [];
   
-  // Animations et états
+  // Animations and states
   isAddingToCart = false;
   cartAnimation = false;
 
@@ -140,16 +140,16 @@ export class MenuComponent implements OnInit, OnDestroy {
   readonly MIN_QUANTITY = 1;
 
   ngOnInit() {
-    // Charger le panier depuis le localStorage si disponible
+    // Load cart from localStorage if available
     this.loadCartFromStorage();
   }
 
   ngOnDestroy() {
-    // Sauvegarder le panier dans le localStorage
+    // Save cart to localStorage
     this.saveCartToStorage();
   }
 
-  // --- Gestion du panier ---
+  // --- Cart management ---
   openOrderModal(mocktail: Mocktail) {
     if (!mocktail.available) return;
     
@@ -167,10 +167,10 @@ export class MenuComponent implements OnInit, OnDestroy {
   addToOrder() {
     if (!this.selectedMocktail || this.selectedQuantity < this.MIN_QUANTITY) return;
     
-    // Animation d'ajout au panier
+    // Add to cart animation
     this.isAddingToCart = true;
     
-    // Chercher si le mocktail est déjà dans la liste
+    // Check if mocktail is already in the list
     const found = this.orderList.find(item => item.mocktail.id === this.selectedMocktail!.id);
     if (found) {
       found.quantity += this.selectedQuantity;
@@ -181,13 +181,13 @@ export class MenuComponent implements OnInit, OnDestroy {
       });
     }
     
-    // Animation du panier
+    // Cart animation
     this.cartAnimation = true;
     setTimeout(() => {
       this.cartAnimation = false;
     }, 300);
     
-    // Sauvegarder dans le localStorage
+    // Save to localStorage
     this.saveCartToStorage();
     
     this.closeOrderModal();
@@ -205,7 +205,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   clearOrder() {
     if (this.orderList.length === 0) return;
     
-    if (confirm('Êtes-vous sûr de vouloir vider votre panier ?')) {
+    if (confirm('Are you sure you want to empty your cart?')) {
       this.orderList = [];
       this.saveCartToStorage();
     }
@@ -230,7 +230,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- Gestion des modals ---
+  // --- Modal management ---
   showFullOrderModal = false;
 
   openFullOrderModal() {
@@ -243,7 +243,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.showFullOrderModal = false;
   }
 
-  // --- Validation de la quantité ---
+  // --- Quantity validation ---
   onQuantityChange(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = parseInt(input.value);
@@ -258,12 +258,12 @@ export class MenuComponent implements OnInit, OnDestroy {
     input.value = value.toString();
   }
 
-  // --- Persistance du panier ---
+  // --- Cart persistence ---
   private saveCartToStorage() {
     try {
       localStorage.setItem('helha-fresh-cart', JSON.stringify(this.orderList));
     } catch (error) {
-      console.warn('Impossible de sauvegarder le panier:', error);
+      console.warn('Unable to save cart:', error);
     }
   }
 
@@ -272,18 +272,18 @@ export class MenuComponent implements OnInit, OnDestroy {
       const savedCart = localStorage.getItem('helha-fresh-cart');
       if (savedCart) {
         const parsedCart = JSON.parse(savedCart);
-        // Vérifier que les mocktails existent toujours
+        // Check that mocktails still exist
         this.orderList = parsedCart.filter((item: any) => 
           this.mocktails.find(m => m.id === item.mocktail.id)
         );
       }
     } catch (error) {
-      console.warn('Impossible de charger le panier:', error);
+      console.warn('Unable to load cart:', error);
       this.orderList = [];
     }
   }
 
-  // --- Utilitaires ---
+  // --- Utilities ---
   getOrderItemCount(): number {
     return this.orderList.reduce((sum, item) => sum + item.quantity, 0);
   }
@@ -292,30 +292,30 @@ export class MenuComponent implements OnInit, OnDestroy {
     return this.orderList.length === 0;
   }
 
-  // --- Gestion du bouton Quitter ---
+  // --- Quit button management ---
   onQuit() {
     if (this.orderList.length > 0) {
-      if (confirm('Vous avez des articles dans votre panier. Voulez-vous vraiment quitter ?')) {
+      if (confirm('You have items in your cart. Do you really want to quit?')) {
         this.clearOrder();
-        // Ici on pourrait rediriger vers une autre page
-        console.log('Quitter le menu');
+        // Here we could redirect to another page
+        console.log('Quit menu');
       }
     } else {
-      // Ici on pourrait rediriger vers une autre page
-      console.log('Quitter le menu');
+      // Here we could redirect to another page
+      console.log('Quit menu');
     }
   }
 
-  // --- Gestion du paiement ---
+  // --- Payment management ---
   onPay() {
     if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
     
-    // Ici on pourrait intégrer un système de paiement
-    alert(`Paiement de €${this.getOrderTotal().toFixed(2)} en cours...`);
+    // Here we could integrate a payment system
+    alert(`Payment of €${this.getOrderTotal().toFixed(2)} in progress...`);
     
-    // Simulation de paiement réussi
+    // Successful payment simulation
     setTimeout(() => {
-      alert('Paiement réussi ! Votre commande a été enregistrée.');
+      alert('Payment successful! Your order has been recorded.');
       this.orderList = [];
       this.saveCartToStorage();
       this.closeFullOrderModal();

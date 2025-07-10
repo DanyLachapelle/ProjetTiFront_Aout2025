@@ -5,35 +5,35 @@
         <img src="assets/favicon.png" alt="Logo Helha Fresh" class="client-logo-img" />
         <h1>Helha Fresh</h1>
       </div>
-      <p>Savoure chaque gorgée, l'été est trop court pour s'ennuyer.</p>
+      <p>Savor every sip, summer is too short to be bored.</p>
     </div>
     
     <!-- Panier en haut à droite -->
     <div class="order-cart" [class.cart-animation]="cartAnimation">
       <div class="cart-header">
-        <span class="cart-title">🧾 Commande ({{ getOrderItemCount() }})</span>
+        <span class="cart-title">🧾 Order ({{ getOrderItemCount() }})</span>
         <button 
           class="cart-clear" 
           *ngIf="!isCartEmpty()" 
           (click)="$event.stopPropagation(); clearOrder();" 
-          title="Vider le panier">
+          title="Clear cart">
           ✕
         </button>
       </div>
       
       <div *ngIf="isCartEmpty()" class="cart-empty">
-        Aucune commande
+        No order
       </div>
       
       <div class="cart-footer" *ngIf="!isCartEmpty()">
         <div class="cart-total">
-          <span>Total :</span>
+          <span>Total:</span>
           <span class="cart-total-price">€{{ getOrderTotal().toFixed(2) }}</span>
         </div>
         <button 
           class="btn btn-primary cart-pay" 
           (click)="$event.stopPropagation(); openFullOrderModal();">
-          Payer
+          Pay
         </button>
       </div>
     </div>
@@ -41,9 +41,9 @@
     <!-- Modal toutes les commandes -->
     <div class="order-modal-backdrop" *ngIf="showFullOrderModal" (click)="closeFullOrderModal()">
       <div class="order-modal order-modal-large" (click)="$event.stopPropagation()">
-        <button class="modal-close" (click)="closeFullOrderModal()" title="Fermer">✕</button>
+        <button class="modal-close" (click)="closeFullOrderModal()" title="Close">✕</button>
         <div class="order-modal-content">
-          <h2 style="margin-bottom:1.2rem; color: #111;">Votre commande</h2>
+          <h2 style="margin-bottom:1.2rem; color: #111;">Your Order</h2>
           
           <div class="cart-list-full">
             <div class="cart-item" *ngFor="let item of orderList">
@@ -67,14 +67,14 @@
               <button 
                 class="cart-remove" 
                 (click)="removeOrderItem(item.mocktail.id)" 
-                title="Retirer">
+                title="Remove">
                 🗑️
               </button>
             </div>
           </div>
           
           <div class="cart-total">
-            <span>Total :</span>
+            <span>Total:</span>
             <span class="cart-total-price">€{{ getOrderTotal().toFixed(2) }}</span>
           </div>
           
@@ -83,10 +83,10 @@
               class="btn btn-primary" 
               (click)="onPay()"
               [disabled]="getOrderTotal() <= 0">
-              Payer €{{ getOrderTotal().toFixed(2) }}
+              Pay €{{ getOrderTotal().toFixed(2) }}
             </button>
             <button class="btn btn-outline" (click)="closeFullOrderModal()">
-              Continuer
+              Continue
             </button>
           </div>
         </div>
@@ -95,8 +95,8 @@
   </header>
 
   <main class="client-menu">
-    <h2>Notre carte de mocktails</h2>
-    <p class="menu-subtitle">Découvrez nos délicieuses boissons sans alcool</p>
+    <h2>Our Mocktails Menu</h2>
+    <p class="menu-subtitle">Discover our delicious non-alcoholic beverages</p>
     
     <div class="mocktails-grid">
       <div 
@@ -107,7 +107,7 @@
         <div class="mocktail-image">
           <span class="mocktail-emoji">{{ mocktail.image }}</span>
           <div class="availability-badge" *ngIf="!mocktail.available">
-            Indisponible
+            Unavailable
           </div>
         </div>
         <div class="mocktail-content">
@@ -119,7 +119,7 @@
               class="btn btn-primary" 
               [disabled]="!mocktail.available" 
               (click)="openOrderModal(mocktail)">
-              {{ mocktail.available ? 'Commander' : 'Indisponible' }}
+              {{ mocktail.available ? 'Order' : 'Unavailable' }}
             </button>
           </div>
         </div>
@@ -129,14 +129,14 @@
     <!-- Bouton Quitter sous la grille -->
     <div style="display: flex; justify-content: center; margin-top: 2.5rem;">
       <button class="btn btn-primary btn-quit" (click)="onQuit()">
-        Quitter
+        Quit
       </button>
     </div>
 
     <!-- Modal de commande -->
     <div class="order-modal-backdrop" *ngIf="showOrderModal" (click)="closeOrderModal()">
       <div class="order-modal" (click)="$event.stopPropagation()">
-        <button class="modal-close" (click)="closeOrderModal()" title="Fermer">✕</button>
+        <button class="modal-close" (click)="closeOrderModal()" title="Close">✕</button>
         <div class="order-modal-content">
           <img 
             [src]="'assets/favicon.png'" 
@@ -147,12 +147,12 @@
           <p *ngIf="selectedMocktail">{{ selectedMocktail.description }}</p>
           
           <div class="modal-row">
-            <span>Prix :</span>
+            <span>Price:</span>
             <span class="modal-price">€{{ selectedMocktail?.price?.toFixed(2) || '0.00' }}</span>
           </div>
           
           <div class="modal-row">
-            <label for="quantity">Quantité :</label>
+            <label for="quantity">Quantity:</label>
             <input 
               id="quantity" 
               type="number" 
@@ -168,10 +168,10 @@
               class="btn btn-primary" 
               (click)="addToOrder()"
               [disabled]="selectedQuantity < MIN_QUANTITY || selectedQuantity > MAX_QUANTITY">
-              Ajouter à la commande
+              Add to Order
             </button>
             <button class="btn btn-outline" (click)="closeOrderModal()">
-              Annuler
+              Cancel
             </button>
           </div>
         </div>

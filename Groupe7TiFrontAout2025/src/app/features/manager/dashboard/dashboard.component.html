@@ -1,5 +1,5 @@
 <div class="container">
-  <!-- Header du dashboard -->
+  <!-- Dashboard header -->
   <header class="header">
     <div class="header-left">
       <div class="header-time">
@@ -21,23 +21,23 @@
         <span class="notification-badge" *ngIf="activeAlerts.length > 0">{{ activeAlerts.length }}</span>
       </button>
       
-      <!-- BOUTON DEV TEMPORAIRE -->
-      <button class="btn btn-icon dev-menu-btn" (click)="navigateTo('/menu')" title="DEV: Accès Menu (à retirer)">
+      <!-- TEMPORARY DEV BUTTON -->
+      <button class="btn btn-icon dev-menu-btn" (click)="navigateTo('/menu')" title="DEV: Menu Access (to remove)">
         <span class="dev-menu-icon">🛠️</span>
       </button>
       
-      <button class="btn btn-icon settings-btn" (click)="showSettings()" title="Paramètres">
+      <button class="btn btn-icon settings-btn" (click)="showSettings()" title="Settings">
         <span class="settings-icon">⚙️</span>
       </button>
       
       <button class="btn btn-outline logout-btn" (click)="logout()">
         <span class="logout-icon">🚪</span>
-        Se déconnecter
+        Logout
       </button>
     </div>
   </header>
 
-  <!-- Zone centrale avec image de fond centrée -->
+  <!-- Central area with centered background image -->
   <div class="dashboard-bg-center">
     <section class="menu-section">
       <div class="menu-columns">
@@ -58,11 +58,11 @@
               </div>
               <div class="stat-item">
                 <span class="stat-number available">{{ item.stats.available }}</span>
-                <span class="stat-text">Disponibles</span>
+                <span class="stat-text">Available</span>
               </div>
               <div class="stat-item">
                 <span class="stat-number unavailable">{{ item.stats.unavailable }}</span>
-                <span class="stat-text">Indisponibles</span>
+                <span class="stat-text">Unavailable</span>
               </div>
             </div>
             <div class="menu-stats" *ngIf="item.id === 'gestion-ingredients'">
@@ -76,15 +76,15 @@
               </div>
               <div class="stat-item">
                 <span class="stat-number warning">{{ item.stats.warning }}</span>
-                <span class="stat-text">Attention</span>
+                <span class="stat-text">Warning</span>
               </div>
               <div class="stat-item">
                 <span class="stat-number critical">{{ item.stats.critical }}</span>
-                <span class="stat-text">Critique</span>
+                <span class="stat-text">Critical</span>
               </div>
             </div>
             <div class="menu-action">
-              <span class="action-text">Accéder</span>
+              <span class="action-text">Access</span>
               <span class="action-arrow">→</span>
             </div>
           </div>
@@ -102,33 +102,33 @@
             <div class="menu-stats" *ngIf="item.id === 'revenue'">
               <div class="stat-item">
                 <span class="stat-number">{{ item.stats.today }}</span>
-                <span class="stat-text">Aujourd'hui</span>
+                <span class="stat-text">Today</span>
               </div>
               <div class="stat-item">
                 <span class="stat-number">{{ item.stats.week }}</span>
-                <span class="stat-text">Cette semaine</span>
+                <span class="stat-text">This week</span>
               </div>
               <div class="stat-item">
                 <span class="stat-number">{{ item.stats.month }}</span>
-                <span class="stat-text">Ce mois</span>
+                <span class="stat-text">This month</span>
               </div>
             </div>
             <div class="menu-stats" *ngIf="item.id === 'gestion-sales'">
               <div class="stat-item">
                 <span class="stat-number">{{ item.stats.today }}</span>
-                <span class="stat-text">Aujourd'hui</span>
+                <span class="stat-text">Today</span>
               </div>
               <div class="stat-item">
                 <span class="stat-number">{{ item.stats.week }}</span>
-                <span class="stat-text">Cette semaine</span>
+                <span class="stat-text">This week</span>
               </div>
               <div class="stat-item">
                 <span class="stat-number">{{ item.stats.month }}</span>
-                <span class="stat-text">Ce mois</span>
+                <span class="stat-text">This month</span>
               </div>
             </div>
             <div class="menu-action">
-              <span class="action-text">Accéder</span>
+              <span class="action-text">Access</span>
               <span class="action-arrow">→</span>
             </div>
           </div>
@@ -137,10 +137,10 @@
     </section>
   </div>
 
-  <!-- Modal des notifications -->
+  <!-- Notifications modal -->
   <div class="modal-backdrop" *ngIf="showNotificationsModal" (click)="closeNotifications()">
     <div class="modal notifications-modal" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="closeNotifications()" title="Fermer">✕</button>
+      <button class="modal-close" (click)="closeNotifications()" title="Close">✕</button>
       <div class="modal-content">
         <h2>🔔 Notifications</h2>
         
@@ -151,50 +151,50 @@
             <div class="notification-icon">{{ alert.icon }}</div>
             <div class="notification-content">
               <p class="notification-message">{{ alert.message }}</p>
-              <span class="notification-time">Il y a 5 minutes</span>
+              <span class="notification-time">5 minutes ago</span>
             </div>
           </div>
         </div>
         
         <div class="no-notifications" *ngIf="activeAlerts.length === 0">
           <span class="no-notifications-icon">✅</span>
-          <p>Aucune notification active</p>
+          <p>No active notifications</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal des paramètres -->
+  <!-- Settings modal -->
   <div class="modal-backdrop" *ngIf="showSettingsModal" (click)="closeSettings()">
     <div class="modal settings-modal" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="closeSettings()" title="Fermer">✕</button>
+      <button class="modal-close" (click)="closeSettings()" title="Close">✕</button>
       <div class="modal-content">
-        <h2>⚙️ Paramètres</h2>
+        <h2>⚙️ Settings</h2>
         
         <div class="settings-section">
-          <h3>Changer le mot de passe</h3>
+          <h3>Change password</h3>
           <form class="password-form" (ngSubmit)="changePassword()">
             <div class="form-group">
-              <label for="current-password">Mot de passe actuel</label>
+              <label for="current-password">Current password</label>
               <input type="password" id="current-password" [(ngModel)]="passwordForm.currentPassword" 
                      name="currentPassword" class="form-input" required>
             </div>
             
             <div class="form-group">
-              <label for="new-password">Nouveau mot de passe</label>
+              <label for="new-password">New password</label>
               <input type="password" id="new-password" [(ngModel)]="passwordForm.newPassword" 
                      name="newPassword" class="form-input" required>
             </div>
             
             <div class="form-group">
-              <label for="confirm-password">Confirmer le nouveau mot de passe</label>
+              <label for="confirm-password">Confirm new password</label>
               <input type="password" id="confirm-password" [(ngModel)]="passwordForm.confirmPassword" 
                      name="confirmPassword" class="form-input" required>
             </div>
             
             <div class="modal-actions">
-              <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
-              <button type="button" class="btn btn-outline" (click)="closeSettings()">Annuler</button>
+              <button type="submit" class="btn btn-primary">Change password</button>
+              <button type="button" class="btn btn-outline" (click)="closeSettings()">Cancel</button>
             </div>
           </form>
         </div>

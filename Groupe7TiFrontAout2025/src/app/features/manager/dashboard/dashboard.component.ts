@@ -12,14 +12,14 @@ import { FormsModule } from '@angular/forms';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   
-  // Données du gérant connecté
+  // Connected manager data
   currentManager = {
     name: 'Marie Dupont',
-    role: 'Gérant',
+    role: 'Manager',
     avatar: '👨‍💼'
   };
 
-  // Statistiques rapides
+  // Quick statistics
   quickStats = {
     totalSales: 1247.50,
     todaySales: 89.30,
@@ -27,28 +27,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     lowStockItems: 2
   };
 
-  // Variables pour l'heure en temps réel
+  // Real-time time variables
   currentTime: string = '';
   currentDate: string = '';
   private timeInterval: number | null = null;
 
-  // Variables pour les modales
+  // Modal variables
   showNotificationsModal: boolean = false;
   showSettingsModal: boolean = false;
 
-  // Formulaire de changement de mot de passe
+  // Password change form
   passwordForm = {
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   };
 
-  // Menu de navigation
+  // Navigation menu
   menuItems = [
     {
       id: 'gestion-mocktails',
-      title: 'Gestion des Mocktails',
-      description: 'Créer, modifier et gérer vos recettes de mocktails',
+      title: 'Mocktails Management',
+      description: 'Create, modify and manage your mocktail recipes',
       icon: '🍹',
       color: 'primary',
       route: '/gestion-mocktails',
@@ -60,8 +60,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     },
     {
       id: 'gestion-ingredients',
-      title: 'Gestion des Ingrédients',
-      description: 'Gérer les stocks et les alertes de réapprovisionnement',
+      title: 'Ingredients Management',
+      description: 'Manage stocks and restocking alerts',
       icon: '🧪',
       color: 'secondary',
       route: '/gestion-ingredients',
@@ -74,8 +74,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     },
     {
       id: 'revenue',
-      title: 'Chiffre d\'Affaires',
-      description: 'Visualiser et analyser vos performances commerciales',
+      title: 'Revenue',
+      description: 'View and analyze your business performance',
       icon: '📊',
       color: 'success',
       route: '/revenue',
@@ -87,8 +87,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     },
     {
       id: 'gestion-sales',
-      title: 'Historique des Ventes',
-      description: 'Consulter l\'historique complet de vos transactions',
+      title: 'Sales History',
+      description: 'View complete transaction history',
       icon: '🧾',
       color: 'warning',
       route: '/gestion-sales',
@@ -100,17 +100,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   ];
 
-  // Alertes actives
+  // Active alerts
   activeAlerts = [
     {
       type: 'stock',
-      message: 'Stock critique : Menthe fraîche (5g restants)',
+      message: 'Critical stock: Fresh mint (5g remaining)',
       severity: 'critical',
       icon: '⚠️'
     },
     {
       type: 'stock',
-      message: 'Stock faible : Jus d\'ananas (15cl restants)',
+      message: 'Low stock: Pineapple juice (15cl remaining)',
       severity: 'warning',
       icon: '⚠️'
     }
@@ -119,19 +119,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    // Initialiser immédiatement l'heure et la date
+    // Initialize time and date immediately
     this.updateTime();
     
-    // Démarrer l'intervalle pour mettre à jour l'heure
+    // Start interval to update time
     this.startTimeInterval();
   }
 
   ngOnDestroy(): void {
-    // Nettoyer l'intervalle
+    // Clean up interval
     this.stopTimeInterval();
   }
 
-  // Démarrer l'intervalle de temps
+  // Start time interval
   private startTimeInterval(): void {
     if (this.timeInterval === null) {
       this.timeInterval = window.setInterval(() => {
@@ -140,7 +140,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Arrêter l'intervalle de temps
+  // Stop time interval
   private stopTimeInterval(): void {
     if (this.timeInterval !== null) {
       clearInterval(this.timeInterval);
@@ -148,19 +148,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Mettre à jour l'heure et la date
+  // Update time and date
   private updateTime(): void {
     try {
       const now = new Date();
       
-      // Mettre à jour l'heure (format HH:MM seulement pour l'affichage)
-      this.currentTime = now.toLocaleTimeString('fr-FR', {
+      // Update time (HH:MM format only for display)
+      this.currentTime = now.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit'
       });
       
-      // Mettre à jour la date (seulement si elle a changé)
-      const newDate = now.toLocaleDateString('fr-FR', {
+      // Update date (only if it has changed)
+      const newDate = now.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -171,44 +171,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.currentDate = newDate;
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de l\'heure:', error);
-      // En cas d'erreur, utiliser des valeurs par défaut
+      console.error('Error updating time:', error);
+      // In case of error, use default values
       this.currentTime = '--:--';
-      this.currentDate = 'Date non disponible';
+      this.currentDate = 'Date not available';
     }
   }
 
-  // Navigation vers une page
+  // Navigate to a page
   navigateTo(route: string): void {
     this.router.navigate([route]);
   }
 
-  // Déconnexion
+  // Logout
   logout(): void {
-    // TODO: Implémenter la logique de déconnexion
-    console.log('Déconnexion demandée');
+    // TODO: Implement logout logic
+    console.log('Logout requested');
     // this.router.navigate(['/login']);
   }
 
-  // Afficher les notifications
+  // Show notifications
   showNotifications(): void {
     this.showNotificationsModal = true;
   }
 
-  // Fermer les notifications
+  // Close notifications
   closeNotifications(): void {
     this.showNotificationsModal = false;
   }
 
-  // Afficher les paramètres
+  // Show settings
   showSettings(): void {
     this.showSettingsModal = true;
   }
 
-  // Fermer les paramètres
+  // Close settings
   closeSettings(): void {
     this.showSettingsModal = false;
-    // Réinitialiser le formulaire
+    // Reset form
     this.passwordForm = {
       currentPassword: '',
       newPassword: '',
@@ -216,25 +216,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  // Changer le mot de passe
+  // Change password
   changePassword(): void {
     if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
-      alert('Les mots de passe ne correspondent pas');
+      alert('Passwords do not match');
       return;
     }
     
     if (this.passwordForm.newPassword.length < 6) {
-      alert('Le nouveau mot de passe doit contenir au moins 6 caractères');
+      alert('New password must contain at least 6 characters');
       return;
     }
     
-    // TODO: Implémenter la logique de changement de mot de passe
-    console.log('Changement de mot de passe demandé');
-    alert('Mot de passe changé avec succès !');
+    // TODO: Implement password change logic
+    console.log('Password change requested');
+    alert('Password changed successfully!');
     this.closeSettings();
   }
 
-  // Obtenir la classe de couleur pour les cartes
+  // Get color class for cards
   getCardColorClass(color: string): string {
     const colorMap: { [key: string]: string } = {
       'primary': 'card-primary',
@@ -245,7 +245,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return colorMap[color] || 'card-primary';
   }
 
-  // Obtenir la classe de sévérité pour les alertes
+  // Get severity class for alerts
   getAlertSeverityClass(severity: string): string {
     const severityMap: { [key: string]: string } = {
       'critical': 'alert-critical',
@@ -255,17 +255,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return severityMap[severity] || 'alert-info';
   }
 
-  // Formater un montant
+  // Format an amount
   formatAmount(amount: number): string {
     return amount.toFixed(2) + '€';
   }
 
-  // Méthodes publiques pour l'heure et la date
+  // Public methods for time and date
   getCurrentTime(): string {
     return this.currentTime || '--:--';
   }
 
   getCurrentDate(): string {
-    return this.currentDate || 'Date non disponible';
+    return this.currentDate || 'Date not available';
   }
 }
