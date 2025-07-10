@@ -1,1 +1,417 @@
-<p>gestion-ingredients works!</p>
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="btn btn-outline back-btn" (click)="goBack()">
+        <span class="back-icon">←</span>
+        Back
+      </button>
+    </div>
+    
+    <div class="header-center">
+      <div class="title-section">
+        <span class="title-icon">🧪</span>
+        <h1>Ingredients Management</h1>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <button class="btn btn-outline" (click)="refreshData()">
+        <span class="action-icon">🔄</span>
+        Refresh
+      </button>
+      <button class="btn btn-primary" (click)="openAddIngredientModal()">
+        <span class="action-icon">+</span>
+        Add Ingredient
+      </button>
+    </div>
+  </header>
+
+  <!-- Statistics Section -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🧪</div>
+        <div class="stat-content">
+          <h3>Total Ingredients</h3>
+          <p class="stat-amount">{{ totalIngredients }}</p>
+          <span class="stat-period">All types</span>
+        </div>
+      </div>
+      
+
+      
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-content">
+          <h3>Low Stock</h3>
+          <p class="stat-amount">{{ lowStockCount }}</p>
+          <span class="stat-period">Warning & Critical</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <h3>Status Overview</h3>
+          <div class="status-breakdown">
+            <span class="status-item good">{{ getStatusCount('good') }} OK</span>
+            <span class="status-item warning">{{ getStatusCount('warning') }} Warning</span>
+            <span class="status-item critical">{{ getStatusCount('critical') }} Critical</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section class="filters-section">
+    <div class="filters-row">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="onSearchChange()"
+          placeholder="Search ingredients..."
+          class="search-input"
+        >
+        <span class="search-icon">🔍</span>
+      </div>
+      
+      <div class="filter-buttons">
+        <button 
+          class="filter-btn" 
+          [class.active]="selectedFilter === 'all'" 
+          (click)="setFilter('all')"
+        >
+          All
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="selectedFilter === 'good'" 
+          (click)="setFilter('good')"
+        >
+          OK
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="selectedFilter === 'warning'" 
+          (click)="setFilter('warning')"
+        >
+          Warning
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="selectedFilter === 'critical'" 
+          (click)="setFilter('critical')"
+        >
+          Critical
+        </button>
+      </div>
+      
+      <div class="type-filters">
+        <button 
+          class="type-btn" 
+          [class.active]="selectedType === 'all'" 
+          (click)="setTypeFilter('all')"
+        >
+          All Types
+        </button>
+        <button 
+          class="type-btn" 
+          [class.active]="selectedType === 'liquide'" 
+          (click)="setTypeFilter('liquide')"
+        >
+          Liquids
+        </button>
+        <button 
+          class="type-btn" 
+          [class.active]="selectedType === 'solide'" 
+          (click)="setTypeFilter('solide')"
+        >
+          Solids
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ingredients List -->
+  <section class="ingredients-section">
+    <div class="ingredients-header">
+      <h2>Ingredients Inventory</h2>
+      <div class="sort-controls">
+        <span class="sort-label">Sort by:</span>
+        <button class="sort-btn" (click)="setSort('name')">
+          Name {{ getSortIcon('name') }}
+        </button>
+        <button class="sort-btn" (click)="setSort('stock')">
+          Stock {{ getSortIcon('stock') }}
+        </button>
+
+        <button class="sort-btn" (click)="setSort('lastRestock')">
+          Last Restock {{ getSortIcon('lastRestock') }}
+        </button>
+      </div>
+    </div>
+    
+    <div class="ingredients-grid" *ngIf="getFilteredIngredients().length > 0; else noIngredients">
+      <div class="ingredient-card" *ngFor="let ingredient of getFilteredIngredients()" [class]="'status-' + ingredient.status">
+        <div class="ingredient-header">
+          <h3 class="ingredient-name">{{ ingredient.name }}</h3>
+          <span class="status-badge" [class]="ingredient.status">
+            {{ getStatusText(ingredient.status) }}
+          </span>
+        </div>
+        
+        <div class="ingredient-content">
+          <div class="stock-info">
+            <div class="stock-bar">
+              <div class="stock-fill" 
+                   [style.width.%]="getStockPercentage(ingredient.stock, ingredient.limit)"
+                   [style.background]="getStockColor(ingredient.stock, ingredient.limit)">
+              </div>
+              <div class="limit-marker" style="left: 25%"></div>
+            </div>
+            <div class="stock-details">
+              <span class="current-stock">{{ ingredient.stock }}{{ ingredient.unit }}</span>
+              <span class="stock-limit">/ {{ ingredient.limit }}{{ ingredient.unit }}</span>
+            </div>
+          </div>
+          
+          <div class="ingredient-details">
+            <div class="detail-row">
+              <span class="detail-label">Type:</span>
+              <span class="detail-value">{{ ingredient.type === 'liquide' ? 'Liquid' : 'Solid' }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Last Restock:</span>
+              <span class="detail-value">{{ formatDate(ingredient.lastRestock) }}</span>
+            </div>
+          </div>
+          
+          <div class="ingredient-actions">
+            <button class="btn btn-small btn-primary" (click)="openRestockModal(ingredient)">
+              Restock
+            </button>
+            <button class="btn btn-small btn-secondary" (click)="openDetailsModal(ingredient)">
+              Details
+            </button>
+            <button class="btn btn-small btn-outline" (click)="openEditLimitModal(ingredient)">
+              Edit Limit
+            </button>
+            <button class="btn btn-small btn-danger" (click)="openDeleteModal(ingredient)">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- No ingredients message -->
+    <ng-template #noIngredients>
+      <div class="no-ingredients">
+        <div class="no-ingredients-icon">🧪</div>
+        <h3>No ingredients found</h3>
+        <p>No ingredients match your current filters. Try adjusting your search criteria or add a new ingredient.</p>
+        <button class="btn btn-primary" (click)="openAddIngredientModal()">
+          Add First Ingredient
+        </button>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- Pagination Section -->
+  <section class="pagination-section" *ngIf="getAllFilteredIngredients().length > itemsPerPage">
+    <div class="pagination">
+      <button 
+        class="pagination-btn" 
+        [disabled]="currentPage === 1"
+        (click)="previousPage()"
+      >
+        ← Previous
+      </button>
+      
+      <div class="page-numbers">
+        <span class="page-info">
+          Page {{ currentPage }} of {{ getTotalPages() }}
+        </span>
+        <div class="page-dots" *ngIf="getTotalPages() > 5">
+          <span class="page-dot" *ngFor="let page of getPageNumbers()" 
+                [class.active]="page === currentPage"
+                [class.dots]="page === '...'"
+                (click)="goToPage(page)">
+            {{ page }}
+          </span>
+        </div>
+      </div>
+      
+      <button 
+        class="pagination-btn" 
+        [disabled]="currentPage === getTotalPages()"
+        (click)="nextPage()"
+      >
+        Next →
+      </button>
+    </div>
+  </section>
+
+  <!-- Restock Modal -->
+  <div class="modal-backdrop" *ngIf="showRestockModal" (click)="closeRestockModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeRestockModal()" title="Close">✕</button>
+      <div class="modal-content">
+        <h2>Restock {{ restockIngredient?.name }}</h2>
+        <div class="form-group">
+          <label for="restock-qty">Quantity to add</label>
+          <div class="form-row">
+            <input type="number" id="restock-qty" [(ngModel)]="restockQuantity" class="form-input" min="1" step="0.1">
+            <span class="unit-label">{{ restockIngredient?.unit }}</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" (click)="validateRestock()">Confirm Restock</button>
+          <button class="btn btn-outline" (click)="closeRestockModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Ingredient Modal -->
+  <div class="modal-backdrop" *ngIf="showAddIngredientModal" (click)="closeAddIngredientModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeAddIngredientModal()" title="Close">✕</button>
+      <div class="modal-content">
+        <h2>Add New Ingredient</h2>
+        <div class="form-group">
+          <label for="new-ingredient-name">Name</label>
+          <input type="text" id="new-ingredient-name" [(ngModel)]="newIngredientForm.name" class="form-input" placeholder="Ingredient name">
+        </div>
+        <div class="form-group">
+          <label for="new-ingredient-type">Type</label>
+          <select id="new-ingredient-type" [(ngModel)]="newIngredientForm.type" class="form-input">
+            <option value="liquide">Liquid (ml)</option>
+            <option value="solide">Solid (g)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="new-ingredient-stock">Initial stock</label>
+          <div class="form-row">
+            <input type="number" id="new-ingredient-stock" [(ngModel)]="newIngredientForm.stock" class="form-input" min="0" step="0.1">
+            <span class="unit-label">{{ newIngredientForm.type === 'liquide' ? 'ml' : 'g' }}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="new-ingredient-limit">Stock limit</label>
+          <div class="form-row">
+            <input type="number" id="new-ingredient-limit" [(ngModel)]="newIngredientForm.limit" class="form-input" min="1" step="0.1">
+            <span class="unit-label">{{ newIngredientForm.type === 'liquide' ? 'ml' : 'g' }}</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" (click)="validateAddIngredient()">Add Ingredient</button>
+          <button class="btn btn-outline" (click)="closeAddIngredientModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Limit Modal -->
+  <div class="modal-backdrop" *ngIf="showEditLimitModal" (click)="closeEditLimitModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeEditLimitModal()" title="Close">✕</button>
+      <div class="modal-content">
+        <h2>Edit Limit for {{ editLimitIngredient?.name }}</h2>
+        <div class="form-group">
+          <label for="edit-limit">New limit</label>
+          <div class="form-row">
+            <input type="number" id="edit-limit" [(ngModel)]="editLimitValue" class="form-input" min="1" step="0.1">
+            <span class="unit-label">{{ editLimitIngredient?.unit }}</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" (click)="validateEditLimit()">Update Limit</button>
+          <button class="btn btn-outline" (click)="closeEditLimitModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeDeleteModal()" title="Close">✕</button>
+      <div class="modal-content">
+        <h2>Delete Ingredient</h2>
+        <p>Are you sure you want to delete <strong>{{ selectedIngredient?.name }}</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+          <button class="btn btn-outline" (click)="closeDeleteModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div class="modal-backdrop" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+    <div class="modal modal-large" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeDetailsModal()" title="Close">✕</button>
+      <div class="modal-content">
+        <h2>{{ selectedIngredient?.name }} - Details</h2>
+        <div class="details-grid">
+          <div class="detail-card">
+            <h3>Stock Information</h3>
+            <div class="detail-item">
+              <span class="detail-label">Current Stock:</span>
+              <span class="detail-value">{{ selectedIngredient?.stock }}{{ selectedIngredient?.unit }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Stock Limit:</span>
+              <span class="detail-value">{{ selectedIngredient?.limit }}{{ selectedIngredient?.unit }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Status:</span>
+              <span class="detail-value status-badge" [class]="selectedIngredient?.status">
+                {{ getStatusText(selectedIngredient?.status || '') }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Stock Percentage:</span>
+              <span class="detail-value">{{ getStockPercentage(selectedIngredient?.stock || 0, selectedIngredient?.limit || 1).toFixed(1) }}%</span>
+            </div>
+          </div>
+          
+          <div class="detail-card">
+            <h3>General Information</h3>
+            <div class="detail-item">
+              <span class="detail-label">Type:</span>
+              <span class="detail-value">{{ selectedIngredient?.type === 'liquide' ? 'Liquid' : 'Solid' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Unit:</span>
+              <span class="detail-value">{{ selectedIngredient?.unit }}</span>
+            </div>
+
+          </div>
+          
+          <div class="detail-card">
+            <h3>History</h3>
+            <div class="detail-item">
+              <span class="detail-label">Last Restock:</span>
+              <span class="detail-value">{{ formatDate(selectedIngredient?.lastRestock) }}</span>
+            </div>
+
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" (click)="openRestockModal(selectedIngredient!)">Restock</button>
+          <button class="btn btn-secondary" (click)="openEditLimitModal(selectedIngredient!)">Edit Limit</button>
+          <button class="btn btn-outline" (click)="closeDetailsModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
