@@ -1,1 +1,205 @@
-<p>dashboard works!</p>
+<div class="container">
+  <!-- Header du dashboard -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-time">
+        <div class="current-time">{{ getCurrentTime() }}</div>
+        <div class="current-date">{{ getCurrentDate() }}</div>
+      </div>
+    </div>
+    
+    <div class="header-center">
+      <div class="logo-section">
+        <img src="assets/favicon.png" alt="Logo Helha Fresh" class="logo-img" />
+        <h1>Helha Fresh</h1>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <button class="btn btn-icon notification-btn" (click)="showNotifications()" title="Notifications">
+        <span class="notification-icon">🔔</span>
+        <span class="notification-badge" *ngIf="activeAlerts.length > 0">{{ activeAlerts.length }}</span>
+      </button>
+      
+      <!-- BOUTON DEV TEMPORAIRE -->
+      <button class="btn btn-icon dev-menu-btn" (click)="navigateTo('/menu')" title="DEV: Accès Menu (à retirer)">
+        <span class="dev-menu-icon">🛠️</span>
+      </button>
+      
+      <button class="btn btn-icon settings-btn" (click)="showSettings()" title="Paramètres">
+        <span class="settings-icon">⚙️</span>
+      </button>
+      
+      <button class="btn btn-outline logout-btn" (click)="logout()">
+        <span class="logout-icon">🚪</span>
+        Se déconnecter
+      </button>
+    </div>
+  </header>
+
+  <!-- Zone centrale avec image de fond centrée -->
+  <div class="dashboard-bg-center">
+    <section class="menu-section">
+      <div class="menu-columns">
+        <div class="menu-col menu-col-left">
+          <div class="menu-card" 
+               *ngFor="let item of menuItems.slice(0,2)"
+               [class]="getCardColorClass(item.color)"
+               (click)="navigateTo(item.route)">
+            <div class="menu-card-header">
+              <div class="menu-icon">{{ item.icon }}</div>
+              <h3 class="menu-title">{{ item.title }}</h3>
+            </div>
+            <p class="menu-description">{{ item.description }}</p>
+            <div class="menu-stats" *ngIf="item.id === 'gestion-mocktails'">
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.total }}</span>
+                <span class="stat-text">Total</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number available">{{ item.stats.available }}</span>
+                <span class="stat-text">Disponibles</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number unavailable">{{ item.stats.unavailable }}</span>
+                <span class="stat-text">Indisponibles</span>
+              </div>
+            </div>
+            <div class="menu-stats" *ngIf="item.id === 'gestion-ingredients'">
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.total }}</span>
+                <span class="stat-text">Total</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number good">{{ item.stats.good }}</span>
+                <span class="stat-text">OK</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number warning">{{ item.stats.warning }}</span>
+                <span class="stat-text">Attention</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number critical">{{ item.stats.critical }}</span>
+                <span class="stat-text">Critique</span>
+              </div>
+            </div>
+            <div class="menu-action">
+              <span class="action-text">Accéder</span>
+              <span class="action-arrow">→</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-col menu-col-right">
+          <div class="menu-card" 
+               *ngFor="let item of menuItems.slice(2,4)"
+               [class]="getCardColorClass(item.color)"
+               (click)="navigateTo(item.route)">
+            <div class="menu-card-header">
+              <div class="menu-icon">{{ item.icon }}</div>
+              <h3 class="menu-title">{{ item.title }}</h3>
+            </div>
+            <p class="menu-description">{{ item.description }}</p>
+            <div class="menu-stats" *ngIf="item.id === 'revenue'">
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.today }}</span>
+                <span class="stat-text">Aujourd'hui</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.week }}</span>
+                <span class="stat-text">Cette semaine</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.month }}</span>
+                <span class="stat-text">Ce mois</span>
+              </div>
+            </div>
+            <div class="menu-stats" *ngIf="item.id === 'gestion-sales'">
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.today }}</span>
+                <span class="stat-text">Aujourd'hui</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.week }}</span>
+                <span class="stat-text">Cette semaine</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.month }}</span>
+                <span class="stat-text">Ce mois</span>
+              </div>
+            </div>
+            <div class="menu-action">
+              <span class="action-text">Accéder</span>
+              <span class="action-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal des notifications -->
+  <div class="modal-backdrop" *ngIf="showNotificationsModal" (click)="closeNotifications()">
+    <div class="modal notifications-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeNotifications()" title="Fermer">✕</button>
+      <div class="modal-content">
+        <h2>🔔 Notifications</h2>
+        
+        <div class="notifications-list" *ngIf="activeAlerts.length > 0">
+          <div class="notification-item" 
+               *ngFor="let alert of activeAlerts"
+               [class]="getAlertSeverityClass(alert.severity)">
+            <div class="notification-icon">{{ alert.icon }}</div>
+            <div class="notification-content">
+              <p class="notification-message">{{ alert.message }}</p>
+              <span class="notification-time">Il y a 5 minutes</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="no-notifications" *ngIf="activeAlerts.length === 0">
+          <span class="no-notifications-icon">✅</span>
+          <p>Aucune notification active</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal des paramètres -->
+  <div class="modal-backdrop" *ngIf="showSettingsModal" (click)="closeSettings()">
+    <div class="modal settings-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeSettings()" title="Fermer">✕</button>
+      <div class="modal-content">
+        <h2>⚙️ Paramètres</h2>
+        
+        <div class="settings-section">
+          <h3>Changer le mot de passe</h3>
+          <form class="password-form" (ngSubmit)="changePassword()">
+            <div class="form-group">
+              <label for="current-password">Mot de passe actuel</label>
+              <input type="password" id="current-password" [(ngModel)]="passwordForm.currentPassword" 
+                     name="currentPassword" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="new-password">Nouveau mot de passe</label>
+              <input type="password" id="new-password" [(ngModel)]="passwordForm.newPassword" 
+                     name="newPassword" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="confirm-password">Confirmer le nouveau mot de passe</label>
+              <input type="password" id="confirm-password" [(ngModel)]="passwordForm.confirmPassword" 
+                     name="confirmPassword" class="form-input" required>
+            </div>
+            
+            <div class="modal-actions">
+              <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
+              <button type="button" class="btn btn-outline" (click)="closeSettings()">Annuler</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
