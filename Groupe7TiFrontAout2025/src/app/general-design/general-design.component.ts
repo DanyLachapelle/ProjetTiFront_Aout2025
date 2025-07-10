@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 export class GeneralDesignComponent {
   currentPage: 'login' | 'helha-fresh' | 'client-menu' | 'mocktails-management' | 'ingredients-management' | 'ca-visualization' | 'sales-history' = 'login';
   
-  // Données pour les mocktails
+  // Données pour les mocktails.
   mocktails = [
     {
       id: 1,
