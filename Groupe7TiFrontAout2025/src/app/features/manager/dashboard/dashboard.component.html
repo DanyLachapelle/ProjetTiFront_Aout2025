@@ -41,9 +41,74 @@
   <div class="dashboard-bg-center">
     <section class="menu-section">
       <div class="menu-columns">
-        <div class="menu-col menu-col-left">
+        <!-- First row: two cards side by side -->
+        <div class="menu-row">
+          <div class="menu-col menu-col-left">
+            <div class="menu-card" 
+                 *ngFor="let item of menuItems.slice(0,1)"
+                 [class]="getCardColorClass(item.color)"
+                 (click)="navigateTo(item.route)">
+              <div class="menu-card-header">
+                <div class="menu-icon">{{ item.icon }}</div>
+                <h3 class="menu-title">{{ item.title }}</h3>
+              </div>
+              <p class="menu-description">{{ item.description }}</p>
+              <div class="menu-stats" *ngIf="item.id === 'gestion-mocktails'">
+                <div class="stat-item">
+                  <span class="stat-number">{{ item.stats.total }}</span>
+                  <span class="stat-text">Total</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number available">{{ item.stats.available }}</span>
+                  <span class="stat-text">Available</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number unavailable">{{ item.stats.unavailable }}</span>
+                  <span class="stat-text">Unavailable</span>
+                </div>
+              </div>
+              <div class="menu-action">
+                <span class="action-text">Access</span>
+                <span class="action-arrow">→</span>
+              </div>
+            </div>
+          </div>
+          <div class="menu-col menu-col-right">
+            <div class="menu-card" 
+                 *ngFor="let item of menuItems.slice(2,3)"
+                 [class]="getCardColorClass(item.color)"
+                 (click)="navigateTo(item.route)">
+              <div class="menu-card-header">
+                <div class="menu-icon">{{ item.icon }}</div>
+                <h3 class="menu-title">{{ item.title }}</h3>
+              </div>
+              <p class="menu-description">{{ item.description }}</p>
+              <div class="menu-stats" *ngIf="item.id === 'gestion-sales'">
+                <div class="stat-item">
+                  <span class="stat-number">{{ item.stats.today }}</span>
+                  <span class="stat-text">Today</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ item.stats.week }}</span>
+                  <span class="stat-text">This week</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ item.stats.month }}</span>
+                  <span class="stat-text">This month</span>
+                </div>
+              </div>
+              <div class="menu-action">
+                <span class="action-text">Access</span>
+                <span class="action-arrow">→</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Second row: third card centered -->
+        <div class="menu-col menu-col-center">
           <div class="menu-card" 
-               *ngFor="let item of menuItems.slice(0,2)"
+               *ngFor="let item of menuItems.slice(1,2)"
                [class]="getCardColorClass(item.color)"
                (click)="navigateTo(item.route)">
             <div class="menu-card-header">
@@ -51,20 +116,6 @@
               <h3 class="menu-title">{{ item.title }}</h3>
             </div>
             <p class="menu-description">{{ item.description }}</p>
-            <div class="menu-stats" *ngIf="item.id === 'gestion-mocktails'">
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.total }}</span>
-                <span class="stat-text">Total</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number available">{{ item.stats.available }}</span>
-                <span class="stat-text">Available</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number unavailable">{{ item.stats.unavailable }}</span>
-                <span class="stat-text">Unavailable</span>
-              </div>
-            </div>
             <div class="menu-stats" *ngIf="item.id === 'gestion-ingredients'">
               <div class="stat-item">
                 <span class="stat-number">{{ item.stats.total }}</span>
@@ -81,50 +132,6 @@
               <div class="stat-item">
                 <span class="stat-number critical">{{ item.stats.critical }}</span>
                 <span class="stat-text">Critical</span>
-              </div>
-            </div>
-            <div class="menu-action">
-              <span class="action-text">Access</span>
-              <span class="action-arrow">→</span>
-            </div>
-          </div>
-        </div>
-        <div class="menu-col menu-col-right">
-          <div class="menu-card" 
-               *ngFor="let item of menuItems.slice(2,4)"
-               [class]="getCardColorClass(item.color)"
-               (click)="navigateTo(item.route)">
-            <div class="menu-card-header">
-              <div class="menu-icon">{{ item.icon }}</div>
-              <h3 class="menu-title">{{ item.title }}</h3>
-            </div>
-            <p class="menu-description">{{ item.description }}</p>
-            <div class="menu-stats" *ngIf="item.id === 'revenue'">
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.today }}</span>
-                <span class="stat-text">Today</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.week }}</span>
-                <span class="stat-text">This week</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.month }}</span>
-                <span class="stat-text">This month</span>
-              </div>
-            </div>
-            <div class="menu-stats" *ngIf="item.id === 'gestion-sales'">
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.today }}</span>
-                <span class="stat-text">Today</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.week }}</span>
-                <span class="stat-text">This week</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.month }}</span>
-                <span class="stat-text">This month</span>
               </div>
             </div>
             <div class="menu-action">

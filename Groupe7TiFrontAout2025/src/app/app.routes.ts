@@ -18,9 +18,6 @@ export const routes: Routes = [
   // Routes pour la gestion des ventes
   { path: 'gestion-sales', loadComponent: () => import('./features/manager/gestion-sales/gestion-sales.component').then(m => m.GestionSalesComponent) },
   
-  // Routes pour les revenus/CA
-  { path: 'revenue', loadComponent: () => import('./features/manager/revenue/revenue.component').then(m => m.RevenueComponent) },
-  
   // Routes pour le menu client
   { path: 'menu', loadComponent: () => import('./features/client/menu/menu.component').then(m => m.MenuComponent) },
   

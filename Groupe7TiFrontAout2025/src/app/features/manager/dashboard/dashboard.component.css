@@ -729,9 +729,8 @@
 
 .menu-columns {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   gap: 3rem;
   width: 100%;
   max-width: 1100px;
@@ -741,27 +740,44 @@
   z-index: 1;
 }
 
+.menu-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 3rem;
+  width: 100%;
+}
+
 .menu-col {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  flex: 1 1 0;
   align-items: stretch;
 }
 
 .menu-col-left {
   align-items: flex-end;
 }
+
 .menu-col-right {
   align-items: flex-start;
 }
 
+.menu-col-center {
+  align-items: center;
+  margin-top: 1rem;
+}
+
 @media (max-width: 900px) {
   .menu-columns {
+    gap: 2rem;
+    padding: 1.5rem 0.5rem;
+  }
+  .menu-row {
     flex-direction: column;
     gap: 2rem;
     align-items: center;
-    padding: 1.5rem 0.5rem;
   }
   .menu-col {
     min-width: 0;
@@ -769,7 +785,7 @@
     width: 100%;
     align-items: center;
   }
-  .menu-col-left, .menu-col-right {
+  .menu-col-left, .menu-col-right, .menu-col-center {
     align-items: center;
   }
   .menu-card {

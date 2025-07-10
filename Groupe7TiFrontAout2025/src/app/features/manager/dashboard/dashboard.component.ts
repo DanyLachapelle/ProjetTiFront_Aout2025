@@ -73,19 +73,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     },
     {
-      id: 'revenue',
-      title: 'Revenue',
-      description: 'View and analyze your business performance',
-      icon: '📊',
-      color: 'success',
-      route: '/revenue',
-      stats: {
-        today: '89.30€',
-        week: '647.80€',
-        month: '2847.50€'
-      }
-    },
-    {
       id: 'gestion-sales',
       title: 'Sales History',
       description: 'View complete transaction history',
@@ -93,9 +80,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       color: 'warning',
       route: '/gestion-sales',
       stats: {
-        today: 12,
-        week: 89,
-        month: 342
+        today: '€89.30',
+        week: '€647.80',
+        month: '€2847.50'
       }
     }
   ];
@@ -133,7 +120,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Start time interval
   private startTimeInterval(): void {
-    if (this.timeInterval === null) {
+    if (this.timeInterval === null && typeof window !== 'undefined') {
       this.timeInterval = window.setInterval(() => {
         this.updateTime();
       }, 1000);
@@ -142,7 +129,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Stop time interval
   private stopTimeInterval(): void {
-    if (this.timeInterval !== null) {
+    if (this.timeInterval !== null && typeof window !== 'undefined') {
       clearInterval(this.timeInterval);
       this.timeInterval = null;
     }
