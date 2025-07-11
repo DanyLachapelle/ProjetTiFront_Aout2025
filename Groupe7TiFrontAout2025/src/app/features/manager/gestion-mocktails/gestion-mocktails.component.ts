@@ -2,29 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
-interface Mocktail {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  available: boolean;
-  image: string;
-  ingredients: Array<{
-    name: string;
-    quantity: number;
-    unit: string;
-  }>;
-}
-
-interface Ingredient {
-  id: number;
-  name: string;
-  stock: number;
-  limit: number;
-  unit: string;
-  status: string;
-}
+import { MocktailService, Mocktail, CreateMocktailRequest, UpdateMocktailRequest, Ingredient } from '../../../services/mocktail.service';
 
 interface MocktailForm {
   name: string;
@@ -47,123 +25,16 @@ interface MocktailForm {
   styleUrl: './gestion-mocktails.component.css'
 })
 export class GestionMocktailsComponent implements OnInit {
-  constructor(private router: Router) {}
-  // Mocktails data
-  mocktails: Mocktail[] = [
-    {
-      id: 1,
-      name: 'Virgin Mojito',
-      description: 'Refreshing with fresh mint and lime',
-      price: 8.50,
-      available: true,
-      image: '🍹',
-      ingredients: [
-        { name: 'Fresh mint', quantity: 5, unit: 'g' },
-        { name: 'Lime', quantity: 20, unit: 'g' },
-        { name: 'Sugar syrup', quantity: 1.5, unit: 'cl' },
-        { name: 'Sparkling water', quantity: 20, unit: 'cl' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Virgin Colada',
-      description: 'Exotic with coconut and pineapple',
-      price: 9.00,
-      available: true,
-      image: '🥤',
-      ingredients: [
-        { name: 'Pineapple juice', quantity: 15, unit: 'cl' },
-        { name: 'Coconut milk', quantity: 8, unit: 'cl' },
-        { name: 'Sugar syrup', quantity: 1, unit: 'cl' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Sunset Spritz',
-      description: 'Blood orange, grenadine and sparkling water',
-      price: 7.50,
-      available: false,
-      image: '🌅',
-      ingredients: [
-        { name: 'Blood orange juice', quantity: 12, unit: 'cl' },
-        { name: 'Grenadine', quantity: 3, unit: 'cl' },
-        { name: 'Sparkling water', quantity: 10, unit: 'cl' }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Berry Fizz',
-      description: 'Red berries, lemon and sparkling water',
-      price: 8.00,
-      available: true,
-      image: '🍓',
-      ingredients: [
-        { name: 'Red berries', quantity: 8, unit: 'g' },
-        { name: 'Lemon juice', quantity: 5, unit: 'cl' },
-        { name: 'Sparkling water', quantity: 15, unit: 'cl' }
-      ]
-    },
-    {
-      id: 5,
-      name: 'Tropical Dream',
-      description: 'Mango, passion fruit and coconut milk',
-      price: 9.20,
-      available: true,
-      image: '🥭',
-      ingredients: [
-        { name: 'Mango juice', quantity: 10, unit: 'cl' },
-        { name: 'Passion fruit juice', quantity: 5, unit: 'cl' },
-        { name: 'Coconut milk', quantity: 8, unit: 'cl' }
-      ]
-    },
-    {
-      id: 6,
-      name: 'Green Detox',
-      description: 'Cucumber, green apple and mint',
-      price: 8.80,
-      available: true,
-      image: '🥒',
-      ingredients: [
-        { name: 'Cucumber', quantity: 10, unit: 'g' },
-        { name: 'Green apple', quantity: 10, unit: 'g' },
-        { name: 'Fresh mint', quantity: 3, unit: 'g' }
-      ]
-    },
-    {
-      id: 7,
-      name: 'Pink Lemonade',
-      description: 'Lemon, raspberry and agave syrup',
-      price: 7.80,
-      available: true,
-      image: '🍋',
-      ingredients: [
-        { name: 'Lemon juice', quantity: 8, unit: 'cl' },
-        { name: 'Raspberries', quantity: 6, unit: 'g' },
-        { name: 'Agave syrup', quantity: 1.2, unit: 'cl' }
-      ]
-    }
-  ];
+  constructor(
+    private router: Router,
+    private mocktailService: MocktailService
+  ) {}
 
-  // Ingredients data
-  ingredients: Ingredient[] = [
-    { id: 1, name: 'Fresh mint', stock: 40, limit: 50, unit: 'g', status: 'warning' },
-    { id: 2, name: 'Lime', stock: 120, limit: 100, unit: 'g', status: 'good' },
-    { id: 3, name: 'Sugar syrup', stock: 800, limit: 500, unit: 'cl', status: 'good' },
-    { id: 4, name: 'Pineapple juice', stock: 200, limit: 300, unit: 'cl', status: 'warning' },
-    { id: 5, name: 'Coconut milk', stock: 30, limit: 50, unit: 'cl', status: 'critical' },
-    { id: 6, name: 'Blood orange juice', stock: 150, limit: 200, unit: 'cl', status: 'good' },
-    { id: 7, name: 'Grenadine', stock: 80, limit: 100, unit: 'cl', status: 'warning' },
-    { id: 8, name: 'Sparkling water', stock: 1000, limit: 800, unit: 'cl', status: 'good' },
-    { id: 9, name: 'Red berries', stock: 60, limit: 80, unit: 'g', status: 'warning' },
-    { id: 10, name: 'Lemon juice', stock: 200, limit: 250, unit: 'cl', status: 'good' },
-    { id: 11, name: 'Sparkling water', stock: 800, limit: 600, unit: 'cl', status: 'good' },
-    { id: 12, name: 'Mango juice', stock: 120, limit: 150, unit: 'cl', status: 'warning' },
-    { id: 13, name: 'Passion fruit juice', stock: 80, limit: 100, unit: 'cl', status: 'warning' },
-    { id: 14, name: 'Cucumber', stock: 200, limit: 150, unit: 'g', status: 'good' },
-    { id: 15, name: 'Green apple', stock: 300, limit: 250, unit: 'g', status: 'good' },
-    { id: 16, name: 'Raspberries', stock: 100, limit: 120, unit: 'g', status: 'warning' },
-    { id: 17, name: 'Agave syrup', stock: 150, limit: 200, unit: 'cl', status: 'warning' }
-  ];
+  // Mocktails data
+  mocktails: Mocktail[] = [];
+
+  // Ingredients data - maintenant chargés depuis l'API
+  ingredients: Ingredient[] = [];
 
   // Filters and search
   filteredMocktails: Mocktail[] = [];
@@ -196,26 +67,41 @@ export class GestionMocktailsComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.initializeIngredients();
-    this.filterMocktails();
-    this.loadMocktailsFromStorage();
+    this.loadMocktails();
+    this.loadIngredients();
+  }
+
+  // --- Load data from API ---
+  loadMocktails() {
+    this.mocktailService.getAll().subscribe({
+      next: (data) => {
+        this.mocktails = data;
+        this.filterMocktails();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des mocktails:', error);
+        this.mocktails = [];
+      }
+    });
+  }
+
+  loadIngredients() {
+    this.mocktailService.getAllIngredients().subscribe({
+      next: (data) => {
+        this.ingredients = data;
+        this.allIngredients = this.ingredients.map(ing => ing.name).sort();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des ingrédients:', error);
+        this.ingredients = [];
+        this.allIngredients = [];
+      }
+    });
   }
 
   // --- Navigation ---
   goBack() {
     this.router.navigate(['/dashboard']);
-  }
-
-  // --- Ingredients initialization ---
-  initializeIngredients() {
-    // Get all unique ingredients from mocktails
-    const ingredientSet = new Set<string>();
-    this.mocktails.forEach(mocktail => {
-      mocktail.ingredients.forEach(ingredient => {
-        ingredientSet.add(ingredient.name);
-      });
-    });
-    this.allIngredients = Array.from(ingredientSet).sort();
   }
 
   // --- Statistics ---
@@ -296,9 +182,10 @@ export class GestionMocktailsComponent implements OnInit {
   }
 
   toggleAvailability(mocktail: Mocktail) {
-    mocktail.available = !mocktail.available;
-    this.saveMocktailsToStorage();
-    this.filterMocktails();
+    // Note: Le champ available est calculé côté backend, 
+    // cette fonctionnalité nécessiterait un endpoint spécifique
+    // pour l'instant, on recharge les données
+    this.loadMocktails();
   }
 
   deleteMocktail(mocktail: Mocktail) {
@@ -308,10 +195,15 @@ export class GestionMocktailsComponent implements OnInit {
 
   confirmDelete() {
     if (this.mocktailToDelete) {
-      this.mocktails = this.mocktails.filter(m => m.id !== this.mocktailToDelete!.id);
-      this.saveMocktailsToStorage();
-      this.filterMocktails();
-      this.closeDeleteModal();
+      this.mocktailService.delete(this.mocktailToDelete.id).subscribe({
+        next: () => {
+          this.loadMocktails();
+          this.closeDeleteModal();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression:', error);
+        }
+      });
     }
   }
 
@@ -382,13 +274,24 @@ export class GestionMocktailsComponent implements OnInit {
   }
 
   validateForm(): boolean {
-    return !!(
+    const isValid = !!(
       this.mocktailForm.name &&
       this.mocktailForm.description &&
       this.mocktailForm.price > 0 &&
       this.mocktailForm.image &&
       this.hasValidIngredients()
     );
+    
+    console.log('Validation du formulaire:', {
+      name: this.mocktailForm.name,
+      description: this.mocktailForm.description,
+      price: this.mocktailForm.price,
+      image: this.mocktailForm.image,
+      hasValidIngredients: this.hasValidIngredients(),
+      isValid: isValid
+    });
+    
+    return isValid;
   }
 
   // --- Save ---
@@ -396,50 +299,62 @@ export class GestionMocktailsComponent implements OnInit {
     this.showErrors = true;
     
     if (!this.validateForm()) {
+      console.log('Formulaire invalide');
       return;
     }
 
     this.isSaving = true;
+    console.log('Début de la sauvegarde...');
 
-    // Save simulation
-    setTimeout(() => {
-      if (this.editingMocktail) {
-        // Edit mode - update existing mocktail
-        Object.assign(this.editingMocktail, this.mocktailForm);
-      } else {
-        // Create mode - add new mocktail
-        const newMocktail: Mocktail = {
-          id: Math.max(...this.mocktails.map(m => m.id)) + 1,
-          ...this.mocktailForm
-        };
-        this.mocktails.push(newMocktail);
-      }
-      
-      this.saveMocktailsToStorage();
-      this.filterMocktails();
-      this.closeMocktailModal();
-      this.isSaving = false;
-    }, 500);
-  }
+    if (this.editingMocktail) {
+      // Edit mode - update existing mocktail
+      console.log('Mode édition pour:', this.editingMocktail.name);
+      const updateRequest: UpdateMocktailRequest = {
+        name: this.mocktailForm.name,
+        description: this.mocktailForm.description,
+        price: this.mocktailForm.price,
+        image: this.mocktailForm.image,
+        ingredients: this.mocktailForm.ingredients
+      };
 
-  // --- Persistence ---
-  private saveMocktailsToStorage() {
-    try {
-      localStorage.setItem('helha-fresh-mocktails', JSON.stringify(this.mocktails));
-    } catch (error) {
-      console.warn('Unable to save mocktails:', error);
+      this.mocktailService.update(this.editingMocktail.id, updateRequest).subscribe({
+        next: (response) => {
+          console.log('Mocktail mis à jour avec succès:', response);
+          this.loadMocktails();
+          this.closeMocktailModal();
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('Erreur lors de la mise à jour:', error);
+          this.isSaving = false;
+        }
+      });
+    } else {
+      // Create mode - add new mocktail
+      console.log('Mode création pour:', this.mocktailForm.name);
+      const createRequest: CreateMocktailRequest = {
+        name: this.mocktailForm.name,
+        description: this.mocktailForm.description,
+        price: this.mocktailForm.price,
+        image: this.mocktailForm.image,
+        ingredients: this.mocktailForm.ingredients
+      };
+
+      console.log('Données envoyées:', createRequest);
+
+      this.mocktailService.create(createRequest).subscribe({
+        next: (response) => {
+          console.log('Mocktail créé avec succès:', response);
+          this.loadMocktails();
+          this.closeMocktailModal();
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('Erreur lors de la création:', error);
+          this.isSaving = false;
+        }
+      });
     }
   }
 
-  private loadMocktailsFromStorage() {
-    try {
-      const savedMocktails = localStorage.getItem('helha-fresh-mocktails');
-      if (savedMocktails) {
-        this.mocktails = JSON.parse(savedMocktails);
-        this.filterMocktails();
-      }
-    } catch (error) {
-      console.warn('Unable to load mocktails:', error);
-    }
-  }
 }
