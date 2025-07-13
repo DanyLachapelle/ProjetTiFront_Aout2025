@@ -12,7 +12,8 @@ export class UserService {
 
   constructor(private _http:HttpClient) { }
 
-  login(loginData: { login: string; mot_de_passe: string }): Observable<any> {
+  login(loginData: { username: string; password: string }): Observable<any> {
     return this._http.post<any>(UserService.LOGIN_URL, loginData);
   }
+
 }

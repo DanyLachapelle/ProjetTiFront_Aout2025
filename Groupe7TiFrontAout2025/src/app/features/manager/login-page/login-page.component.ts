@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NgIf} from '@angular/common';
-import {UserService} from './user.service';
+import {UserService} from '../../../services/user.service';
 import {Router} from '@angular/router';
 
 @Component({
@@ -14,14 +14,14 @@ import {Router} from '@angular/router';
   styleUrl: './login-page.component.css'
 })
 export class LoginPageComponent {
-  login: string = '';
-  mot_de_passe: string = '';
+  username: string = '';
+  password: string = '';
   errorMessage: string = '';
 
   constructor(private userService: UserService,private router: Router) {}
 
   onLogin() {
-    this.userService.login({ login: this.login, mot_de_passe: this.mot_de_passe }).subscribe({
+    this.userService.login({ username: this.username, password: this.password }).subscribe({
       next: (response) => {
         console.log('Connexion réussie', response);
         localStorage.setItem('token', response.token);

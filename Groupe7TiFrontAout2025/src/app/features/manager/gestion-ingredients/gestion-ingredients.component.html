@@ -7,14 +7,14 @@
         Back
       </button>
     </div>
-    
+
     <div class="header-center">
       <div class="title-section">
         <span class="title-icon">🧪</span>
         <h1>Ingredients Management</h1>
       </div>
     </div>
-    
+
     <div class="header-right">
       <button class="btn btn-outline" (click)="refreshData()">
         <span class="action-icon">🔄</span>
@@ -38,9 +38,9 @@
           <span class="stat-period">All types</span>
         </div>
       </div>
-      
 
-      
+
+
       <div class="stat-card">
         <div class="stat-icon">⚠️</div>
         <div class="stat-content">
@@ -49,7 +49,7 @@
           <span class="stat-period">Warning & Critical</span>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-icon">📊</div>
         <div class="stat-content">
@@ -68,65 +68,65 @@
   <section class="filters-section">
     <div class="filters-row">
       <div class="search-box">
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm" 
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
           (input)="onSearchChange()"
           placeholder="Search ingredients..."
           class="search-input"
         >
         <span class="search-icon">🔍</span>
       </div>
-      
+
       <div class="filter-buttons">
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'all'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'all'"
           (click)="setFilter('all')"
         >
           All
         </button>
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'good'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'good'"
           (click)="setFilter('good')"
         >
           OK
         </button>
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'warning'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'warning'"
           (click)="setFilter('warning')"
         >
           Warning
         </button>
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'critical'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'critical'"
           (click)="setFilter('critical')"
         >
           Critical
         </button>
       </div>
-      
+
       <div class="type-filters">
-        <button 
-          class="type-btn" 
-          [class.active]="selectedType === 'all'" 
+        <button
+          class="type-btn"
+          [class.active]="selectedType === 'all'"
           (click)="setTypeFilter('all')"
         >
           All Types
         </button>
-        <button 
-          class="type-btn" 
-          [class.active]="selectedType === 'liquide'" 
+        <button
+          class="type-btn"
+          [class.active]="selectedType === 'liquide'"
           (click)="setTypeFilter('liquide')"
         >
           Liquids
         </button>
-        <button 
-          class="type-btn" 
-          [class.active]="selectedType === 'solide'" 
+        <button
+          class="type-btn"
+          [class.active]="selectedType === 'solide'"
           (click)="setTypeFilter('solide')"
         >
           Solids
@@ -153,7 +153,7 @@
         </button>
       </div>
     </div>
-    
+
     <div class="ingredients-grid" *ngIf="getFilteredIngredients().length > 0; else noIngredients">
       <div class="ingredient-card" *ngFor="let ingredient of getFilteredIngredients()" [class]="'status-' + ingredient.status">
         <div class="ingredient-header">
@@ -162,22 +162,22 @@
             {{ getStatusText(ingredient.status) }}
           </span>
         </div>
-        
+
         <div class="ingredient-content">
           <div class="stock-info">
             <div class="stock-bar">
-              <div class="stock-fill" 
-                   [style.width.%]="getStockPercentage(ingredient.stock, ingredient.limit)"
-                   [style.background]="getStockColor(ingredient.stock, ingredient.limit)">
+              <div class="stock-fill"
+                   [style.width.%]="getStockPercentage(ingredient.quantity, ingredient.restock_threshold)"
+                   [style.background]="getStockColor(ingredient.quantity, ingredient.restock_threshold)">
               </div>
               <div class="limit-marker" style="left: 25%"></div>
             </div>
             <div class="stock-details">
-              <span class="current-stock">{{ ingredient.stock }}{{ ingredient.unit }}</span>
-              <span class="stock-limit">/ {{ ingredient.limit }}{{ ingredient.unit }}</span>
+              <span class="current-stock">{{ ingredient.quantity }}{{ ingredient.unit }}</span>
+              <span class="stock-limit">/ {{ ingredient.restock_threshold }}{{ ingredient.unit }}</span>
             </div>
           </div>
-          
+
           <div class="ingredient-details">
             <div class="detail-row">
               <span class="detail-label">Type:</span>
@@ -189,7 +189,7 @@
               <span class="detail-value">{{ formatDate(ingredient.lastRestock) }}</span>
             </div>
           </div>
-          
+
           <div class="ingredient-actions">
             <button class="btn btn-small btn-primary" (click)="openRestockModal(ingredient)">
               Restock
@@ -207,7 +207,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- No ingredients message -->
     <ng-template #noIngredients>
       <div class="no-ingredients">
@@ -224,20 +224,20 @@
   <!-- Pagination Section -->
   <section class="pagination-section" *ngIf="getAllFilteredIngredients().length > itemsPerPage">
     <div class="pagination">
-      <button 
-        class="pagination-btn" 
+      <button
+        class="pagination-btn"
         [disabled]="currentPage === 1"
         (click)="previousPage()"
       >
         ← Previous
       </button>
-      
+
       <div class="page-numbers">
         <span class="page-info">
           Page {{ currentPage }} of {{ getTotalPages() }}
         </span>
         <div class="page-dots" *ngIf="getTotalPages() > 5">
-          <span class="page-dot" *ngFor="let page of getPageNumbers()" 
+          <span class="page-dot" *ngFor="let page of getPageNumbers()"
                 [class.active]="page === currentPage"
                 [class.dots]="page === '...'"
                 (click)="goToPage(page)">
@@ -245,9 +245,9 @@
           </span>
         </div>
       </div>
-      
-      <button 
-        class="pagination-btn" 
+
+      <button
+        class="pagination-btn"
         [disabled]="currentPage === getTotalPages()"
         (click)="nextPage()"
       >
@@ -366,11 +366,11 @@
             <h3>Stock Information</h3>
             <div class="detail-item">
               <span class="detail-label">Current Stock:</span>
-              <span class="detail-value">{{ selectedIngredient?.stock }}{{ selectedIngredient?.unit }}</span>
+              <span class="detail-value">{{ selectedIngredient?.quantity }}{{ selectedIngredient?.unit }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Stock Limit:</span>
-              <span class="detail-value">{{ selectedIngredient?.limit }}{{ selectedIngredient?.unit }}</span>
+              <span class="detail-value">{{ selectedIngredient?.restock_threshold }}{{ selectedIngredient?.unit }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Status:</span>
@@ -380,10 +380,10 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">Stock Percentage:</span>
-              <span class="detail-value">{{ getStockPercentage(selectedIngredient?.stock || 0, selectedIngredient?.limit || 1).toFixed(1) }}%</span>
+              <span class="detail-value">{{ getStockPercentage(selectedIngredient?.quantity || 0, selectedIngredient?.restock_threshold || 1).toFixed(1) }}%</span>
             </div>
           </div>
-          
+
           <div class="detail-card">
             <h3>General Information</h3>
             <div class="detail-item">
@@ -396,7 +396,7 @@
             </div>
 
           </div>
-          
+
           <div class="detail-card">
             <h3>History</h3>
             <div class="detail-item">

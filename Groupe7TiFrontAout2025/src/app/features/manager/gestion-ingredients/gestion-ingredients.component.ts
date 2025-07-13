@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import {IngredientService} from '../../../services/ingredient.service';
+
 
 interface Ingredient {
   id: number;
   name: string;
-  stock: number;
-  limit: number;
+  quantity: number;
+  restock_threshold: number;
   unit: string;
   status: 'good' | 'warning' | 'critical';
   type: 'liquide' | 'solide';
@@ -22,82 +24,80 @@ interface Ingredient {
   styleUrl: './gestion-ingredients.component.css'
 })
 export class GestionIngredientsComponent implements OnInit {
+  ingredients: Ingredient[] = [];
 
-  // Ingredients data
-  ingredients: Ingredient[] = [
-    { id: 1, name: 'Fresh Mint', stock: 40, limit: 50, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-15' },
-    { id: 2, name: 'Lime', stock: 120, limit: 100, unit: 'g', status: 'good', type: 'solide', lastRestock: '2025-01-20' },
-    { id: 3, name: 'Sugar Syrup', stock: 800, limit: 500, unit: 'ml', status: 'good', type: 'liquide', lastRestock: '2025-01-18' },
-    { id: 4, name: 'Pineapple Juice', stock: 200, limit: 300, unit: 'ml', status: 'warning', type: 'liquide', lastRestock: '2025-01-22' },
-    { id: 5, name: 'Coconut', stock: 30, limit: 50, unit: 'g', status: 'critical', type: 'solide', lastRestock: '2025-01-10' },
-    { id: 6, name: 'Strawberry', stock: 80, limit: 100, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-25' },
-    { id: 7, name: 'Blueberry', stock: 150, limit: 120, unit: 'g', status: 'good', type: 'solide', lastRestock: '2025-01-23' },
-    { id: 8, name: 'Lemon Juice', stock: 400, limit: 350, unit: 'ml', status: 'good', type: 'liquide', lastRestock: '2025-01-21' },
-    { id: 9, name: 'Ginger', stock: 25, limit: 40, unit: 'g', status: 'critical', type: 'solide', lastRestock: '2025-01-12' },
-    { id: 10, name: 'Honey', stock: 300, limit: 250, unit: 'ml', status: 'good', type: 'liquide', lastRestock: '2025-01-19' },
-    { id: 11, name: 'Orange Juice', stock: 350, limit: 400, unit: 'ml', status: 'good', type: 'liquide', lastRestock: '2025-01-24' },
-    { id: 12, name: 'Basil', stock: 35, limit: 45, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-16' },
-    { id: 13, name: 'Grapefruit Juice', stock: 180, limit: 250, unit: 'ml', status: 'warning', type: 'liquide', lastRestock: '2025-01-17' },
-    { id: 14, name: 'Raspberry', stock: 60, limit: 80, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-26' },
-    { id: 15, name: 'Cinnamon', stock: 15, limit: 25, unit: 'g', status: 'critical', type: 'solide', lastRestock: '2025-01-08' },
-    { id: 16, name: 'Coconut Milk', stock: 250, limit: 300, unit: 'ml', status: 'good', type: 'liquide', lastRestock: '2025-01-20' },
-    { id: 17, name: 'Vanilla Extract', stock: 45, limit: 60, unit: 'ml', status: 'warning', type: 'liquide', lastRestock: '2025-01-14' },
-    { id: 18, name: 'Mango', stock: 90, limit: 120, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-27' },
-    { id: 19, name: 'Peach', stock: 75, limit: 100, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-28' },
-    { id: 20, name: 'Almond Syrup', stock: 120, limit: 150, unit: 'ml', status: 'warning', type: 'liquide', lastRestock: '2025-01-13' },
-    { id: 21, name: 'Passion Fruit', stock: 40, limit: 60, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-29' },
-    { id: 22, name: 'Rose Water', stock: 80, limit: 100, unit: 'ml', status: 'warning', type: 'liquide', lastRestock: '2025-01-11' },
-    { id: 23, name: 'Lavender', stock: 20, limit: 30, unit: 'g', status: 'critical', type: 'solide', lastRestock: '2025-01-09' },
-    { id: 24, name: 'Chamomile', stock: 30, limit: 40, unit: 'g', status: 'warning', type: 'solide', lastRestock: '2025-01-07' },
-    { id: 25, name: 'Elderflower', stock: 25, limit: 35, unit: 'g', status: 'critical', type: 'solide', lastRestock: '2025-01-06' }
-  ];
+  constructor(
+    private router: Router,
+    private ingredientService: IngredientService // injection du service
+  ) {}
+
+  ngOnInit(): void {
+    this.loadIngredients();
+  }
+
+  loadIngredients(): void {
+    this.ingredientService.GetAll().subscribe({
+      next: (data) => {
+        const ingredientsArray = Array.isArray(data) ? data : data.ingredients;
+
+        this.ingredients = ingredientsArray.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          restock_threshold: item.restock_threshold,
+          unit: item.unit,
+          status: this.getStockStatus(item.stock, item.limit),
+          type: item.type,
+          lastRestock: item.lastRestock
+        }));
+
+        this.updateStatistics();
+      },
+    });
+  }
 
   // Filter and search properties
   selectedFilter: 'all' | 'good' | 'warning' | 'critical' = 'all';
   searchTerm: string = '';
   selectedType: 'all' | 'liquide' | 'solide' = 'all';
-  
+
   // Modal states
   showRestockModal = false;
   showAddIngredientModal = false;
   showEditLimitModal = false;
   showDeleteModal = false;
   showDetailsModal = false;
-  
+
   // Modal data
   restockIngredient: Ingredient | null = null;
   restockQuantity: number = 1;
   restockCost: number = 0;
-  
+
   newIngredientForm = {
     name: '',
     type: 'liquide' as 'liquide' | 'solide',
     stock: 0,
     limit: 1
   };
-  
+
   editLimitIngredient: Ingredient | null = null;
   editLimitValue: number = 1;
-  
+
   selectedIngredient: Ingredient | null = null;
-  
+
   // Statistics
   totalIngredients: number = 0;
   lowStockCount: number = 0;
-  
+
   // Sort properties
   sortBy: 'name' | 'stock' | 'lastRestock' = 'name';
   sortOrder: 'asc' | 'desc' = 'asc';
-  
+
   // Pagination properties
   currentPage: number = 1;
   itemsPerPage: number = 12;
 
-  constructor(private router: Router) {}
 
-  ngOnInit(): void {
-    this.updateStatistics();
-  }
 
   // Navigation
   goBack(): void {
@@ -136,7 +136,7 @@ export class GestionIngredientsComponent implements OnInit {
     // Apply search filter
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(ingredient => 
+      filtered = filtered.filter(ingredient =>
         ingredient.name.toLowerCase().includes(searchLower)
       );
     }
@@ -144,15 +144,15 @@ export class GestionIngredientsComponent implements OnInit {
     // Apply sorting
     filtered.sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (this.sortBy) {
         case 'name':
           aValue = a.name.toLowerCase();
           bValue = b.name.toLowerCase();
           break;
         case 'stock':
-          aValue = a.stock;
-          bValue = b.stock;
+          aValue = a.quantity;
+          bValue = b.quantity;
           break;
 
         case 'lastRestock':
@@ -194,7 +194,7 @@ export class GestionIngredientsComponent implements OnInit {
     // Apply search filter
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(ingredient => 
+      filtered = filtered.filter(ingredient =>
         ingredient.name.toLowerCase().includes(searchLower)
       );
     }
@@ -251,7 +251,7 @@ export class GestionIngredientsComponent implements OnInit {
   // Statistics
   updateStatistics(): void {
     this.totalIngredients = this.ingredients.length;
-    this.lowStockCount = this.ingredients.filter(ingredient => 
+    this.lowStockCount = this.ingredients.filter(ingredient =>
       ingredient.status === 'warning' || ingredient.status === 'critical').length;
   }
 
@@ -276,8 +276,8 @@ export class GestionIngredientsComponent implements OnInit {
 
   validateRestock(): void {
     if (this.restockIngredient && this.restockQuantity > 0) {
-      this.restockIngredient.stock += Number(this.restockQuantity);
-      this.restockIngredient.status = this.getStockStatus(this.restockIngredient.stock, this.restockIngredient.limit);
+      this.restockIngredient.quantity += Number(this.restockQuantity);
+      this.restockIngredient.status = this.getStockStatus(this.restockIngredient.quantity, this.restockIngredient.restock_threshold);
       this.restockIngredient.lastRestock = new Date().toISOString().split('T')[0];
       this.updateStatistics();
     }
@@ -301,18 +301,18 @@ export class GestionIngredientsComponent implements OnInit {
 
   validateAddIngredient(): void {
     if (!this.newIngredientForm.name || this.newIngredientForm.limit <= 0) return;
-    
+
     const newIngredient: Ingredient = {
       id: Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
       name: this.newIngredientForm.name,
-      stock: Number(this.newIngredientForm.stock),
-      limit: Number(this.newIngredientForm.limit),
+      quantity: Number(this.newIngredientForm.stock),
+      restock_threshold: Number(this.newIngredientForm.limit),
       unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g',
       status: this.getStockStatus(Number(this.newIngredientForm.stock), Number(this.newIngredientForm.limit)),
       type: this.newIngredientForm.type,
       lastRestock: new Date().toISOString().split('T')[0]
     };
-    
+
     this.ingredients.push(newIngredient);
     this.updateStatistics();
     this.closeAddIngredientModal();
@@ -321,7 +321,7 @@ export class GestionIngredientsComponent implements OnInit {
   // Modal methods - Edit limit
   openEditLimitModal(ingredient: Ingredient): void {
     this.editLimitIngredient = ingredient;
-    this.editLimitValue = ingredient.limit;
+    this.editLimitValue = ingredient.restock_threshold;
     this.showEditLimitModal = true;
   }
 
@@ -333,8 +333,8 @@ export class GestionIngredientsComponent implements OnInit {
 
   validateEditLimit(): void {
     if (this.editLimitIngredient && this.editLimitValue > 0) {
-      this.editLimitIngredient.limit = Number(this.editLimitValue);
-      this.editLimitIngredient.status = this.getStockStatus(this.editLimitIngredient.stock, this.editLimitIngredient.limit);
+      this.editLimitIngredient.restock_threshold = Number(this.editLimitValue);
+      this.editLimitIngredient.status = this.getStockStatus(this.editLimitIngredient.quantity, this.editLimitIngredient.restock_threshold);
       this.updateStatistics();
     }
     this.closeEditLimitModal();
@@ -423,19 +423,19 @@ export class GestionIngredientsComponent implements OnInit {
   getPageNumbers(): (number | string)[] {
     const totalPages = this.getTotalPages();
     const current = this.currentPage;
-    
+
     if (totalPages <= 5) {
       return Array.from({length: totalPages}, (_, i) => i + 1);
     }
-    
+
     if (current <= 3) {
       return [1, 2, 3, 4, '...', totalPages];
     }
-    
+
     if (current >= totalPages - 2) {
       return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
     }
-    
+
     return [1, '...', current - 1, current, current + 1, '...', totalPages];
   }
 

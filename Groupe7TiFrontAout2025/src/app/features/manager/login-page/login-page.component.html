@@ -11,11 +11,11 @@
       <form class="login-form" (ngSubmit)="onLogin()">
         <div class="form-group">
           <label for="username">Username</label>
-          <input [(ngModel)]="login" name="pseudo" type="text" id="username" placeholder="Entrez votre nom d'utilisateur" class="form-input">
+          <input [(ngModel)]="username" name="username" type="text" id="username" placeholder="Enter your username" class="form-input">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input [(ngModel)]="mot_de_passe" name="password" type="password" id="password" placeholder="Entrez votre mot de passe" class="form-input">
+          <input [(ngModel)]="password" name="password" type="password" id="password" placeholder="Enter your password" class="form-input">
         </div>
         <button type="submit" class="btn-login">
           Se connecter
