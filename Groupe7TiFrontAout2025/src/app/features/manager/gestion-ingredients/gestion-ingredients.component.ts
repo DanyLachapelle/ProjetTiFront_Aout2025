@@ -386,12 +386,29 @@ export class GestionIngredientsComponent implements OnInit {
     this.selectedIngredient = null;
   }
 
+  // confirmDelete(): void {
+  //   if (this.selectedIngredient) {
+  //     this.ingredients = this.ingredients.filter(ingredient => ingredient.id !== this.selectedIngredient!.id);
+  //     this.updateStatistics();
+  //   }
+  //   this.closeDeleteModal();
+  // }
+
   confirmDelete(): void {
     if (this.selectedIngredient) {
-      this.ingredients = this.ingredients.filter(ingredient => ingredient.id !== this.selectedIngredient!.id);
-      this.updateStatistics();
+      const id = this.selectedIngredient.id;
+      this.ingredientService.deleteIngredient(id).subscribe({
+        next: res => {
+          alert(res.message);
+          this.loadIngredients();
+          this.closeDeleteModal();
+        },
+        error: err => {
+          console.error('Erreur lors de la suppression', err);
+          alert('Erreur lors de la suppression');
+        }
+      });
     }
-    this.closeDeleteModal();
   }
 
   // Modal methods - Details
