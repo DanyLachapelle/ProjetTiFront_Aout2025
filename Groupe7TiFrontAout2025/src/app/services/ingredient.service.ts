@@ -14,4 +14,17 @@ export class IngredientService {
     GetAll(): Observable<any> {
         return this._http.get<any>(IngredientService.URL);
     }
+
+  CreateIngredient(ingredient: { name: string; quantity: number; restock_threshold: number; unit: string }): Observable<any> {
+    return this._http.post<any>(
+      'http://localhost:5201/api/ingredients/createIngredient',
+      {
+        name: ingredient.name,
+        quantity: ingredient.quantity,
+        restock_threshold: ingredient.restock_threshold,
+        unit: ingredient.unit
+      }
+    );
+  }
+
 }

@@ -46,7 +46,7 @@ export class GestionIngredientsComponent implements OnInit {
           quantity: item.quantity,
           restock_threshold: item.restock_threshold,
           unit: item.unit,
-          status: this.getStockStatus(item.stock, item.limit),
+          status: this.getStockStatus(item.quantity, item.restock_threshold),
           type: item.type,
           lastRestock: item.lastRestock
         }));
@@ -299,23 +299,58 @@ export class GestionIngredientsComponent implements OnInit {
     this.showAddIngredientModal = false;
   }
 
+  // validateAddIngredient(): void {
+  //   if (!this.newIngredientForm.name || this.newIngredientForm.limit <= 0) return;
+  //
+  //   const newIngredient: Ingredient = {
+  //     id: Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
+  //     name: this.newIngredientForm.name,
+  //     quantity: Number(this.newIngredientForm.stock),
+  //     restock_threshold: Number(this.newIngredientForm.limit),
+  //     unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g',
+  //     status: this.getStockStatus(Number(this.newIngredientForm.stock), Number(this.newIngredientForm.limit)),
+  //     type: this.newIngredientForm.type,
+  //     lastRestock: new Date().toISOString().split('T')[0]
+  //   };
+  //
+  //   this.ingredients.push(newIngredient);
+  //   this.updateStatistics();
+  //   this.closeAddIngredientModal();
+  // }
+
   validateAddIngredient(): void {
     if (!this.newIngredientForm.name || this.newIngredientForm.limit <= 0) return;
 
-    const newIngredient: Ingredient = {
-      id: Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
+    const newIngredientPayload = {
       name: this.newIngredientForm.name,
       quantity: Number(this.newIngredientForm.stock),
       restock_threshold: Number(this.newIngredientForm.limit),
-      unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g',
-      status: this.getStockStatus(Number(this.newIngredientForm.stock), Number(this.newIngredientForm.limit)),
-      type: this.newIngredientForm.type,
-      lastRestock: new Date().toISOString().split('T')[0]
+      unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g'
     };
 
-    this.ingredients.push(newIngredient);
-    this.updateStatistics();
-    this.closeAddIngredientModal();
+    this.ingredientService.CreateIngredient(newIngredientPayload).subscribe({
+      next: (createdIngredient) => {
+        // Ajouter l'ingrédient créé dans la liste locale avec les infos reçues
+        const ingredient: Ingredient = {
+          id: createdIngredient.id || Math.max(0, ...this.ingredients.map(i => i.id)) + 1, // fallback si pas d'id retourné
+          name: createdIngredient.name,
+          quantity: createdIngredient.quantity,
+          restock_threshold: createdIngredient.restock_threshold,
+          unit: createdIngredient.unit,
+          status: this.getStockStatus(createdIngredient.quantity, createdIngredient.restock_threshold),
+          type: this.newIngredientForm.type,
+          lastRestock: new Date().toISOString().split('T')[0]
+        };
+
+        this.ingredients.push(ingredient);
+        this.updateStatistics();
+        this.closeAddIngredientModal();
+      },
+      error: (err) => {
+        console.error('Erreur lors de la création de l’ingrédient', err);
+        // Optionnel : afficher un message d’erreur à l’utilisateur
+      }
+    });
   }
 
   // Modal methods - Edit limit
