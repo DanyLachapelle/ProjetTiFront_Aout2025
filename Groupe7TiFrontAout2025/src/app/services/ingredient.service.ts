@@ -7,6 +7,10 @@ export interface DeleteIngredientOutput {
   message: string;
 }
 
+export interface UpdateLimitIngredientOutput {
+  success: boolean;
+  message: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -29,12 +33,17 @@ export class IngredientService {
         unit: ingredient.unit
       }
     );
-  }
+    }
 
   deleteIngredient(id: number): Observable<DeleteIngredientOutput> {
     return this._http.delete<DeleteIngredientOutput>(`http://localhost:5201/api/ingredients/deleteIngredient/${id}`);
   }
 
-
+  updateRestockThreshold(id: number, restockThreshold: number): Observable<{ success: boolean; message: string }> {
+    return this._http.put<{ success: boolean; message: string }>(
+      `http://localhost:5201/api/ingredients/updateLimitIngredient/${id}`,
+      { restockThreshold }  // attention au nom de la propriété selon backend
+    );
+  }
 
 }

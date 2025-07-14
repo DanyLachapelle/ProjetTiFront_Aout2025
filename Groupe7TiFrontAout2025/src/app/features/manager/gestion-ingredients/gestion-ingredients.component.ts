@@ -366,13 +366,37 @@ export class GestionIngredientsComponent implements OnInit {
     this.editLimitValue = 1;
   }
 
+  // validateEditLimit(): void {
+  //   if (this.editLimitIngredient && this.editLimitValue > 0) {
+  //     this.editLimitIngredient.restock_threshold = Number(this.editLimitValue);
+  //     this.editLimitIngredient.status = this.getStockStatus(this.editLimitIngredient.quantity, this.editLimitIngredient.restock_threshold);
+  //     this.updateStatistics();
+  //   }
+  //   this.closeEditLimitModal();
+  // }
+
   validateEditLimit(): void {
     if (this.editLimitIngredient && this.editLimitValue > 0) {
-      this.editLimitIngredient.restock_threshold = Number(this.editLimitValue);
-      this.editLimitIngredient.status = this.getStockStatus(this.editLimitIngredient.quantity, this.editLimitIngredient.restock_threshold);
-      this.updateStatistics();
+      this.ingredientService.updateRestockThreshold(this.editLimitIngredient.id, this.editLimitValue).subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Met à jour localement la valeur et le status
+            this.editLimitIngredient!.restock_threshold = Number(this.editLimitValue);
+            this.editLimitIngredient!.status = this.getStockStatus(this.editLimitIngredient!.quantity, this.editLimitIngredient!.restock_threshold);
+            this.updateStatistics();
+            alert('Restock threshold updated successfully');
+          } else {
+            alert('Update failed: : ' + response.message);
+          }
+          this.closeEditLimitModal();
+        },
+        error: (err) => {
+          console.error('Error updating restock threshold', err);
+          alert('Error updating restock threshold');
+          this.closeEditLimitModal();
+        }
+      });
     }
-    this.closeEditLimitModal();
   }
 
   // Modal methods - Delete ingredient
