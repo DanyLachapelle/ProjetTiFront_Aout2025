@@ -274,14 +274,41 @@ export class GestionIngredientsComponent implements OnInit {
     this.restockCost = 0;
   }
 
+  // validateRestock(): void {
+  //   if (this.restockIngredient && this.restockQuantity > 0) {
+  //     this.restockIngredient.quantity += Number(this.restockQuantity);
+  //     this.restockIngredient.status = this.getStockStatus(this.restockIngredient.quantity, this.restockIngredient.restock_threshold);
+  //     this.restockIngredient.lastRestock = new Date().toISOString().split('T')[0];
+  //     this.updateStatistics();
+  //   }
+  //   this.closeRestockModal();
+  // }
+
   validateRestock(): void {
     if (this.restockIngredient && this.restockQuantity > 0) {
-      this.restockIngredient.quantity += Number(this.restockQuantity);
-      this.restockIngredient.status = this.getStockStatus(this.restockIngredient.quantity, this.restockIngredient.restock_threshold);
-      this.restockIngredient.lastRestock = new Date().toISOString().split('T')[0];
-      this.updateStatistics();
+      this.ingredientService.updateQuantity(this.restockIngredient.id, this.restockQuantity).subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Mise à jour locale des données
+            this.restockIngredient!.quantity += Number(this.restockQuantity);
+            this.restockIngredient!.status = this.getStockStatus(this.restockIngredient!.quantity, this.restockIngredient!.restock_threshold);
+            this.restockIngredient!.lastRestock = new Date().toISOString().split('T')[0];
+            this.updateStatistics();
+            alert('Quantity updated successfully');
+          } else {
+            alert('Update failed: ' + response.message);
+          }
+          this.closeRestockModal();
+        },
+        error: (err) => {
+          console.error('Error updating quantity', err);
+          alert('Error updating quantity');
+          this.closeRestockModal();
+        }
+      });
+    } else {
+      this.closeRestockModal();
     }
-    this.closeRestockModal();
   }
 
   // Modal methods - Add ingredient

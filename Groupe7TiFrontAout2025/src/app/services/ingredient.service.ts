@@ -46,4 +46,11 @@ export class IngredientService {
     );
   }
 
+  updateQuantity(id: number, amount: number): Observable<{ success: boolean; message: string }> {
+    return this._http.put<{ success: boolean; message: string }>(
+      `http://localhost:5201/api/ingredients/updateQuantity/${id}`,
+      amount
+    );
+  }
+
 }
