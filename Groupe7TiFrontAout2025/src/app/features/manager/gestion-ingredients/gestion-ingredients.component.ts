@@ -47,9 +47,10 @@ export class GestionIngredientsComponent implements OnInit {
           restock_threshold: item.restock_threshold,
           unit: item.unit,
           status: this.getStockStatus(item.quantity, item.restock_threshold),
-          type: item.type,
+          type: item.unit === 'g' ? 'solide' : 'liquide',
           lastRestock: item.lastRestock
         }));
+
 
         this.updateStatistics();
       },
