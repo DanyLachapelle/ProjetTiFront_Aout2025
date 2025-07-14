@@ -148,8 +148,8 @@
           Stock {{ getSortIcon('stock') }}
         </button>
 
-        <button class="sort-btn" (click)="setSort('lastRestock')">
-          Last Restock {{ getSortIcon('lastRestock') }}
+        <button class="sort-btn" (click)="setSort('last_modified_at')">
+          Last Restock {{ getSortIcon('last_modified_at') }}
         </button>
       </div>
     </div>
@@ -186,7 +186,7 @@
 
             <div class="detail-row">
               <span class="detail-label">Last Restock:</span>
-              <span class="detail-value">{{ formatDate(ingredient.lastRestock) }}</span>
+              <span class="detail-value">{{ formatDate(ingredient.last_modified_at) }}</span>
             </div>
           </div>
 
@@ -401,7 +401,7 @@
             <h3>History</h3>
             <div class="detail-item">
               <span class="detail-label">Last Restock:</span>
-              <span class="detail-value">{{ formatDate(selectedIngredient?.lastRestock) }}</span>
+              <span class="detail-value">{{ formatDate(selectedIngredient?.last_modified_at) }}</span>
             </div>
 
           </div>

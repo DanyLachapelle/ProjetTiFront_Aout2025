@@ -13,7 +13,7 @@ interface Ingredient {
   unit: string;
   status: 'good' | 'warning' | 'critical';
   type: 'liquide' | 'solide';
-  lastRestock?: string;
+  last_modified_at?: string;
 }
 
 @Component({
@@ -48,7 +48,7 @@ export class GestionIngredientsComponent implements OnInit {
           unit: item.unit,
           status: this.getStockStatus(item.quantity, item.restock_threshold),
           type: item.unit === 'g' ? 'solide' : 'liquide',
-          lastRestock: item.lastRestock
+          last_modified_at: item.last_modified_at
         }));
 
 
@@ -91,7 +91,7 @@ export class GestionIngredientsComponent implements OnInit {
   lowStockCount: number = 0;
 
   // Sort properties
-  sortBy: 'name' | 'stock' | 'lastRestock' = 'name';
+  sortBy: 'name' | 'stock' | 'last_modified_at' = 'name';
   sortOrder: 'asc' | 'desc' = 'asc';
 
   // Pagination properties
@@ -156,9 +156,9 @@ export class GestionIngredientsComponent implements OnInit {
           bValue = b.quantity;
           break;
 
-        case 'lastRestock':
-          aValue = a.lastRestock || '';
-          bValue = b.lastRestock || '';
+        case 'last_modified_at':
+          aValue = a.last_modified_at || '';
+          bValue = b.last_modified_at || '';
           break;
         default:
           aValue = a.name.toLowerCase();
@@ -213,7 +213,7 @@ export class GestionIngredientsComponent implements OnInit {
   }
 
   // Sort methods
-  setSort(field: 'name' | 'stock' | 'lastRestock'): void {
+  setSort(field: 'name' | 'stock' | 'last_modified_at'): void {
     if (this.sortBy === field) {
       this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
     } else {
@@ -290,10 +290,7 @@ export class GestionIngredientsComponent implements OnInit {
       this.ingredientService.updateQuantity(this.restockIngredient.id, this.restockQuantity).subscribe({
         next: (response) => {
           if (response.success) {
-            // Mise à jour locale des données
-            this.restockIngredient!.quantity += Number(this.restockQuantity);
-            this.restockIngredient!.status = this.getStockStatus(this.restockIngredient!.quantity, this.restockIngredient!.restock_threshold);
-            this.restockIngredient!.lastRestock = new Date().toISOString().split('T')[0];
+            this.loadIngredients();  // <-- recharge la liste complète
             this.updateStatistics();
             alert('Quantity updated successfully');
           } else {
@@ -311,6 +308,7 @@ export class GestionIngredientsComponent implements OnInit {
       this.closeRestockModal();
     }
   }
+
 
   // Modal methods - Add ingredient
   openAddIngredientModal(): void {
@@ -367,7 +365,7 @@ export class GestionIngredientsComponent implements OnInit {
           unit: createdIngredient.unit,
           status: this.getStockStatus(createdIngredient.quantity, createdIngredient.restock_threshold),
           type: this.newIngredientForm.type,
-          lastRestock: new Date().toISOString().split('T')[0]
+          last_modified_at: new Date().toISOString().split('T')[0]
         };
 
         this.ingredients.push(ingredient);
@@ -546,7 +544,6 @@ export class GestionIngredientsComponent implements OnInit {
   // Refresh data
   refreshData(): void {
     // In a real app, this would reload data from the server
-    this.currentPage = 1;
-    this.updateStatistics();
+    window.location.reload();
   }
 }
