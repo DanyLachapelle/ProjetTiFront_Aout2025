@@ -1,20 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Mocktail {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  available: boolean;
-  image: string;
-  ingredients: Array<{
-    name: string;
-    quantity: number;
-    unit: string;
-  }>;
-}
+import { MocktailService, Mocktail, Ingredient } from '../../../services/mocktail.service';
 
 interface OrderItem {
   mocktail: Mocktail;
@@ -29,101 +16,21 @@ interface OrderItem {
   styleUrl: './menu.component.css'
 })
 export class MenuComponent implements OnInit, OnDestroy {
-  // Mocktails data
-  mocktails: Mocktail[] = [
-    {
-      id: 1,
-      name: 'Virgin Mojito',
-      description: 'Refreshing with fresh mint and lime',
-      price: 8.50,
-      available: true,
-      image: '🍹',
-      ingredients: [
-        { name: 'Fresh mint', quantity: 5, unit: 'g' },
-        { name: 'Lime', quantity: 20, unit: 'g' },
-        { name: 'Sugar syrup', quantity: 1.5, unit: 'cl' },
-        { name: 'Sparkling water', quantity: 20, unit: 'cl' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Virgin Colada',
-      description: 'Exotic with coconut and pineapple',
-      price: 9.00,
-      available: true,
-      image: '🥤',
-      ingredients: [
-        { name: 'Pineapple juice', quantity: 15, unit: 'cl' },
-        { name: 'Coconut milk', quantity: 8, unit: 'cl' },
-        { name: 'Sugar syrup', quantity: 1, unit: 'cl' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Sunset Spritz',
-      description: 'Blood orange, grenadine and sparkling water',
-      price: 7.50,
-      available: false,
-      image: '🌅',
-      ingredients: [
-        { name: 'Blood orange juice', quantity: 12, unit: 'cl' },
-        { name: 'Grenadine', quantity: 3, unit: 'cl' },
-        { name: 'Sparkling water', quantity: 10, unit: 'cl' }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Berry Fizz',
-      description: 'Red berries, lemon and sparkling water',
-      price: 8.00,
-      available: true,
-      image: '🍓',
-      ingredients: [
-        { name: 'Red berries', quantity: 8, unit: 'g' },
-        { name: 'Lemon juice', quantity: 5, unit: 'cl' },
-        { name: 'Sparkling water', quantity: 15, unit: 'cl' }
-      ]
-    },
-    {
-      id: 5,
-      name: 'Tropical Dream',
-      description: 'Mango, passion fruit and coconut milk',
-      price: 9.20,
-      available: true,
-      image: '🥭',
-      ingredients: [
-        { name: 'Mango juice', quantity: 10, unit: 'cl' },
-        { name: 'Passion fruit juice', quantity: 5, unit: 'cl' },
-        { name: 'Coconut milk', quantity: 8, unit: 'cl' }
-      ]
-    },
-    {
-      id: 6,
-      name: 'Green Detox',
-      description: 'Cucumber, green apple and mint',
-      price: 8.80,
-      available: true,
-      image: '🥒',
-      ingredients: [
-        { name: 'Cucumber', quantity: 10, unit: 'g' },
-        { name: 'Green apple', quantity: 10, unit: 'g' },
-        { name: 'Fresh mint', quantity: 3, unit: 'g' }
-      ]
-    },
-    {
-      id: 7,
-      name: 'Pink Lemonade',
-      description: 'Lemon, raspberry and agave syrup',
-      price: 7.80,
-      available: true,
-      image: '🍋',
-      ingredients: [
-        { name: 'Lemon juice', quantity: 8, unit: 'cl' },
-        { name: 'Raspberries', quantity: 6, unit: 'g' },
-        { name: 'Agave syrup', quantity: 1.2, unit: 'cl' }
-      ]
-    }
-  ];
+  // Mocktails data - maintenant chargés depuis l'API
+  mocktails: Mocktail[] = [];
+  filteredMocktails: Mocktail[] = [];
+  
+  // Ingredients data
+  ingredients: Ingredient[] = [];
+  
+  // Filters
+  excludedIngredients: string[] = [];
+  
+  // Ingredients data
+  allIngredients: string[] = [];
+  
+  // Expanded mocktail for ingredients display
+  expandedMocktailId: number | null = null;
 
   // --- Cart and modals management ---
   showOrderModal = false;
@@ -139,7 +46,13 @@ export class MenuComponent implements OnInit, OnDestroy {
   readonly MAX_QUANTITY = 10;
   readonly MIN_QUANTITY = 1;
 
+  constructor(private mocktailService: MocktailService) {}
+
   ngOnInit() {
+    // Load data from API
+    this.loadMocktails();
+    this.loadIngredients();
+    
     // Load cart from localStorage if available
     this.loadCartFromStorage();
   }
@@ -147,6 +60,74 @@ export class MenuComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Save cart to localStorage
     this.saveCartToStorage();
+  }
+
+  // --- Load data from API ---
+  loadMocktails() {
+    this.mocktailService.getAll().subscribe({
+      next: (data) => {
+        this.mocktails = data;
+        this.filterMocktails();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des mocktails:', error);
+        this.mocktails = [];
+        this.filteredMocktails = [];
+      }
+    });
+  }
+
+  loadIngredients() {
+    this.mocktailService.getAllIngredients().subscribe({
+      next: (data) => {
+        this.ingredients = data;
+        this.allIngredients = this.ingredients.map(ing => ing.name).sort();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des ingrédients:', error);
+        this.ingredients = [];
+        this.allIngredients = [];
+      }
+    });
+  }
+
+  // --- Filtering ---
+  filterMocktails() {
+    this.filteredMocktails = this.mocktails.filter(mocktail => {
+      // Check if mocktail contains excluded ingredients
+      const hasExcludedIngredient = this.excludedIngredients.some(excludedIngredient =>
+        mocktail.ingredients.some(ingredient =>
+          ingredient.name.toLowerCase().includes(excludedIngredient.toLowerCase())
+        )
+      );
+      
+      return !hasExcludedIngredient;
+    });
+  }
+
+  // --- Allergen filtering ---
+  toggleExcludedIngredient(ingredientName: string) {
+    const index = this.excludedIngredients.indexOf(ingredientName);
+    if (index > -1) {
+      this.excludedIngredients.splice(index, 1);
+    } else {
+      this.excludedIngredients.push(ingredientName);
+    }
+    this.filterMocktails();
+  }
+
+  isIngredientExcluded(ingredientName: string): boolean {
+    return this.excludedIngredients.includes(ingredientName);
+  }
+
+  clearAllergenFilters() {
+    this.excludedIngredients = [];
+    this.filterMocktails();
+  }
+
+  // --- Ingredients display ---
+  toggleIngredients(mocktailId: number) {
+    this.expandedMocktailId = this.expandedMocktailId === mocktailId ? null : mocktailId;
   }
 
   // --- Cart management ---
@@ -256,6 +237,19 @@ export class MenuComponent implements OnInit, OnDestroy {
     
     this.selectedQuantity = value;
     input.value = value.toString();
+  }
+
+  // --- Modal quantity controls ---
+  decreaseModalQuantity() {
+    if (this.selectedQuantity > this.MIN_QUANTITY) {
+      this.selectedQuantity--;
+    }
+  }
+
+  increaseModalQuantity() {
+    if (this.selectedQuantity < this.MAX_QUANTITY) {
+      this.selectedQuantity++;
+    }
   }
 
   // --- Cart persistence ---
