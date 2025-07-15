@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MocktailService, Mocktail } from '../../../services/mocktail.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -53,9 +54,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       color: 'primary',
       route: '/gestion-mocktails',
       stats: {
-        total: 7,
-        available: 6,
-        unavailable: 1
+        total: 0,
+        available: 0,
+        unavailable: 0
       }
     },
     {
@@ -103,7 +104,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private mocktailService: MocktailService
+  ) {}
 
   ngOnInit(): void {
     // Initialize time and date immediately
@@ -111,6 +115,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     
     // Start interval to update time
     this.startTimeInterval();
+    
+    // Load mocktails data for dashboard
+    this.loadMocktailsStats();
   }
 
   ngOnDestroy(): void {
@@ -219,6 +226,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log('Password change requested');
     alert('Password changed successfully!');
     this.closeSettings();
+  }
+
+  // Load mocktails statistics for dashboard
+  private loadMocktailsStats(): void {
+    this.mocktailService.getAll().subscribe({
+      next: (mocktails: Mocktail[]) => {
+        const total = mocktails.length;
+        const available = mocktails.filter((m: Mocktail) => m.available).length;
+        const unavailable = total - available;
+        
+        // Update the mocktails card stats
+        const mocktailsCard = this.menuItems.find(item => item.id === 'gestion-mocktails');
+        if (mocktailsCard) {
+          mocktailsCard.stats = {
+            total: total,
+            available: available,
+            unavailable: unavailable
+          };
+        }
+      },
+      error: (error: any) => {
+        console.error('Erreur lors du chargement des statistiques des mocktails:', error);
+        // En cas d'erreur, on garde les valeurs par défaut (0)
+      }
+    });
   }
 
   // Get color class for cards

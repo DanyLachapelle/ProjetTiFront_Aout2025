@@ -259,27 +259,23 @@ export class MenuComponent implements OnInit, OnDestroy {
   }
 
   // --- Cart persistence ---
-  private saveCartToStorage() {
-    try {
+  private saveCartToStorage(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('helha-fresh-cart', JSON.stringify(this.orderList));
-    } catch (error) {
-      console.warn('Unable to save cart:', error);
     }
   }
 
-  private loadCartFromStorage() {
-    try {
+  private loadCartFromStorage(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
       const savedCart = localStorage.getItem('helha-fresh-cart');
       if (savedCart) {
-        const parsedCart = JSON.parse(savedCart);
-        // Check that mocktails still exist
-        this.orderList = parsedCart.filter((item: any) => 
-          this.mocktails.find(m => m.id === item.mocktail.id)
-        );
+        try {
+          this.orderList = JSON.parse(savedCart);
+        } catch (error) {
+          console.error('Error loading cart from localStorage:', error);
+          this.orderList = [];
+        }
       }
-    } catch (error) {
-      console.warn('Unable to load cart:', error);
-      this.orderList = [];
     }
   }
 

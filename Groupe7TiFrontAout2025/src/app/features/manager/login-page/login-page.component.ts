@@ -24,7 +24,9 @@ export class LoginPageComponent {
     this.userService.login({ login: this.login, mot_passe: this.mot_passe }).subscribe({
       next: (response) => {
         console.log('Connexion réussie', response);
-        localStorage.setItem('token', response.token);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem('token', response.token);
+        }
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
