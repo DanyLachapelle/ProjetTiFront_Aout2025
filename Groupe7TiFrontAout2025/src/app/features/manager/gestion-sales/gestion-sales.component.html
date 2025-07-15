@@ -140,107 +140,304 @@
     </div>
   </section>
 
-  <!-- Liste des ventes -->
-  <section class="sales-section">
-    <div class="sales-header-row">
-      <h2>Sales History</h2>
-      <div class="sales-actions">
-        <button class="btn btn-outline" (click)="exportSales()">
-          <span class="action-icon">📄</span>
-          Export
-        </button>
-        <button class="btn btn-outline" (click)="refreshData()">
-          <span class="action-icon">🔄</span>
-          Refresh
-        </button>
-      </div>
+  <!-- Sélecteur de mode d'affichage -->
+  <section class="display-mode-section">
+    <div class="mode-selector">
+      <button 
+        class="mode-btn" 
+        [class.active]="displayMode === 'list'"
+        (click)="setDisplayMode('list')"
+      >
+        <span class="mode-icon">📋</span>
+        Sales List
+      </button>
+      <button 
+        class="mode-btn" 
+        [class.active]="displayMode === 'statistics'"
+        (click)="setDisplayMode('statistics')"
+      >
+        <span class="mode-icon">📊</span>
+        Statistics & Charts
+      </button>
     </div>
-    
-    <div class="sales-list" *ngIf="getFilteredSales().length > 0; else noSales">
-      <div class="sale-item" *ngFor="let sale of getFilteredSales(); let i = index" 
-           [class.expanded]="expandedSaleIndex === i"
-           (click)="toggleSaleDetail(i)">
-        
-        <div class="sale-main">
-          <div class="sale-info">
-            <div class="sale-date-time">
-              <span class="sale-date">{{ sale.date | date:'MMM dd, yyyy' }}</span>
-              <span class="sale-time">{{ sale.date | date:'HH:mm' }}</span>
+  </section>
+
+  <!-- Zone de contenu dynamique -->
+  <section class="content-section">
+    <!-- Mode Liste des ventes -->
+    <div class="sales-content" *ngIf="displayMode === 'list'">
+      <div class="sales-header-row">
+        <h2>Sales History</h2>
+        <div class="sales-actions">
+          <button class="btn btn-outline" (click)="exportSales()">
+            <span class="action-icon">📄</span>
+            Export
+          </button>
+          <button class="btn btn-outline" (click)="refreshData()">
+            <span class="action-icon">🔄</span>
+            Refresh
+          </button>
+        </div>
+      </div>
+      
+      <div class="sales-list" *ngIf="getFilteredSales().length > 0; else noSales">
+        <div class="sale-item" *ngFor="let sale of getFilteredSales(); let i = index" 
+             [class.expanded]="expandedSaleIndex === i"
+             (click)="toggleSaleDetail(i)">
+          
+          <div class="sale-main">
+            <div class="sale-info">
+              <div class="sale-date-time">
+                <span class="sale-date">{{ sale.date | date:'MMM dd, yyyy' }}</span>
+                <span class="sale-time">{{ sale.date | date:'HH:mm' }}</span>
+              </div>
+              <div class="sale-summary">
+                <span class="sale-items-count">{{ getSaleItemsCount(sale) }} items</span>
+                <span class="sale-mocktails">{{ getSaleMocktailsSummary(sale) }}</span>
+              </div>
             </div>
-            <div class="sale-summary">
-              <span class="sale-items-count">{{ getSaleItemsCount(sale) }} items</span>
-              <span class="sale-mocktails">{{ getSaleMocktailsSummary(sale) }}</span>
+            
+            <div class="sale-amount">
+              <span class="amount-value">€{{ sale.total.toFixed(2) }}</span>
+              <span class="expand-icon">{{ expandedSaleIndex === i ? '▲' : '▼' }}</span>
             </div>
           </div>
           
-          <div class="sale-amount">
-            <span class="amount-value">€{{ sale.total.toFixed(2) }}</span>
-            <span class="expand-icon">{{ expandedSaleIndex === i ? '▲' : '▼' }}</span>
+          <!-- Détails de la vente -->
+          <div class="sale-details" *ngIf="expandedSaleIndex === i">
+            <div class="details-header">
+              <h4>Order Details</h4>
+            </div>
+            
+            <div class="mocktails-list">
+              <div class="mocktail-item" *ngFor="let mocktail of sale.mocktails">
+                <div class="mocktail-info">
+                  <span class="mocktail-name">{{ mocktail.name }}</span>
+                  <span class="mocktail-quantity">x{{ mocktail.quantity }}</span>
+                </div>
+                <div class="mocktail-price">
+                  <span class="total-price">€{{ (getMocktailUnitPrice(sale, mocktail) * mocktail.quantity).toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="sale-footer">
+              <div class="sale-total">
+                <span class="total-label">Total</span>
+                <span class="total-amount">€{{ sale.total.toFixed(2) }}</span>
+              </div>
+            </div>
           </div>
         </div>
-        
-                 <!-- Détails de la vente -->
-         <div class="sale-details" *ngIf="expandedSaleIndex === i">
-           <div class="details-header">
-             <h4>Order Details</h4>
-           </div>
-           
-           <div class="mocktails-list">
-             <div class="mocktail-item" *ngFor="let mocktail of sale.mocktails">
-               <div class="mocktail-info">
-                 <span class="mocktail-name">{{ mocktail.name }}</span>
-                 <span class="mocktail-quantity">x{{ mocktail.quantity }}</span>
-               </div>
-               <div class="mocktail-price">
-                 <span class="total-price">€{{ (getMocktailUnitPrice(sale, mocktail) * mocktail.quantity).toFixed(2) }}</span>
-               </div>
-             </div>
-           </div>
-           
-           <div class="sale-footer">
-             <div class="sale-total">
-               <span class="total-label">Total</span>
-               <span class="total-amount">€{{ sale.total.toFixed(2) }}</span>
-             </div>
-           </div>
-         </div>
+      </div>
+      
+      <!-- Message si aucune vente -->
+      <ng-template #noSales>
+        <div class="no-sales">
+          <div class="no-sales-icon">📊</div>
+          <h3>No sales found</h3>
+          <p>No sales match your current filters. Try adjusting your search criteria or date range.</p>
+        </div>
+      </ng-template>
+
+      <!-- Pagination -->
+      <section class="pagination-section" *ngIf="filteredSales.length > itemsPerPage">
+        <div class="pagination">
+          <button 
+            class="pagination-btn" 
+            [disabled]="currentPage === 1"
+            (click)="previousPage()"
+          >
+            ← Previous
+          </button>
+          
+          <div class="page-numbers">
+            <span class="page-info">
+              Page {{ currentPage }} of {{ getTotalPages() }}
+            </span>
+          </div>
+          
+          <button 
+            class="pagination-btn" 
+            [disabled]="currentPage === getTotalPages()"
+            (click)="nextPage()"
+          >
+            Next →
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Mode Statistiques et Graphiques -->
+    <div class="statistics-content" *ngIf="displayMode === 'statistics'">
+      <div class="statistics-header">
+        <h2>Sales Analytics & Charts</h2>
+        <p class="statistics-subtitle">Visualize your sales performance with interactive charts and detailed analytics</p>
+      </div>
+
+      <!-- Grille des graphiques -->
+      <div class="charts-grid" [class.dark-theme]="chartSettings.theme === 'dark'">
+        <!-- Graphique des ventes par période -->
+        <div class="chart-container" id="sales-trend-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>📈 Sales Trend</h3>
+            <p>Revenue evolution over time</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="salesTrendChart.data"
+              [options]="salesTrendChart.options"
+              [type]="salesTrendChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('sales-trend-chart', 'Sales_Trend')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Graphique des mocktails les plus vendus -->
+        <div class="chart-container" id="top-mocktails-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>🍹 Top Selling Mocktails</h3>
+            <p>Most popular drinks by quantity sold</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="topMocktailsChart.data"
+              [options]="topMocktailsChart.options"
+              [type]="topMocktailsChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('top-mocktails-chart', 'Top_Selling_Mocktails')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Graphique de répartition des ventes -->
+        <div class="chart-container" id="sales-distribution-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>🥧 Sales Distribution</h3>
+            <p>Revenue breakdown by mocktail category</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="salesDistributionChart.data"
+              [options]="salesDistributionChart.options"
+              [type]="salesDistributionChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('sales-distribution-chart', 'Sales_Distribution')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Graphique des heures de pointe -->
+        <div class="chart-container" id="peak-hours-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>⏰ Peak Hours Analysis</h3>
+            <p>Sales activity by time of day</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="peakHoursChart.data"
+              [options]="peakHoursChart.options"
+              [type]="peakHoursChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('peak-hours-chart', 'Peak_Hours_Analysis')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Tableau de bord des KPIs -->
+        <div class="chart-container kpi-dashboard" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>🎯 Key Performance Indicators</h3>
+            <p>Detailed metrics and insights</p>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-grid">
+              <div class="kpi-item">
+                <div class="kpi-label">Conversion Rate</div>
+                <div class="kpi-value">{{ conversionRate.conversion }}%</div>
+                <div class="kpi-trend" [class.positive]="conversionRate.trend === '📈'" 
+                     [class.negative]="conversionRate.trend === '📉'">
+                  {{ conversionRate.trend }} {{ conversionRate.conversion > 0 ? '+' : '' }}{{ conversionRate.conversion }}%
+                </div>
+              </div>
+              <div class="kpi-item">
+                <div class="kpi-label">Customer Retention</div>
+                <div class="kpi-value">{{ customerRetention.retention }}%</div>
+                <div class="kpi-trend" [class.positive]="customerRetention.trend === '📈'" 
+                     [class.negative]="customerRetention.trend === '📉'">
+                  {{ customerRetention.trend }} {{ customerRetention.retention > 0 ? '+' : '' }}{{ customerRetention.retention }}%
+                </div>
+              </div>
+              <div class="kpi-item">
+                <div class="kpi-label">Average Order Value</div>
+                <div class="kpi-value">€{{ getAverageOrderValue().toFixed(2) }}</div>
+                <div class="kpi-trend positive">📈 +0%</div>
+              </div>
+              <div class="kpi-item">
+                <div class="kpi-label">Sales Growth</div>
+                <div class="kpi-value">{{ salesGrowth.isPositive ? '+' : '' }}{{ salesGrowth.growth }}%</div>
+                <div class="kpi-trend" [class.positive]="salesGrowth.isPositive" 
+                     [class.negative]="!salesGrowth.isPositive">
+                  {{ salesGrowth.trend }} {{ salesGrowth.isPositive ? '+' : '' }}{{ salesGrowth.growth }}%
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graphique de comparaison -->
+        <div class="chart-container" id="period-comparison-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>📊 Period Comparison</h3>
+            <p>Compare performance across different time periods</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="periodComparisonChart.data"
+              [options]="periodComparisonChart.options"
+              [type]="periodComparisonChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('period-comparison-chart', 'Period_Comparison')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions pour les statistiques -->
+      <div class="statistics-actions" [class.dark-theme]="chartSettings.theme === 'dark'">
+        <button class="btn btn-outline" (click)="exportAllCharts()">
+          <span class="action-icon">📄</span>
+          Export All Charts
+        </button>
+        <button class="btn btn-outline" (click)="openChartSettings()">
+          <span class="action-icon">⚙️</span>
+          Chart Settings
+        </button>
       </div>
     </div>
-    
-    <!-- Message si aucune vente -->
-    <ng-template #noSales>
-      <div class="no-sales">
-        <div class="no-sales-icon">📊</div>
-        <h3>No sales found</h3>
-        <p>No sales match your current filters. Try adjusting your search criteria or date range.</p>
-      </div>
-    </ng-template>
   </section>
 
-  <!-- Pagination -->
-  <section class="pagination-section" *ngIf="filteredSales.length > itemsPerPage">
-    <div class="pagination">
-      <button 
-        class="pagination-btn" 
-        [disabled]="currentPage === 1"
-        (click)="previousPage()"
-      >
-        ← Previous
-      </button>
-      
-      <div class="page-numbers">
-        <span class="page-info">
-          Page {{ currentPage }} of {{ getTotalPages() }}
-        </span>
-      </div>
-      
-      <button 
-        class="pagination-btn" 
-        [disabled]="currentPage === getTotalPages()"
-        (click)="nextPage()"
-      >
-        Next →
-      </button>
-    </div>
-  </section>
+  <!-- Modal des paramètres des graphiques -->
+  <app-chart-settings-modal
+    [isOpen]="showSettingsModal"
+    [settings]="chartSettings"
+    (settingsChange)="onSettingsChange($event)"
+    (close)="closeChartSettings()">
+  </app-chart-settings-modal>
 </div>

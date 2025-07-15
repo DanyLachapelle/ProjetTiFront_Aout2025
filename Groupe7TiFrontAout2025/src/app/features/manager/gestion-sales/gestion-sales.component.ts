@@ -1,27 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Chart } from 'chart.js/auto';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartDataService, Sale } from './chart-data.service';
+import { ChartExportService, ChartSettings } from './chart-export.service';
+import { ChartSettingsModalComponent } from './chart-settings-modal.component';
+import { 
+  CHART_COLORS, 
+  LINE_CHART_CONFIG, 
+  BAR_CHART_CONFIG, 
+  PIE_CHART_CONFIG, 
+  RADAR_CHART_CONFIG,
+  applyChartSettings,
+  getColorScheme
+} from './chart-config';
 
-interface Sale {
-  date: string;
-  total: number;
-  mocktails: Array<{
-    name: string;
-    quantity: number;
-    price?: number;
-  }>;
-}
+// Enregistrer Chart.js avec tous les éléments automatiquement
+Chart.register();
 
 @Component({
   selector: 'app-gestion-sales',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BaseChartDirective, ChartSettingsModalComponent],
   templateUrl: './gestion-sales.component.html',
   styleUrl: './gestion-sales.component.css'
 })
 export class GestionSalesComponent implements OnInit {
   
+  @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
+
   // Sales history data
   salesHistory: Sale[] = [
     {
@@ -205,23 +214,55 @@ export class GestionSalesComponent implements OnInit {
     }
   ];
 
-  // Filter and search properties
+  // Filtres et pagination
   selectedFilter: 'all' | 'today' | 'week' | 'month' | 'custom' = 'all';
   searchTerm: string = '';
   customDateRange = { start: '', end: '' };
   
-  // Pagination properties
+  // Pagination
   currentPage: number = 1;
   itemsPerPage: number = 10;
   
-  // UI state
+  // Sale details
   expandedSaleIndex: number | null = null;
   filteredSales: Sale[] = [];
+  displayMode: 'list' | 'statistics' = 'list'; // Nouveau: mode d'affichage
 
-  constructor(private router: Router) {}
+  // Graphiques avec configuration de base
+  salesTrendChart: any = { ...LINE_CHART_CONFIG };
+  topMocktailsChart: any = { ...BAR_CHART_CONFIG };
+  salesDistributionChart: any = { ...PIE_CHART_CONFIG };
+  peakHoursChart: any = { ...RADAR_CHART_CONFIG };
+  periodComparisonChart: any = { ...BAR_CHART_CONFIG };
+
+  // KPIs
+  salesGrowth: { growth: number; isPositive: boolean; trend: string } = { growth: 0, isPositive: true, trend: '📈' };
+  customerRetention: { retention: number; trend: string } = { retention: 0, trend: '📈' };
+  conversionRate: { conversion: number; trend: string } = { conversion: 0, trend: '📈' };
+
+  // Paramètres des graphiques
+  chartSettings: ChartSettings;
+  showSettingsModal: boolean = false;
+
+  constructor(
+    private router: Router,
+    private chartDataService: ChartDataService,
+    private chartExportService: ChartExportService
+  ) {
+    // Initialiser les paramètres des graphiques avec les valeurs par défaut
+    this.chartSettings = this.chartExportService.getDefaultChartSettings();
+  }
 
   ngOnInit(): void {
+    // Charger les paramètres sauvegardés s'ils existent (côté client uniquement)
+    const savedSettings = this.chartExportService.loadChartSettings();
+    if (savedSettings) {
+      this.chartSettings = { ...this.chartSettings, ...savedSettings };
+    }
+    
     this.applyFilters();
+    this.updateCharts();
+    this.updateKPIs();
   }
 
   // Navigation
@@ -229,22 +270,43 @@ export class GestionSalesComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
+  // Mode d'affichage
+  setDisplayMode(mode: 'list' | 'statistics'): void {
+    this.displayMode = mode;
+    if (mode === 'statistics') {
+      this.updateCharts();
+      this.updateKPIs();
+    }
+  }
+
   // Filter methods
   setFilter(filter: 'all' | 'today' | 'week' | 'month' | 'custom'): void {
     this.selectedFilter = filter;
     this.currentPage = 1;
     this.applyFilters();
+    if (this.displayMode === 'statistics') {
+      this.updateCharts();
+      this.updateKPIs();
+    }
   }
 
   applyCustomFilter(): void {
     if (this.customDateRange.start && this.customDateRange.end) {
       this.applyFilters();
+      if (this.displayMode === 'statistics') {
+        this.updateCharts();
+        this.updateKPIs();
+      }
     }
   }
 
   onSearchChange(): void {
     this.currentPage = 1;
     this.applyFilters();
+    if (this.displayMode === 'statistics') {
+      this.updateCharts();
+      this.updateKPIs();
+    }
   }
 
   private applyFilters(): void {
@@ -418,6 +480,79 @@ export class GestionSalesComponent implements OnInit {
     this.applyFilters();
     this.currentPage = 1;
     this.expandedSaleIndex = null;
+  }
+
+  // Mise à jour des graphiques
+  private updateCharts(): void {
+    const filteredSales = this.getFilteredSales();
+    
+    // Préparer les données avec les paramètres actuels
+    const salesTrendData = this.chartDataService.prepareSalesTrendData(filteredSales, 'day', this.chartSettings);
+    const topMocktailsData = this.chartDataService.prepareTopMocktailsData(filteredSales, this.chartSettings);
+    const salesDistributionData = this.chartDataService.prepareSalesDistributionData(filteredSales, this.chartSettings);
+    const peakHoursData = this.chartDataService.preparePeakHoursData(filteredSales, this.chartSettings);
+    const periodComparisonData = this.chartDataService.preparePeriodComparisonData(filteredSales, this.chartSettings);
+    
+    // Appliquer les paramètres aux graphiques
+    this.salesTrendChart = applyChartSettings(LINE_CHART_CONFIG, this.chartSettings);
+    this.salesTrendChart.data = salesTrendData;
+    
+    this.topMocktailsChart = applyChartSettings(BAR_CHART_CONFIG, this.chartSettings);
+    this.topMocktailsChart.data = topMocktailsData;
+    
+    this.salesDistributionChart = applyChartSettings(PIE_CHART_CONFIG, this.chartSettings);
+    this.salesDistributionChart.data = salesDistributionData;
+    
+    this.peakHoursChart = applyChartSettings(RADAR_CHART_CONFIG, this.chartSettings);
+    this.peakHoursChart.data = peakHoursData;
+    
+    this.periodComparisonChart = applyChartSettings(BAR_CHART_CONFIG, this.chartSettings);
+    this.periodComparisonChart.data = periodComparisonData;
+  }
+
+  // Mise à jour des KPIs
+  private updateKPIs(): void {
+    const filteredSales = this.getFilteredSales();
+    
+    this.salesGrowth = this.chartDataService.calculateSalesGrowth(filteredSales);
+    this.customerRetention = this.chartDataService.calculateCustomerRetention(filteredSales);
+    this.conversionRate = this.chartDataService.calculateConversionRate(filteredSales);
+  }
+
+  // Méthodes pour les boutons d'export et de paramètres
+  exportChart(chartId: string, chartTitle: string): void {
+    this.chartExportService.exportChart(chartId, chartTitle);
+  }
+
+  exportAllCharts(): void {
+    this.chartExportService.exportAllCharts();
+  }
+
+
+
+  openChartSettings(): void {
+    console.log('Opening chart settings modal');
+    this.showSettingsModal = true;
+  }
+
+  closeChartSettings(): void {
+    console.log('Closing chart settings modal');
+    this.showSettingsModal = false;
+  }
+
+  onSettingsChange(settings: ChartSettings): void {
+    console.log('Settings changed:', settings);
+    this.chartSettings = { ...settings };
+    this.chartExportService.saveChartSettings(settings);
+    // Appliquer les nouveaux paramètres aux graphiques
+    this.applyChartSettings();
+  }
+
+  private applyChartSettings(): void {
+    // Appliquer les paramètres aux graphiques existants
+    if (this.displayMode === 'statistics') {
+      this.updateCharts();
+    }
   }
 
 
