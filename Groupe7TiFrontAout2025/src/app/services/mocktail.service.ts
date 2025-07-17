@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {map, Observable} from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Mocktail {
@@ -58,7 +58,7 @@ export class MocktailService {
   constructor(private http: HttpClient) { }
 
   getAll(): Observable<Mocktail[]> {
-    return this.http.get<Mocktail[]>(this.apiUrl);
+    return this.http.get<Mocktail[]>(`http://localhost:5201/api/MocktailQuery/getAllMocktails`);
   }
 
   getById(id: number): Observable<Mocktail> {
@@ -66,8 +66,9 @@ export class MocktailService {
   }
 
   create(mocktail: CreateMocktailRequest): Observable<Mocktail> {
-    return this.http.post<Mocktail>(this.apiUrl, mocktail);
+    return this.http.post<Mocktail>(`http://localhost:5201/api/MocktailCommand/CreateMocktail`, mocktail);
   }
+
 
   update(id: number, mocktail: UpdateMocktailRequest): Observable<Mocktail> {
     return this.http.put<Mocktail>(`${this.apiUrl}/${id}`, mocktail);
@@ -79,6 +80,10 @@ export class MocktailService {
 
   // Nouvelle méthode pour récupérer tous les ingrédients
   getAllIngredients(): Observable<Ingredient[]> {
-    return this.http.get<Ingredient[]>(`${environment.apiUrl.replace('/mocktail', '')}/ingredient`);
+    return this.http.get<{ ingredients: Ingredient[] }>(`${environment.apiUrl.replace('/mocktail', '')}/ingredients/getAllIngredients`)
+      .pipe(
+        map(response => response.ingredients)
+      );
   }
+
 }

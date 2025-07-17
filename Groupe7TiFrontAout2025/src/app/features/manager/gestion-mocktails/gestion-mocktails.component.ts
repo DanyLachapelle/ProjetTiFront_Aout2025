@@ -41,7 +41,7 @@ export class GestionMocktailsComponent implements OnInit {
   searchTerm: string = '';
   statusFilter: string = 'all';
   priceSort: string = 'none';
-  
+
   // Autocompletion
   showSuggestions: boolean = false;
   filteredSuggestions: string[] = [];
@@ -121,15 +121,15 @@ export class GestionMocktailsComponent implements OnInit {
   filterMocktails() {
     this.filteredMocktails = this.mocktails.filter(mocktail => {
       // Search by ingredient
-      const matchesSearch = !this.searchTerm || 
-        mocktail.ingredients.some(ingredient => 
+      const matchesSearch = !this.searchTerm ||
+        mocktail.ingredients.some(ingredient =>
           ingredient.name.toLowerCase().includes(this.searchTerm.toLowerCase())
         );
-      
+
       const matchesStatus = this.statusFilter === 'all' ||
         (this.statusFilter === 'available' && mocktail.available) ||
         (this.statusFilter === 'unavailable' && !mocktail.available);
-      
+
       return matchesSearch && matchesStatus;
     });
 
@@ -163,7 +163,7 @@ export class GestionMocktailsComponent implements OnInit {
       this.filteredSuggestions = this.allIngredients.slice(0, 10); // Show first 10
     } else {
       this.filteredSuggestions = this.allIngredients
-        .filter(ingredient => 
+        .filter(ingredient =>
           ingredient.toLowerCase().includes(this.searchTerm.toLowerCase())
         )
         .slice(0, 8); // Limit to 8 suggestions
@@ -182,7 +182,7 @@ export class GestionMocktailsComponent implements OnInit {
   }
 
   toggleAvailability(mocktail: Mocktail) {
-    // Note: Le champ available est calculé côté backend, 
+    // Note: Le champ available est calculé côté backend,
     // cette fonctionnalité nécessiterait un endpoint spécifique
     // pour l'instant, on recharge les données
     this.loadMocktails();
@@ -216,7 +216,7 @@ export class GestionMocktailsComponent implements OnInit {
   openMocktailModal(mocktail?: Mocktail) {
     this.editingMocktail = mocktail || null;
     this.showErrors = false;
-    
+
     if (mocktail) {
       // Edit mode - pre-fill the form
       this.mocktailForm = {
@@ -268,7 +268,7 @@ export class GestionMocktailsComponent implements OnInit {
 
   // --- Validation ---
   hasValidIngredients(): boolean {
-    return this.mocktailForm.ingredients.some(ing => 
+    return this.mocktailForm.ingredients.some(ing =>
       ing.name && ing.quantity > 0
     );
   }
@@ -281,7 +281,7 @@ export class GestionMocktailsComponent implements OnInit {
       this.mocktailForm.image &&
       this.hasValidIngredients()
     );
-    
+
     console.log('Validation du formulaire:', {
       name: this.mocktailForm.name,
       description: this.mocktailForm.description,
@@ -290,14 +290,14 @@ export class GestionMocktailsComponent implements OnInit {
       hasValidIngredients: this.hasValidIngredients(),
       isValid: isValid
     });
-    
+
     return isValid;
   }
 
   // --- Save ---
   saveMocktail() {
     this.showErrors = true;
-    
+
     if (!this.validateForm()) {
       console.log('Formulaire invalide');
       return;
@@ -341,7 +341,7 @@ export class GestionMocktailsComponent implements OnInit {
       };
 
       console.log('Données envoyées:', createRequest);
-
+      console.log('Prix avant create (type et valeur):', typeof this.mocktailForm.price, this.mocktailForm.price);
       this.mocktailService.create(createRequest).subscribe({
         next: (response) => {
           console.log('Mocktail créé avec succès:', response);
