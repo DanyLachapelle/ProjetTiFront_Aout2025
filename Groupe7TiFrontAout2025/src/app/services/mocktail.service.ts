@@ -71,8 +71,9 @@ export class MocktailService {
 
 
   update(id: number, mocktail: UpdateMocktailRequest): Observable<Mocktail> {
-    return this.http.put<Mocktail>(`${this.apiUrl}/${id}`, mocktail);
+    return this.http.put<Mocktail>(`http://localhost:5201/api/MocktailCommand/UpdateMocktail/${id}`, mocktail);
   }
+
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`http://localhost:5201/api/MocktailCommand/DeleteMocktail/${id}`);
