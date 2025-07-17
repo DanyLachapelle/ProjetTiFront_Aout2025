@@ -75,8 +75,9 @@ export class MocktailService {
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`http://localhost:5201/api/MocktailCommand/DeleteMocktail/${id}`);
   }
+
 
   // Nouvelle méthode pour récupérer tous les ingrédients
   getAllIngredients(): Observable<Ingredient[]> {
