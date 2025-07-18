@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {UserService} from '../login-page/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +12,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  
+
   // Connected manager data
   currentManager = {
     name: 'Marie Dupont',
@@ -103,12 +104,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private userService: UserService,private router: Router) {}
 
   ngOnInit(): void {
     // Initialize time and date immediately
     this.updateTime();
-    
+
     // Start interval to update time
     this.startTimeInterval();
   }
@@ -139,13 +140,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private updateTime(): void {
     try {
       const now = new Date();
-      
+
       // Update time (HH:MM format only for display)
       this.currentTime = now.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit'
       });
-      
+
       // Update date (only if it has changed)
       const newDate = now.toLocaleDateString('en-US', {
         weekday: 'long',
@@ -153,7 +154,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         month: 'long',
         day: 'numeric'
       });
-      
+
       if (this.currentDate !== newDate) {
         this.currentDate = newDate;
       }
@@ -172,9 +173,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Logout
   logout(): void {
-    // TODO: Implement logout logic
     console.log('Logout requested');
-    // this.router.navigate(['/login']);
+    localStorage.clear();
+    this.router.navigate(['/login']);
   }
 
   // Show notifications
@@ -209,16 +210,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
       alert('Passwords do not match');
       return;
     }
-    
+
     if (this.passwordForm.newPassword.length < 6) {
       alert('New password must contain at least 6 characters');
       return;
     }
-    
-    // TODO: Implement password change logic
-    console.log('Password change requested');
-    alert('Password changed successfully!');
-    this.closeSettings();
+
+    this.userService.changePassword({
+      oldPassword: this.passwordForm.currentPassword,
+      newPassword: this.passwordForm.newPassword
+    }).subscribe({
+      next: () => {
+        alert('Password changed successfully!');
+        this.closeSettings();
+      },
+      error: (err) => {
+        console.error('Password change failed', err);
+        alert('Error changing password. Please try again.');
+      }
+    });
   }
 
   // Get color class for cards

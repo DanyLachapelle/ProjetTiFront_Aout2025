@@ -10,9 +10,24 @@ export class UserService {
 
   private static LOGIN_URL: string = 'http://localhost:5201/api/users/login';
 
+  private static CHANGE_PASSWORD_URL: string = 'http://localhost:5201/api/users/change-password';
+
   constructor(private _http:HttpClient) { }
 
-  login(loginData: { login: string; mot_de_passe: string }): Observable<any> {
-    return this._http.post<any>(UserService.LOGIN_URL, loginData);
+  login(loginData: { pseudo: string; password: string }): Observable<any> {
+    return this._http.post<any>(
+      UserService.LOGIN_URL,
+      loginData // ⬅️ Ajoute ça aussi
+    );
   }
+
+
+  changePassword(changeData: { oldPassword: string, newPassword: string }): Observable<any> {
+    console.log('Change Password payload:', JSON.stringify(changeData, null, 2));
+    return this._http.post<any>(
+      UserService.CHANGE_PASSWORD_URL,
+      changeData// ⬅️ Ajoute ça
+    );
+  }
+
 }

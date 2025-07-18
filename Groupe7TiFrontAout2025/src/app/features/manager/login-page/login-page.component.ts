@@ -6,6 +6,7 @@ import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
+  standalone: true,
   imports: [
     FormsModule,
     NgIf
@@ -21,7 +22,7 @@ export class LoginPageComponent {
   constructor(private userService: UserService,private router: Router) {}
 
   onLogin() {
-    this.userService.login({ login: this.login, mot_de_passe: this.mot_de_passe }).subscribe({
+    this.userService.login({ pseudo: this.login, password: this.mot_de_passe }).subscribe({
       next: (response) => {
         console.log('Connexion réussie', response);
         localStorage.setItem('token', response.token);
