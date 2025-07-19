@@ -4,17 +4,17 @@
     <div class="header-left">
       <button class="btn btn-outline back-btn" (click)="goBack()">
         <span class="back-icon">←</span>
-        Back 
+        Back
       </button>
     </div>
-    
+
     <div class="header-center">
       <div class="logo-section">
         <img src="assets/favicon.png" alt="Logo Helha Fresh" class="logo-img" />
         <h1>Sales History</h1>
       </div>
     </div>
-    
+
     <div class="header-right">
       <div class="header-stats">
         <div class="stat-item">
@@ -33,54 +33,54 @@
   <section class="filters-section">
     <div class="filters-container">
       <div class="search-box">
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm" 
-          placeholder="Search by mocktail name..." 
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Search by mocktail name..."
           class="search-input"
           (input)="onSearchChange()"
         >
         <span class="search-icon">🔍</span>
       </div>
-      
+
       <div class="date-filters">
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'all'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'all'"
           (click)="setFilter('all')"
         >
           All Time
         </button>
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'today'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'today'"
           (click)="setFilter('today')"
         >
           Today
         </button>
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'week'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'week'"
           (click)="setFilter('week')"
         >
           This Week
         </button>
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'month'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'month'"
           (click)="setFilter('month')"
         >
           This Month
         </button>
-        <button 
-          class="filter-btn" 
-          [class.active]="selectedFilter === 'custom'" 
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'custom'"
           (click)="setFilter('custom')"
         >
           Custom Range
         </button>
       </div>
-      
+
       <div class="custom-date-range" *ngIf="selectedFilter === 'custom'">
         <div class="date-inputs">
           <div class="date-input-group">
@@ -110,7 +110,7 @@
           <span class="stat-period">{{ getFilterPeriodText() }}</span>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-icon">📦</div>
         <div class="stat-content">
@@ -119,7 +119,7 @@
           <span class="stat-period">{{ getFilterPeriodText() }}</span>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-icon">🍹</div>
         <div class="stat-content">
@@ -128,7 +128,7 @@
           <span class="stat-period">{{ getFilterPeriodText() }}</span>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-icon">📊</div>
         <div class="stat-content">
@@ -143,16 +143,16 @@
   <!-- Sélecteur de mode d'affichage -->
   <section class="display-mode-section">
     <div class="mode-selector">
-      <button 
-        class="mode-btn" 
+      <button
+        class="mode-btn"
         [class.active]="displayMode === 'list'"
         (click)="setDisplayMode('list')"
       >
         <span class="mode-icon">📋</span>
         Sales List
       </button>
-      <button 
-        class="mode-btn" 
+      <button
+        class="mode-btn"
         [class.active]="displayMode === 'statistics'"
         (click)="setDisplayMode('statistics')"
       >
@@ -179,12 +179,12 @@
           </button>
         </div>
       </div>
-      
+
       <div class="sales-list" *ngIf="getFilteredSales().length > 0; else noSales">
-        <div class="sale-item" *ngFor="let sale of getFilteredSales(); let i = index" 
+        <div class="sale-item" *ngFor="let sale of getFilteredSales(); let i = index"
              [class.expanded]="expandedSaleIndex === i"
              (click)="toggleSaleDetail(i)">
-          
+
           <div class="sale-main">
             <div class="sale-info">
               <div class="sale-date-time">
@@ -196,19 +196,19 @@
                 <span class="sale-mocktails">{{ getSaleMocktailsSummary(sale) }}</span>
               </div>
             </div>
-            
+
             <div class="sale-amount">
               <span class="amount-value">€{{ sale.total.toFixed(2) }}</span>
               <span class="expand-icon">{{ expandedSaleIndex === i ? '▲' : '▼' }}</span>
             </div>
           </div>
-          
+
           <!-- Détails de la vente -->
           <div class="sale-details" *ngIf="expandedSaleIndex === i">
             <div class="details-header">
               <h4>Order Details</h4>
             </div>
-            
+
             <div class="mocktails-list">
               <div class="mocktail-item" *ngFor="let mocktail of sale.mocktails">
                 <div class="mocktail-info">
@@ -220,7 +220,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="sale-footer">
               <div class="sale-total">
                 <span class="total-label">Total</span>
@@ -230,7 +230,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Message si aucune vente -->
       <ng-template #noSales>
         <div class="no-sales">
@@ -243,22 +243,22 @@
       <!-- Pagination -->
       <section class="pagination-section" *ngIf="filteredSales.length > itemsPerPage">
         <div class="pagination">
-          <button 
-            class="pagination-btn" 
+          <button
+            class="pagination-btn"
             [disabled]="currentPage === 1"
             (click)="previousPage()"
           >
             ← Previous
           </button>
-          
+
           <div class="page-numbers">
             <span class="page-info">
               Page {{ currentPage }} of {{ getTotalPages() }}
             </span>
           </div>
-          
-          <button 
-            class="pagination-btn" 
+
+          <button
+            class="pagination-btn"
             [disabled]="currentPage === getTotalPages()"
             (click)="nextPage()"
           >
@@ -368,7 +368,7 @@
               <div class="kpi-item">
                 <div class="kpi-label">Conversion Rate</div>
                 <div class="kpi-value">{{ conversionRate.conversion }}%</div>
-                <div class="kpi-trend" [class.positive]="conversionRate.trend === '📈'" 
+                <div class="kpi-trend" [class.positive]="conversionRate.trend === '📈'"
                      [class.negative]="conversionRate.trend === '📉'">
                   {{ conversionRate.trend }} {{ conversionRate.conversion > 0 ? '+' : '' }}{{ conversionRate.conversion }}%
                 </div>
@@ -376,7 +376,7 @@
               <div class="kpi-item">
                 <div class="kpi-label">Customer Retention</div>
                 <div class="kpi-value">{{ customerRetention.retention }}%</div>
-                <div class="kpi-trend" [class.positive]="customerRetention.trend === '📈'" 
+                <div class="kpi-trend" [class.positive]="customerRetention.trend === '📈'"
                      [class.negative]="customerRetention.trend === '📉'">
                   {{ customerRetention.trend }} {{ customerRetention.retention > 0 ? '+' : '' }}{{ customerRetention.retention }}%
                 </div>
@@ -389,7 +389,7 @@
               <div class="kpi-item">
                 <div class="kpi-label">Sales Growth</div>
                 <div class="kpi-value">{{ salesGrowth.isPositive ? '+' : '' }}{{ salesGrowth.growth }}%</div>
-                <div class="kpi-trend" [class.positive]="salesGrowth.isPositive" 
+                <div class="kpi-trend" [class.positive]="salesGrowth.isPositive"
                      [class.negative]="!salesGrowth.isPositive">
                   {{ salesGrowth.trend }} {{ salesGrowth.isPositive ? '+' : '' }}{{ salesGrowth.growth }}%
                 </div>

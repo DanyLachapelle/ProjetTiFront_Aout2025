@@ -7,11 +7,11 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartDataService, Sale } from './chart-data.service';
 import { ChartExportService, ChartSettings } from './chart-export.service';
 import { ChartSettingsModalComponent } from './chart-settings-modal.component';
-import { 
-  CHART_COLORS, 
-  LINE_CHART_CONFIG, 
-  BAR_CHART_CONFIG, 
-  PIE_CHART_CONFIG, 
+import {
+  CHART_COLORS,
+  LINE_CHART_CONFIG,
+  BAR_CHART_CONFIG,
+  PIE_CHART_CONFIG,
   RADAR_CHART_CONFIG,
   applyChartSettings,
   getColorScheme
@@ -28,7 +28,7 @@ Chart.register();
   styleUrl: './gestion-sales.component.css'
 })
 export class GestionSalesComponent implements OnInit {
-  
+
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 
   // Sales history data
@@ -218,15 +218,15 @@ export class GestionSalesComponent implements OnInit {
   selectedFilter: 'all' | 'today' | 'week' | 'month' | 'custom' = 'all';
   searchTerm: string = '';
   customDateRange = { start: '', end: '' };
-  
+
   // Pagination
   currentPage: number = 1;
   itemsPerPage: number = 10;
-  
+
   // Sale details
   expandedSaleIndex: number | null = null;
   filteredSales: Sale[] = [];
-  displayMode: 'list' | 'statistics' = 'list'; // Nouveau: mode d'affichage
+  displayMode: 'list' | 'statistics' = 'list'; //   Nouveau: mode d'affichage
 
   // Graphiques avec configuration de base
   salesTrendChart: any = { ...LINE_CHART_CONFIG };
@@ -259,7 +259,7 @@ export class GestionSalesComponent implements OnInit {
     if (savedSettings) {
       this.chartSettings = { ...this.chartSettings, ...savedSettings };
     }
-    
+
     this.applyFilters();
     this.updateCharts();
     this.updateKPIs();
@@ -367,8 +367,8 @@ export class GestionSalesComponent implements OnInit {
 
   private filterBySearch(sales: Sale[]): Sale[] {
     const searchLower = this.searchTerm.toLowerCase();
-    return sales.filter(sale => 
-      sale.mocktails.some(mocktail => 
+    return sales.filter(sale =>
+      sale.mocktails.some(mocktail =>
         mocktail.name.toLowerCase().includes(searchLower)
       )
     );
@@ -390,7 +390,7 @@ export class GestionSalesComponent implements OnInit {
   }
 
   getTotalMocktailsSold(): number {
-    return this.filteredSales.reduce((sum, sale) => 
+    return this.filteredSales.reduce((sum, sale) =>
       sum + sale.mocktails.reduce((mocktailSum, mocktail) => mocktailSum + mocktail.quantity, 0), 0
     );
   }
@@ -485,27 +485,27 @@ export class GestionSalesComponent implements OnInit {
   // Mise à jour des graphiques
   private updateCharts(): void {
     const filteredSales = this.getFilteredSales();
-    
+
     // Préparer les données avec les paramètres actuels
     const salesTrendData = this.chartDataService.prepareSalesTrendData(filteredSales, 'day', this.chartSettings);
     const topMocktailsData = this.chartDataService.prepareTopMocktailsData(filteredSales, this.chartSettings);
     const salesDistributionData = this.chartDataService.prepareSalesDistributionData(filteredSales, this.chartSettings);
     const peakHoursData = this.chartDataService.preparePeakHoursData(filteredSales, this.chartSettings);
     const periodComparisonData = this.chartDataService.preparePeriodComparisonData(filteredSales, this.chartSettings);
-    
+
     // Appliquer les paramètres aux graphiques
     this.salesTrendChart = applyChartSettings(LINE_CHART_CONFIG, this.chartSettings);
     this.salesTrendChart.data = salesTrendData;
-    
+
     this.topMocktailsChart = applyChartSettings(BAR_CHART_CONFIG, this.chartSettings);
     this.topMocktailsChart.data = topMocktailsData;
-    
+
     this.salesDistributionChart = applyChartSettings(PIE_CHART_CONFIG, this.chartSettings);
     this.salesDistributionChart.data = salesDistributionData;
-    
+
     this.peakHoursChart = applyChartSettings(RADAR_CHART_CONFIG, this.chartSettings);
     this.peakHoursChart.data = peakHoursData;
-    
+
     this.periodComparisonChart = applyChartSettings(BAR_CHART_CONFIG, this.chartSettings);
     this.periodComparisonChart.data = periodComparisonData;
   }
@@ -513,7 +513,7 @@ export class GestionSalesComponent implements OnInit {
   // Mise à jour des KPIs
   private updateKPIs(): void {
     const filteredSales = this.getFilteredSales();
-    
+
     this.salesGrowth = this.chartDataService.calculateSalesGrowth(filteredSales);
     this.customerRetention = this.chartDataService.calculateCustomerRetention(filteredSales);
     this.conversionRate = this.chartDataService.calculateConversionRate(filteredSales);
