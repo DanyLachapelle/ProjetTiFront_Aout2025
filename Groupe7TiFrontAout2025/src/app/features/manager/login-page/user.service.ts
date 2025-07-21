@@ -17,7 +17,7 @@ export class UserService {
   login(loginData: { pseudo: string; password: string }): Observable<any> {
     return this._http.post<any>(
       UserService.LOGIN_URL,
-      loginData // ⬅️ Ajoute ça aussi
+      loginData
     );
   }
 
@@ -26,8 +26,11 @@ export class UserService {
     console.log('Change Password payload:', JSON.stringify(changeData, null, 2));
     return this._http.post<any>(
       UserService.CHANGE_PASSWORD_URL,
-      changeData// ⬅️ Ajoute ça
+      changeData
     );
   }
 
+  static isLoggedIn() {
+    return !!localStorage.getItem('token');
+  }
 }
