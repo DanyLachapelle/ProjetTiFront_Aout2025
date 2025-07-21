@@ -7,6 +7,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartDataService, Sale } from './chart-data.service';
 import { ChartExportService, ChartSettings } from './chart-export.service';
 import { ChartSettingsModalComponent } from './chart-settings-modal.component';
+
 import {
   CHART_COLORS,
   LINE_CHART_CONFIG,
@@ -18,7 +19,7 @@ import {
 } from './chart-config';
 
 // Enregistrer Chart.js avec tous les éléments automatiquement
-Chart.register();
+//Chart.register();
 
 @Component({
   selector: 'app-gestion-sales',
@@ -29,7 +30,7 @@ Chart.register();
 })
 export class GestionSalesComponent implements OnInit {
 
-  @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   // Sales history data
   salesHistory: Sale[] = [
