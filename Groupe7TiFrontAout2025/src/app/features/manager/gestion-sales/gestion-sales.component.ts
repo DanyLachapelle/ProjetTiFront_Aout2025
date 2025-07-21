@@ -19,7 +19,7 @@ import {
 } from './chart-config';
 
 // Enregistrer Chart.js avec tous les éléments automatiquement
-//Chart.register();
+Chart.register();
 
 @Component({
   selector: 'app-gestion-sales',
