@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './features/menuPrincipal/home/home.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', component: HomeComponent },
 
   // Routes pour la page de connexion
   { path: 'login', loadComponent: () => import('./features/manager/login-page/login-page.component').then(m => m.LoginPageComponent) },

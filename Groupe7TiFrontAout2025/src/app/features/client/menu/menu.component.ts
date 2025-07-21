@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MocktailService, Mocktail, Ingredient } from '../../../services/mocktail.service';
+import { Router } from '@angular/router';
 
 interface OrderItem {
   mocktail: Mocktail;
@@ -46,7 +47,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   readonly MAX_QUANTITY = 10;
   readonly MIN_QUANTITY = 1;
 
-  constructor(private mocktailService: MocktailService) {}
+  constructor(private mocktailService: MocktailService, private router: Router) {}
 
   ngOnInit() {
     // Load data from API
@@ -287,12 +288,10 @@ export class MenuComponent implements OnInit, OnDestroy {
     if (this.orderList.length > 0) {
       if (confirm('You have items in your cart. Do you really want to quit?')) {
         this.clearOrder();
-        // Here we could redirect to another page
-        console.log('Quit menu');
+        this.router.navigate(['/']);
       }
     } else {
-      // Here we could redirect to another page
-      console.log('Quit menu');
+      this.router.navigate(['/']);
     }
   }
 

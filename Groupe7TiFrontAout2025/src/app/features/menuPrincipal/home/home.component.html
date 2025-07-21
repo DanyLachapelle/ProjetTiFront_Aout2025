@@ -1,0 +1,41 @@
+<div class="home-container">
+  <div class="home-card">
+    <div class="home-left">
+      <div class="home-logo">
+        <!-- Image supprimée -->
+      </div>
+      <h2 class="home-title">Accès Client</h2>
+      <p class="home-subtitle">Scannez pour commander</p>
+      <div class="home-qr">
+        <!-- L’élément <img> reste dans le DOM côté serveur, src remplacé côté client -->
+        <img [src]="qrCodeUrl || placeholderPixel" alt="QR Code" />
+        <button
+          class="qr-refresh-btn"
+          (click)="onRefreshQR()"
+          title="Actualiser le QR Code"
+        >
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+      <div class="home-timer">
+        <i class="fas fa-sync-alt timer-icon"></i>
+        Renouvellement dans: {{ formatTime(timeLeft) }}
+      </div>
+    </div>
+    <div class="home-right">
+      <h1 class="home-slogan">
+        L'expérience mocktail,<br />
+        <span class="home-slogan-accent">réinventée.</span>
+      </h1>
+      <p class="home-desc">
+        Notre système de commande digital vous offre un accès direct à notre menu exclusif. Scannez, commandez et dégustez.
+      </p>
+      <div class="home-actions">
+        <button class="btn-home-menu" (click)="onAccessMenu()">
+          <i class="fas fa-bolt"></i>
+          Accéder au Menu
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
