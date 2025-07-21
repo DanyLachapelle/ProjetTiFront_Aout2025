@@ -59,7 +59,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       return '';
     }
 
-    const menuUrl = `${window.location.origin}/menu?token=${token}`;
+    const menuUrl = `${window.location.origin}/menu `;
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(menuUrl)}`;
   }
 
