@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http" // Changed from 'import type'
-import { Observable } from "rxjs" // Changed from 'import type'
+import {map, Observable} from "rxjs" // Changed from 'import type'
 import { environment } from "../../environments/environment"
 import { Injectable } from "@angular/core"
 
@@ -11,7 +11,6 @@ export interface Mocktail {
   available: boolean
   image: string
   ingredients: Array<{
-    id: number // Added 'id' here to match order.ts
     name: string
     quantity: number
     unit: string
@@ -61,27 +60,34 @@ export class MocktailService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Mocktail[]> {
-    return this.http.get<Mocktail[]>(this.apiUrl)
+    return this.http.get<Mocktail[]>(`http://localhost:5201/api/MocktailQuery/getAllMocktails`);
   }
-
   getById(id: number): Observable<Mocktail> {
-    return this.http.get<Mocktail>(`${this.apiUrl}/${id}`)
+    return this.http.get<Mocktail>(`${this.apiUrl}/${id}`);
   }
 
   create(mocktail: CreateMocktailRequest): Observable<Mocktail> {
-    return this.http.post<Mocktail>(this.apiUrl, mocktail)
+    return this.http.post<Mocktail>(`http://localhost:5201/api/MocktailCommand/CreateMocktail`, mocktail);
   }
+
 
   update(id: number, mocktail: UpdateMocktailRequest): Observable<Mocktail> {
-    return this.http.put<Mocktail>(`${this.apiUrl}/${id}`, mocktail)
+    return this.http.put<Mocktail>(`http://localhost:5201/api/MocktailCommand/UpdateMocktail/${id}`, mocktail);
   }
 
+
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`)
+    return this.http.delete<void>(`http://localhost:5201/api/MocktailCommand/DeleteMocktail/${id}`);
   }
+
 
   // Nouvelle méthode pour récupérer tous les ingrédients
   getAllIngredients(): Observable<Ingredient[]> {
-    return this.http.get<Ingredient[]>(environment.ingredientApiUrl)
+    return this.http.get<{ ingredients: Ingredient[] }>(`${environment.apiUrl.replace('/mocktail', '')}/ingredients/getAllIngredients`)
+      .pipe(
+        map(response => response.ingredients)
+      );
   }
+
+
 }
