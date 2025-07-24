@@ -64,12 +64,15 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "Groupe7TiFrontAout2025:build"
+          },
           "configurations": {
             "production": {
-              "browserTarget": "Groupe7TiFrontAout2025:build:production"
+              "buildTarget": "Groupe7TiFrontAout2025:build:production"
             },
             "development": {
-              "browserTarget": "Groupe7TiFrontAout2025:build:development"
+              "buildTarget": "Groupe7TiFrontAout2025:build:development"
             }
           },
           "defaultConfiguration": "development"
