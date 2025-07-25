@@ -1,0 +1,15 @@
+<div class="geoloc-card">
+  <div class="geoloc-icon">
+    <span style="font-size: 2.5rem; color: #5bbd95;">&#128205;</span>
+  </div>
+  <h2>Vérification Position</h2>
+  <div class="geoloc-warning">
+    <span style="font-size: 1.2em; margin-right: 0.5em;">&#9888;&#65039;</span>
+    Nous devons vérifier que vous êtes bien dans notre établissement pour des raisons de sécurité.
+  </div>
+  <button class="geoloc-btn" (click)="requestGeolocation()" [disabled]="loading">
+    <span style="font-size: 1.2em; margin-right: 0.5em;">&#128205;</span>
+    Autoriser la Géolocalisation
+  </button>
+  <div *ngIf="error" class="geoloc-error">{{ error }}</div>
+</div>

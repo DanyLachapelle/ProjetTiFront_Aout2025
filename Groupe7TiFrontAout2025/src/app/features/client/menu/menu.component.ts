@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MocktailService, Mocktail, Ingredient } from '../../../services/mocktail.service';
 import { Router } from '@angular/router';
+import { SessionService, SessionData } from '../../../services/session.service';
 
 interface OrderItem {
   mocktail: Mocktail;
@@ -47,9 +48,47 @@ export class MenuComponent implements OnInit, OnDestroy {
   readonly MAX_QUANTITY = 10;
   readonly MIN_QUANTITY = 1;
 
-  constructor(private mocktailService: MocktailService, private router: Router) {}
+  // Session management
+  sessionData: SessionData | null = null;
+  remainingTime = '15:00';
+  private timerInterval: any;
+  private sessionTimeSeconds = 15 * 60; // 15 minutes en secondes
+
+  // Méthode pour formater le temps en MM:SS
+  private formatTime(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  constructor(
+    private mocktailService: MocktailService, 
+    private router: Router,
+    private sessionService: SessionService
+  ) {}
 
   ngOnInit() {
+    // Charger le timer depuis localStorage ou démarrer à 15 minutes
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const savedTime = localStorage.getItem('menu-timer');
+      if (savedTime) {
+        this.sessionTimeSeconds = parseInt(savedTime);
+        if (this.sessionTimeSeconds <= 0) {
+          this.router.navigate(['/']);
+          return;
+        }
+      } else {
+        this.sessionTimeSeconds = 15 * 60; // 15 minutes
+      }
+    } else {
+      this.sessionTimeSeconds = 15 * 60; // 15 minutes
+    }
+    
+    this.remainingTime = this.formatTime(this.sessionTimeSeconds);
+    
+    // Démarrer le timer immédiatement
+    this.startSimpleTimer();
+    
     // Load data from API
     this.loadMocktails();
     this.loadIngredients();
@@ -61,6 +100,50 @@ export class MenuComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Save cart to localStorage
     this.saveCartToStorage();
+    
+    // Nettoyer le timer
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+    
+    // Sauvegarder le temps restant avant de quitter
+    if (this.sessionTimeSeconds > 0 && typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('menu-timer', this.sessionTimeSeconds.toString());
+    }
+  }
+
+  // Méthode simple inspirée du code React
+  private startSimpleTimer(): void {
+    this.timerInterval = setInterval(() => {
+      this.sessionTimeSeconds = this.sessionTimeSeconds - 1;
+      this.remainingTime = this.formatTime(this.sessionTimeSeconds);
+      
+      // Sauvegarder le temps restant dans localStorage
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('menu-timer', this.sessionTimeSeconds.toString());
+      }
+      
+      if (this.sessionTimeSeconds <= 0) {
+        clearInterval(this.timerInterval);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.removeItem('menu-timer'); // Nettoyer localStorage
+        }
+        this.router.navigate(['/']);
+      }
+    }, 1000);
+  }
+
+  // Méthodes pour la session
+  getTableNumber(): string {
+    // Récupérer le numéro de table depuis localStorage ou utiliser T01 par défaut
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('table-number') || 'T01';
+    }
+    return 'T01';
+  }
+
+  getFormattedRemainingTime(): string {
+    return this.sessionService.formatRemainingTime();
   }
 
   // --- Load data from API ---

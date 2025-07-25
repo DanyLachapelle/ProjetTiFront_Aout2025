@@ -1,8 +1,22 @@
 <div class="client-container">
   <header class="client-header">
+    <!-- En-tête avec numéro de table et décompte -->
+    <div class="session-header">
+      <div class="session-info">
+        <h1 class="menu-title">Menu</h1>
+        <p class="table-number">Table {{ getTableNumber() }}</p>
+      </div>
+      <div class="session-timer">
+        <div class="timer-container">
+          <span class="timer-icon">🕐</span>
+          <span class="timer-text">{{ remainingTime }}</span>
+        </div>
+      </div>
+    </div>
+
     <div class="client-info">
       <div class="client-logo-title">
-        <img src="assets/favicon.png" alt="Logo Helha Fresh" class="client-logo-img" />
+        <img src="assets/favicon.png" alt="Helha Fresh Logo" class="client-logo-img" />
         <h1>Helha Fresh</h1>
       </div>
       <p>Savor every sip, summer is too short to be bored.</p>
@@ -22,7 +36,7 @@
       </div>
       
       <div *ngIf="isCartEmpty()" class="cart-empty">
-        No order
+        No items in cart
       </div>
       
       <div class="cart-footer" *ngIf="!isCartEmpty()">
@@ -30,11 +44,11 @@
           <span>Total:</span>
           <span class="cart-total-price">€{{ getOrderTotal().toFixed(2) }}</span>
         </div>
-        <button 
-          class="btn btn-primary cart-pay" 
-          (click)="$event.stopPropagation(); openFullOrderModal();">
-          Pay
-        </button>
+                  <button 
+            class="btn btn-primary cart-pay" 
+            (click)="$event.stopPropagation(); openFullOrderModal();">
+            Checkout
+          </button>
       </div>
     </div>
 
@@ -43,7 +57,7 @@
       <div class="order-modal order-modal-large" (click)="$event.stopPropagation()">
         <button class="modal-close" (click)="closeFullOrderModal()" title="Close">✕</button>
         <div class="order-modal-content">
-          <h2 style="margin-bottom:1.2rem; color: #111;">Your Order</h2>
+          <h2 style="margin-bottom:1.2rem; color: #111;">Your Cart</h2>
           
           <div class="cart-list-full">
             <div class="cart-item" *ngFor="let item of orderList">
@@ -79,12 +93,12 @@
           </div>
           
           <div class="modal-actions">
-            <button 
-              class="btn btn-primary" 
-              (click)="onPay()"
-              [disabled]="getOrderTotal() <= 0">
-              Pay €{{ getOrderTotal().toFixed(2) }}
-            </button>
+                          <button 
+                class="btn btn-primary" 
+                (click)="onPay()"
+                [disabled]="getOrderTotal() <= 0">
+                Place Order €{{ getOrderTotal().toFixed(2) }}
+              </button>
             <button class="btn btn-outline" (click)="closeFullOrderModal()">
               Continue
             </button>

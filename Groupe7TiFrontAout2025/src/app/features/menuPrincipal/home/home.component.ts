@@ -81,7 +81,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onAccessMenu(): void {
-    this.router.navigate(['/menu'], { queryParams: { token: this.qrToken } });
+    this.router.navigate(['/geoloc'], { queryParams: { token: this.qrToken } });
   }
 
   onAccessAdmin(): void {
