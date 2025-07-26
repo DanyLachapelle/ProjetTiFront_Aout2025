@@ -78,7 +78,8 @@ export class GestionIngredientsComponent implements OnInit {
     name: '',
     type: 'liquide' as 'liquide' | 'solide',
     stock: 0,
-    limit: 1
+    limit: 1,
+    allergen: undefined
   };
 
   editLimitIngredient: Ingredient | null = null;
@@ -316,7 +317,8 @@ export class GestionIngredientsComponent implements OnInit {
     name: '',
     type: 'liquide',
     stock: 0,
-    limit: 1
+    limit: 1,
+    allergen: undefined // ou null si le backend accepte
   };
     this.showAddIngredientModal = true;
   }
@@ -351,8 +353,10 @@ export class GestionIngredientsComponent implements OnInit {
       name: this.newIngredientForm.name,
       quantity: Number(this.newIngredientForm.stock),
       restock_threshold: Number(this.newIngredientForm.limit),
-      unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g'
+      unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g',
+      allergen: this.newIngredientForm.allergen || '' // ou null si backend accepte
     };
+
 
     this.ingredientService.CreateIngredient(newIngredientPayload).subscribe({
       next: (createdIngredient) => {

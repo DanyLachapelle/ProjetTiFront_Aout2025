@@ -11,6 +11,17 @@ export interface UpdateLimitIngredientOutput {
   success: boolean;
   message: string;
 }
+
+export interface Ingredient {
+  id: number;
+  name: string;
+  quantity: number;             // <-- c’est ce que renvoie ton backend
+  restock_threshold: number;    // <-- idem
+  unit: string;
+  allergen?: string;            // optionnel si pas toujours présent
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,14 +34,15 @@ export class IngredientService {
         return this._http.get<any>(IngredientService.URL);
     }
 
-  CreateIngredient(ingredient: { name: string; quantity: number; restock_threshold: number; unit: string }): Observable<any> {
+  CreateIngredient(ingredient: { name: string; quantity: number; restock_threshold: number; unit: string,allergen:string}): Observable<any> {
     return this._http.post<any>(
       'http://localhost:5201/api/ingredients/createIngredient',
       {
         name: ingredient.name,
         quantity: ingredient.quantity,
         restock_threshold: ingredient.restock_threshold,
-        unit: ingredient.unit
+        unit: ingredient.unit,
+        allergen: ingredient.allergen
       }
     );
     }

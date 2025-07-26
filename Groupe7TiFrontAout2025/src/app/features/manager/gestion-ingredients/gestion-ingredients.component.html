@@ -310,6 +310,27 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label for="new-ingredient-allergen">Allergen</label>
+          <select id="new-ingredient-allergen" [(ngModel)]="newIngredientForm.allergen" class="form-input">
+            <option value="none">None</option>
+            <option value="gluten">Gluten</option>
+            <option value="crustaceans">Crustaceans</option>
+            <option value="eggs">Eggs</option>
+            <option value="fish">Fish</option>
+            <option value="peanuts">Peanuts</option>
+            <option value="soy">Soy</option>
+            <option value="milk">Milk</option>
+            <option value="nuts">Nuts</option>
+            <option value="celery">Celery</option>
+            <option value="mustard">Mustard</option>
+            <option value="sesame">Sesame</option>
+            <option value="sulfites">Sulfites</option>
+            <option value="lupin">Lupin</option>
+            <option value="molluscs">Molluscs</option>
+          </select>
+        </div>
+
         <div class="modal-actions">
           <button class="btn btn-primary" (click)="validateAddIngredient()">Add Ingredient</button>
           <button class="btn btn-outline" (click)="closeAddIngredientModal()">Cancel</button>

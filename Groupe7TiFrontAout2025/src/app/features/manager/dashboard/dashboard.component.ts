@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MocktailService, Mocktail } from '../../../services/mocktail.service';
+import {MocktailService, Mocktail} from '../../../services/mocktail.service';
+import {Ingredient, IngredientService} from '../../../services/ingredient.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,7 +13,7 @@ import { MocktailService, Mocktail } from '../../../services/mocktail.service';
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  
+
   // Connected manager data
   currentManager = {
     name: 'Marie Dupont',
@@ -67,10 +68,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       color: 'secondary',
       route: '/gestion-ingredients',
       stats: {
-        total: 12,
-        good: 8,
-        warning: 2,
-        critical: 2
+        total: 0,
+        good: 0,
+        warning: 0,
+        critical: 0
       }
     },
     {
@@ -106,18 +107,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private mocktailService: MocktailService
+    private mocktailService: MocktailService,
+    private ingredientService: IngredientService // Assuming ingredient service is similar to mocktail service
   ) {}
 
   ngOnInit(): void {
     // Initialize time and date immediately
     this.updateTime();
-    
+
     // Start interval to update time
     this.startTimeInterval();
-    
+
     // Load mocktails data for dashboard
     this.loadMocktailsStats();
+
+    this.loadIngredientStats();
   }
 
   ngOnDestroy(): void {
@@ -146,13 +150,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private updateTime(): void {
     try {
       const now = new Date();
-      
+
       // Update time (HH:MM format only for display)
       this.currentTime = now.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit'
       });
-      
+
       // Update date (only if it has changed)
       const newDate = now.toLocaleDateString('en-US', {
         weekday: 'long',
@@ -160,7 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         month: 'long',
         day: 'numeric'
       });
-      
+
       if (this.currentDate !== newDate) {
         this.currentDate = newDate;
       }
@@ -216,12 +220,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       alert('Passwords do not match');
       return;
     }
-    
+
     if (this.passwordForm.newPassword.length < 6) {
       alert('New password must contain at least 6 characters');
       return;
     }
-    
+
     // TODO: Implement password change logic
     console.log('Password change requested');
     alert('Password changed successfully!');
@@ -235,7 +239,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const total = mocktails.length;
         const available = mocktails.filter((m: Mocktail) => m.available).length;
         const unavailable = total - available;
-        
+
         // Update the mocktails card stats
         const mocktailsCard = this.menuItems.find(item => item.id === 'gestion-mocktails');
         if (mocktailsCard) {
@@ -287,4 +291,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getCurrentDate(): string {
     return this.currentDate || 'Date not available';
   }
+  getStockStatus(stock: number, limit: number): 'good' | 'warning' | 'critical' {
+    if (stock < limit * 0.8) return 'critical';
+    if (stock > limit * 1.5) return 'good';
+    return 'warning';
+  }
+
+  private loadIngredientStats(): void {
+    this.ingredientService.GetAll().subscribe({
+      next: (data: any) => {
+        const ingredients = Array.isArray(data) ? data : data.ingredients;
+        if (!Array.isArray(ingredients)) {
+          console.error('Les ingrédients ne sont pas un tableau:', ingredients);
+          return;
+        }
+        const good = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'good').length;
+        const warning = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'warning').length;
+        const critical = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'critical').length;
+
+        const ingredientCard = this.menuItems.find(item => item.id === 'gestion-ingredients');
+        if (ingredientCard) {
+          ingredientCard.stats = {
+            total: ingredients.length,
+            good,
+            warning,
+            critical
+          };
+        }
+      },
+      error: (err) => {
+        console.error('Erreur chargement ingrédients :', err);
+      }
+    });
+  }
+
+
 }
