@@ -350,36 +350,42 @@ export class MenuComponent implements OnInit {
   // }
 
   onPay() {
-    if (this.orderList.length === 0) return;
+    if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
 
-    this.saleService.createSale().subscribe({
-      next: sale => {
-        const saleId = sale.id;
+    // Affiche une alerte de traitement du paiement
+    alert(`Paiement de ${this.getOrderTotal().toFixed(2)} € en cours...`);
 
-        const itemRequests = this.orderList.map(item =>
-          this.saleService.addItemToSale({
-            saleId: saleId,
-            mocktailId: item.mocktail.id,
-            quantity: item.quantity
-          }).toPromise()
-        );
+    setTimeout(() => {
+      this.saleService.createSale().subscribe({
+        next: sale => {
+          const saleId = sale.id;
 
-        Promise.all(itemRequests).then(() => {
-          alert('Commande enregistrée !');
-          this.orderList = [];
-          this.saveCartToStorage();
-          this.closeFullOrderModal();
-        }).catch(err => {
-          console.error('Erreur en ajoutant les items :', err);
-          alert('Erreur pendant l’enregistrement de la commande.');
-        });
-      },
-      error: err => {
-        console.error('Erreur création vente :', err);
-        alert('Impossible de créer la vente.');
-      }
-    });
+          const itemRequests = this.orderList.map(item =>
+            this.saleService.addItemToSale({
+              saleId: saleId,
+              mocktailId: item.mocktail.id,
+              quantity: item.quantity
+            }).toPromise()
+          );
+
+          Promise.all(itemRequests).then(() => {
+            alert('Paiement réussi ! Commande enregistrée.');
+            this.orderList = [];
+            this.saveCartToStorage();
+            this.closeFullOrderModal();
+          }).catch(err => {
+            console.error('Erreur en ajoutant les items :', err);
+            alert('Erreur pendant l’enregistrement de la commande.');
+          });
+        },
+        error: err => {
+          console.error('Erreur création vente :', err);
+          alert('Impossible de créer la vente.');
+        }
+      });
+    }, 2000); // Délai de 2 secondes simulant un paiement
   }
+
 
 
 
