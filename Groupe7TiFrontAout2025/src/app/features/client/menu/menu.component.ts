@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import {MocktailService} from '../../../services/mocktail.service';
+import {SaleService} from '../../../services/sale.service';
 
 
 
@@ -34,7 +35,11 @@ interface OrderItem {
 })
 export class MenuComponent implements OnInit {
 
-  constructor(private mocktailService: MocktailService) {}
+  constructor(
+    private mocktailService: MocktailService,
+    private saleService: SaleService
+  ) {}
+
   // Mocktails data
   // mocktails: Mocktail[] = [
   //   {
@@ -329,18 +334,54 @@ export class MenuComponent implements OnInit {
   }
 
   // --- Payment management ---
+  // onPay() {
+  //   if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
+  //
+  //   // Here we could integrate a payment system
+  //   alert(`Payment of €${this.getOrderTotal().toFixed(2)} in progress...`);
+  //
+  //   // Successful payment simulation
+  //   setTimeout(() => {
+  //     alert('Payment successful! Your order has been recorded.');
+  //     this.orderList = [];
+  //     this.saveCartToStorage();
+  //     this.closeFullOrderModal();
+  //   }, 2000);
+  // }
+
   onPay() {
-    if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
+    if (this.orderList.length === 0) return;
 
-    // Here we could integrate a payment system
-    alert(`Payment of €${this.getOrderTotal().toFixed(2)} in progress...`);
+    this.saleService.createSale().subscribe({
+      next: sale => {
+        const saleId = sale.id;
 
-    // Successful payment simulation
-    setTimeout(() => {
-      alert('Payment successful! Your order has been recorded.');
-      this.orderList = [];
-      this.saveCartToStorage();
-      this.closeFullOrderModal();
-    }, 2000);
+        const itemRequests = this.orderList.map(item =>
+          this.saleService.addItemToSale({
+            saleId: saleId,
+            mocktailId: item.mocktail.id,
+            quantity: item.quantity
+          }).toPromise()
+        );
+
+        Promise.all(itemRequests).then(() => {
+          alert('Commande enregistrée !');
+          this.orderList = [];
+          this.saveCartToStorage();
+          this.closeFullOrderModal();
+        }).catch(err => {
+          console.error('Erreur en ajoutant les items :', err);
+          alert('Erreur pendant l’enregistrement de la commande.');
+        });
+      },
+      error: err => {
+        console.error('Erreur création vente :', err);
+        alert('Impossible de créer la vente.');
+      }
+    });
   }
+
+
+
+
 }
