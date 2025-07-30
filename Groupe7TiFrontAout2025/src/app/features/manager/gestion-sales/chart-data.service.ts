@@ -3,10 +3,10 @@ import { CHART_COLORS, DARK_CHART_COLORS, getColorScheme } from './chart-config'
 import { ChartSettings } from './chart-export.service';
 
 export interface Sale {
-  date: string;
-  total: number;
-  mocktails: Array<{
-    name: string;
+  saleDate: string;
+  totalAmount: number;
+  items: Array<{
+    mocktailName: string;
     quantity: number;
     price?: number;
   }>;
@@ -22,7 +22,7 @@ export class ChartDataService {
   // Préparer les données pour le graphique des ventes par période
   prepareSalesTrendData(sales: Sale[], period: 'day' | 'week' | 'month' = 'day', settings?: ChartSettings) {
     const colors = this.getColors(settings);
-    
+
     if (sales.length === 0) {
       return {
         labels: ['No Data'],
@@ -39,7 +39,7 @@ export class ChartDataService {
     }
 
     const groupedData = this.groupSalesByPeriod(sales, period);
-    
+
     return {
       labels: Object.keys(groupedData),
       datasets: [{
@@ -58,7 +58,7 @@ export class ChartDataService {
   prepareTopMocktailsData(sales: Sale[], settings?: ChartSettings) {
     const colors = this.getColors(settings);
     const colorScheme = getColorScheme(settings || this.getDefaultSettings());
-    
+
     if (sales.length === 0) {
       return {
         labels: ['No Data'],
@@ -79,7 +79,7 @@ export class ChartDataService {
       .slice(0, 8); // Top 8
 
     // Utiliser les couleurs appropriées selon le schéma
-    const backgroundColor = settings?.colorScheme === 'monochrome' 
+    const backgroundColor = settings?.colorScheme === 'monochrome'
       ? colorScheme.slice(0, sortedMocktails.length)
       : colorScheme;
 
@@ -100,7 +100,7 @@ export class ChartDataService {
   prepareSalesDistributionData(sales: Sale[], settings?: ChartSettings) {
     const colors = this.getColors(settings);
     const colorScheme = getColorScheme(settings || this.getDefaultSettings());
-    
+
     if (sales.length === 0) {
       return {
         labels: ['No Data'],
@@ -119,8 +119,8 @@ export class ChartDataService {
       .sort(([,a], [,b]) => b.revenue - a.revenue);
 
     // Pour les graphiques circulaires, utiliser le schéma de couleurs complet
-    const backgroundColor = settings?.colorScheme === 'monochrome' 
-      ? colorScheme 
+    const backgroundColor = settings?.colorScheme === 'monochrome'
+      ? colorScheme
       : colorScheme.slice(0, sortedMocktails.length);
 
     return {
@@ -138,7 +138,7 @@ export class ChartDataService {
   // Préparer les données pour le graphique des heures de pointe
   preparePeakHoursData(sales: Sale[], settings?: ChartSettings) {
     const colors = this.getColors(settings);
-    
+
     if (sales.length === 0) {
       return {
         labels: ['00:00', '06:00', '12:00', '18:00'],
@@ -157,7 +157,7 @@ export class ChartDataService {
     }
 
     const hourlyData = this.getHourlySalesData(sales);
-    
+
     return {
       labels: Object.keys(hourlyData),
       datasets: [{
@@ -177,7 +177,7 @@ export class ChartDataService {
   // Préparer les données pour la comparaison de périodes
   preparePeriodComparisonData(sales: Sale[], settings?: ChartSettings) {
     const colors = this.getColors(settings);
-    
+
     // Si pas de données, retourner des données vides
     if (sales.length === 0) {
       return {
@@ -199,15 +199,15 @@ export class ChartDataService {
     }
 
     // Diviser les données en deux périodes égales pour une comparaison équitable
-    const sortedSales = [...sales].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sortedSales = [...sales].sort((a, b) => new Date(a.saleDate).getTime() - new Date(b.saleDate).getTime());
     const midPoint = Math.ceil(sortedSales.length / 2);
-    
+
     const firstPeriod = sortedSales.slice(0, midPoint);
     const secondPeriod = sortedSales.slice(midPoint);
-    
-    const firstPeriodTotal = firstPeriod.reduce((sum, sale) => sum + sale.total, 0);
-    const secondPeriodTotal = secondPeriod.reduce((sum, sale) => sum + sale.total, 0);
-    
+
+    const firstPeriodTotal = firstPeriod.reduce((sum, sale) => sum + sale.totalAmount, 0);
+    const secondPeriodTotal = secondPeriod.reduce((sum, sale) => sum + sale.totalAmount, 0);
+
     return {
       labels: ['First Half', 'Second Half'],
       datasets: [{
@@ -238,15 +238,15 @@ export class ChartDataService {
     }
 
     // Utiliser la même logique que la comparaison des périodes
-    const sortedSales = [...sales].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sortedSales = [...sales].sort((a, b) => new Date(a.saleDate).getTime() - new Date(b.saleDate).getTime());
     const midPoint = Math.ceil(sortedSales.length / 2);
-    
+
     const firstPeriod = sortedSales.slice(0, midPoint);
     const secondPeriod = sortedSales.slice(midPoint);
-    
-    const firstPeriodTotal = firstPeriod.reduce((sum, sale) => sum + sale.total, 0);
-    const secondPeriodTotal = secondPeriod.reduce((sum, sale) => sum + sale.total, 0);
-    
+
+    const firstPeriodTotal = firstPeriod.reduce((sum, sale) => sum + sale.totalAmount, 0);
+    const secondPeriodTotal = secondPeriod.reduce((sum, sale) => sum + sale.totalAmount, 0);
+
     // Éviter la division par zéro
     if (firstPeriodTotal === 0) {
       return {
@@ -255,10 +255,10 @@ export class ChartDataService {
         trend: secondPeriodTotal > 0 ? '📈' : '➖'
       };
     }
-    
+
     // Calculer le pourcentage de croissance
     const growth = ((secondPeriodTotal - firstPeriodTotal) / firstPeriodTotal) * 100;
-    
+
     return {
       growth: Math.round(growth * 100) / 100, // Arrondir à 2 décimales
       isPositive: growth >= 0,
@@ -278,18 +278,18 @@ export class ChartDataService {
 
     // Logique simplifiée : pourcentage de clients qui ont commandé plus d'une fois
     const customerOrders = new Map<string, number>();
-    
+
     sales.forEach(sale => {
       // Utiliser la date comme identifiant client simplifié
-      const customerId = sale.date.split('T')[0]; // Date sans heure
+      const customerId = sale.saleDate.split('T')[0]; // Date sans heure
       customerOrders.set(customerId, (customerOrders.get(customerId) || 0) + 1);
     });
-    
+
     const totalCustomers = customerOrders.size;
     const returningCustomers = Array.from(customerOrders.values()).filter(orders => orders > 1).length;
-    
+
     const retention = totalCustomers > 0 ? (returningCustomers / totalCustomers) * 100 : 0;
-    
+
     return {
       retention: Math.round(retention * 100) / 100,
       trend: retention > 50 ? '📈' : retention > 25 ? '➖' : '📉'
@@ -308,22 +308,22 @@ export class ChartDataService {
 
     // Logique simplifiée : pourcentage de jours avec ventes vs jours sans ventes
     const daysWithSales = new Set<string>();
-    
+
     // Déterminer la période basée sur les données
-    const dates = sales.map(sale => new Date(sale.date)).sort((a, b) => a.getTime() - b.getTime());
+    const dates = sales.map(sale => new Date(sale.saleDate)).sort((a, b) => a.getTime() - b.getTime());
     const firstDate = dates[0];
     const lastDate = dates[dates.length - 1];
-    
+
     // Calculer le nombre total de jours dans la période
     const totalDays = Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    
+
     sales.forEach(sale => {
-      const saleDate = sale.date.split('T')[0];
+      const saleDate = sale.saleDate.split('T')[0];
       daysWithSales.add(saleDate);
     });
-    
+
     const conversion = totalDays > 0 ? (daysWithSales.size / totalDays) * 100 : 0;
-    
+
     return {
       conversion: Math.round(conversion * 100) / 100,
       trend: conversion > 70 ? '📈' : conversion > 40 ? '➖' : '📉'
@@ -333,11 +333,11 @@ export class ChartDataService {
   // Méthodes utilitaires privées
   private groupSalesByPeriod(sales: Sale[], period: 'day' | 'week' | 'month') {
     const grouped: { [key: string]: number } = {};
-    
+
     sales.forEach(sale => {
-      const date = new Date(sale.date);
+      const date = new Date(sale.saleDate);
       let key: string;
-      
+
       switch (period) {
         case 'day':
           key = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
@@ -351,43 +351,43 @@ export class ChartDataService {
           key = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
           break;
       }
-      
-      grouped[key] = (grouped[key] || 0) + sale.total;
+
+      grouped[key] = (grouped[key] || 0) + sale.totalAmount;
     });
-    
+
     return grouped;
   }
 
   private getMocktailStatistics(sales: Sale[]) {
     const stats: { [key: string]: { quantity: number; revenue: number } } = {};
-    
+
     sales.forEach(sale => {
-      sale.mocktails.forEach(mocktail => {
-        if (!stats[mocktail.name]) {
-          stats[mocktail.name] = { quantity: 0, revenue: 0 };
+      sale.items.forEach(mocktail => {
+        if (!stats[mocktail.mocktailName]) {
+          stats[mocktail.mocktailName] = { quantity: 0, revenue: 0 };
         }
-        stats[mocktail.name].quantity += mocktail.quantity;
-        stats[mocktail.name].revenue += (mocktail.price || 0) * mocktail.quantity;
+        stats[mocktail.mocktailName].quantity += mocktail.quantity;
+        stats[mocktail.mocktailName].revenue += (mocktail.price || 0) * mocktail.quantity;
       });
     });
-    
+
     return stats;
   }
 
   private getHourlySalesData(sales: Sale[]) {
     const hourly: { [key: string]: number } = {};
-    
+
     // Initialiser toutes les heures
     for (let i = 0; i < 24; i++) {
       hourly[`${i.toString().padStart(2, '0')}:00`] = 0;
     }
-    
+
     sales.forEach(sale => {
-      const hour = new Date(sale.date).getHours();
+      const hour = new Date(sale.saleDate).getHours();
       const hourKey = `${hour.toString().padStart(2, '0')}:00`;
-      hourly[hourKey] += sale.total;
+      hourly[hourKey] += sale.totalAmount;
     });
-    
+
     return hourly;
   }
 
@@ -399,14 +399,14 @@ export class ChartDataService {
 
     const now = new Date();
     const currentPeriodSales = sales.filter(sale => {
-      const saleDate = new Date(sale.date);
+      const saleDate = new Date(sale.saleDate);
       const diffTime = Math.abs(now.getTime() - saleDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays <= 7; // Dernière semaine
     });
-    
+
     return {
-      total: currentPeriodSales.reduce((sum, sale) => sum + sale.total, 0),
+      total: currentPeriodSales.reduce((sum, sale) => sum + sale.totalAmount, 0),
       count: currentPeriodSales.length
     };
   }
@@ -419,14 +419,14 @@ export class ChartDataService {
 
     const now = new Date();
     const previousPeriodSales = sales.filter(sale => {
-      const saleDate = new Date(sale.date);
+      const saleDate = new Date(sale.saleDate);
       const diffTime = Math.abs(now.getTime() - saleDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays > 7 && diffDays <= 14; // Semaine précédente
     });
-    
+
     return {
-      total: previousPeriodSales.reduce((sum, sale) => sum + sale.total, 0),
+      total: previousPeriodSales.reduce((sum, sale) => sum + sale.totalAmount, 0),
       count: previousPeriodSales.length
     };
   }
@@ -447,4 +447,4 @@ export class ChartDataService {
       colorScheme: 'default'
     };
   }
-} 
+}

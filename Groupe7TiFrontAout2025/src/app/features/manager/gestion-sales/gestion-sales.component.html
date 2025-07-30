@@ -1,4 +1,4 @@
-<div class="sales-container">
+<div class="sales-container" xmlns="http://www.w3.org/1999/html">
   <!-- Header avec navigation -->
   <header class="sales-header">
     <div class="header-left">
@@ -23,7 +23,7 @@
         </div>
         <div class="stat-item">
           <span class="stat-label">Orders</span>
-          <span class="stat-value">{{ salesHistory.length }}</span>
+          <span class="stat-value">{{ sales.length }}</span>
         </div>
       </div>
     </div>
@@ -188,8 +188,8 @@
           <div class="sale-main">
             <div class="sale-info">
               <div class="sale-date-time">
-                <span class="sale-date">{{ sale.date | date:'MMM dd, yyyy' }}</span>
-                <span class="sale-time">{{ sale.date | date:'HH:mm' }}</span>
+                <span class="sale-date">{{ sale.saleDate  | date:'MMM dd, yyyy' }}</span>
+                <span class="sale-time">{{ sale.saleDate | date:'HH:mm' }}</span>
               </div>
               <div class="sale-summary">
                 <span class="sale-items-count">{{ getSaleItemsCount(sale) }} items</span>
@@ -198,7 +198,7 @@
             </div>
 
             <div class="sale-amount">
-              <span class="amount-value">€{{ sale.total.toFixed(2) }}</span>
+              <span class="amount-value">€{{ sale.totalAmount  !== undefined && sale.totalAmount !== null ? sale.totalAmount.toFixed(2) : '0.00' }}</span>
               <span class="expand-icon">{{ expandedSaleIndex === i ? '▲' : '▼' }}</span>
             </div>
           </div>
@@ -210,9 +210,9 @@
             </div>
 
             <div class="mocktails-list">
-              <div class="mocktail-item" *ngFor="let mocktail of sale.mocktails">
+              <div class="mocktail-item" *ngFor="let mocktail of sale.items ">
                 <div class="mocktail-info">
-                  <span class="mocktail-name">{{ mocktail.name }}</span>
+                  <span class="mocktail-name">{{ mocktail.mocktailName }}</span>
                   <span class="mocktail-quantity">x{{ mocktail.quantity }}</span>
                 </div>
                 <div class="mocktail-price">
@@ -224,10 +224,11 @@
             <div class="sale-footer">
               <div class="sale-total">
                 <span class="total-label">Total</span>
-                <span class="total-amount">€{{ sale.total.toFixed(2) }}</span>
+                <span class="total-amount">€{{ sale.totalAmount !== undefined && sale.totalAmount !== null ? sale.totalAmount.toFixed(2) : '0.00' }}</span>
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
 
@@ -266,7 +267,7 @@
           </button>
         </div>
       </section>
-    </div>
+
 
     <!-- Mode Statistiques et Graphiques -->
     <div class="statistics-content" *ngIf="displayMode === 'statistics'">
@@ -441,3 +442,4 @@
     (close)="closeChartSettings()">
   </app-chart-settings-modal>
 </div>
+
