@@ -61,6 +61,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     },
     {
+      id: 'order-management',
+      title: 'Commandes et Suivi',
+      description: 'Gérer les commandes en temps réel et suivre leur progression',
+      icon: '📋',
+      color: 'success',
+      route: '/order-management',
+      stats: {
+        pending: 0,
+        preparing: 0,
+        ready: 0,
+        total: 0
+      }
+    },
+    {
       id: 'gestion-ingredients',
       title: 'Ingredients Management',
       description: 'Manage stocks and restocking alerts',

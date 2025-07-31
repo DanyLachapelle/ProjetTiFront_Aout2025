@@ -1,0 +1,98 @@
+<div class="welcome-container">
+  <!-- Étape 1: Page d'accueil -->
+  <div class="welcome-step" *ngIf="currentStep === 1">
+    <div class="welcome-header">
+      <img src="assets/Helha_Fresh.png" alt="Helha Fresh" class="welcome-logo">
+      <h1>Bienvenue chez Helha Fresh</h1>
+      <p>Découvrez nos délicieux mocktails sans alcool</p>
+    </div>
+    
+    <div class="welcome-content">
+      <div class="welcome-card">
+        <div class="card-icon">📍</div>
+        <h2>Vérification de localisation</h2>
+        <p>Nous devons vérifier que vous êtes bien dans notre restaurant pour accéder au menu.</p>
+        
+        <button 
+          class="btn btn-primary location-btn" 
+          (click)="checkLocation()"
+          [disabled]="isLoading">
+          <span *ngIf="!isLoading">Vérifier ma localisation</span>
+          <span *ngIf="isLoading">Vérification en cours...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Étape 2: Saisie du numéro de table -->
+  <div class="welcome-step" *ngIf="currentStep === 2">
+    <div class="welcome-header">
+      <img src="assets/Helha_Fresh.png" alt="Helha Fresh" class="welcome-logo">
+      <h1>Numéro de table</h1>
+      <p>Entrez votre numéro de table pour continuer</p>
+    </div>
+    
+    <div class="welcome-content">
+      <div class="welcome-card">
+        <div class="card-icon">🪑</div>
+        <h2>Votre table</h2>
+        <p>Pour une meilleure expérience, nous avons besoin de votre numéro de table.</p>
+        
+        <div class="table-input">
+          <label for="tableNumber">Numéro de table :</label>
+          <input 
+            type="text" 
+            id="tableNumber"
+            [(ngModel)]="tableNumber" 
+            placeholder="Ex: 12"
+            class="table-number-input"
+            (keyup.enter)="setTableNumber()">
+        </div>
+        
+        <div class="step-actions">
+          <button class="btn btn-outline" (click)="goBack()">
+            ← Retour
+          </button>
+          <button 
+            class="btn btn-primary" 
+            (click)="setTableNumber()"
+            [disabled]="!tableNumber.trim()">
+            Continuer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Étape 3: Confirmation -->
+  <div class="welcome-step" *ngIf="currentStep === 3">
+    <div class="welcome-header">
+      <img src="assets/Helha_Fresh.png" alt="Helha Fresh" class="welcome-logo">
+      <h1>Parfait !</h1>
+      <p>Vous êtes prêt à découvrir nos mocktails</p>
+    </div>
+    
+    <div class="welcome-content">
+      <div class="welcome-card">
+        <div class="card-icon">✅</div>
+        <h2>Configuration terminée</h2>
+        <p>Table : <strong>{{ tableNumber }}</strong></p>
+        <p>Vous pouvez maintenant accéder à notre menu et passer votre commande.</p>
+        
+        <div class="step-actions">
+          <button class="btn btn-outline" (click)="goBack()">
+            ← Modifier
+          </button>
+          <button class="btn btn-primary" (click)="goToMenu()">
+            Accéder au menu →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton de réinitialisation -->
+  <button class="reset-btn" (click)="reset()" title="Réinitialiser">
+    ��
+  </button>
+</div> 
