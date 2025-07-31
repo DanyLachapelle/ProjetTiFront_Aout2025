@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,19 @@ export class UserService {
   constructor(private _http:HttpClient) { }
 
   login(loginData: { username: string; password: string }): Observable<any> {
+    // Test credentials for development
+    if (loginData.username === 'admin' && loginData.password === 'admin') {
+      return of({
+        token: 'dev-token-12345',
+        user: {
+          id: 1,
+          username: 'admin',
+          role: 'manager'
+        }
+      });
+    }
+    
+    // Try real backend
     return this._http.post<any>(UserService.LOGIN_URL, loginData);
   }
 

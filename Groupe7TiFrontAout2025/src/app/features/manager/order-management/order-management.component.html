@@ -1,0 +1,246 @@
+<div class="order-management-container">
+  <!-- Header with Statistics -->
+  <div class="management-header">
+    <div class="header-title">
+      <h1>Gestion des Commandes</h1>
+      <div class="header-actions">
+        <div class="sync-indicator" *ngIf="isSyncing">
+          <span class="sync-icon spinning">🔄</span>
+          <span class="sync-text">Synchronisation...</span>
+        </div>
+        <button class="refresh-btn" (click)="refreshOrders()" [disabled]="loading">
+          <span class="refresh-icon" [class.spinning]="loading">🔄</span>
+          Actualiser
+        </button>
+        <button class="clear-test-btn" (click)="clearTestData()" title="Supprimer les données de test">
+          🗑️ Nettoyer
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card pending">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <div class="stat-number">{{ orderStats.pending }}</div>
+          <div class="stat-label">En attente</div>
+        </div>
+      </div>
+
+      <div class="stat-card preparing">
+        <div class="stat-icon">👨‍🍳</div>
+        <div class="stat-info">
+          <div class="stat-number">{{ orderStats.preparing }}</div>
+          <div class="stat-label">En préparation</div>
+        </div>
+      </div>
+
+      <div class="stat-card ready">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="stat-number">{{ orderStats.ready }}</div>
+          <div class="stat-label">Prêts</div>
+        </div>
+      </div>
+
+      <div class="stat-card total">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <div class="stat-number">{{ orderStats.total }}</div>
+          <div class="stat-label">Total aujourd'hui</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Chargement des commandes...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="refreshOrders()">Réessayer</button>
+  </div>
+
+  <!-- Orders Content -->
+  <div *ngIf="!loading && !error" class="orders-content">
+    
+    <!-- No Orders State -->
+    <div *ngIf="activeOrders.length === 0" class="no-orders-state">
+      <div class="no-orders-icon">🎉</div>
+      <h3>Aucune commande active</h3>
+      <p>Toutes les commandes ont été terminées ! Excellent travail équipe.</p>
+    </div>
+
+    <!-- Orders by Status -->
+    <div *ngIf="activeOrders.length > 0" class="orders-sections">
+      
+      <!-- Waiting Orders -->
+      <div *ngIf="getOrdersByStatus(OrderStatus.EN_ATTENTE).length > 0" class="orders-section">
+        <div class="section-header waiting">
+          <div class="section-title">
+            <span class="section-icon">⏳</span>
+            <h2>Commandes en attente ({{ getOrdersByStatus(OrderStatus.EN_ATTENTE).length }})</h2>
+          </div>
+          <div class="section-subtitle">Commandes prêtes à commencer la préparation</div>
+        </div>
+
+        <div class="orders-grid">
+          <div *ngFor="let order of getOrdersByStatus(OrderStatus.EN_ATTENTE)" 
+               class="order-card" 
+               [class]="getPriorityClass(order)">
+            
+            <div class="order-header">
+              <div class="order-id">{{ order.id }}</div>
+              <div class="order-time">{{ getElapsedTime(order.createdAt) }}</div>
+            </div>
+
+            <div class="order-info">
+              <div class="order-table">
+                <span class="table-icon">🪑</span>
+                <span>Table {{ order.tableNumber }}</span>
+              </div>
+              <div class="order-items-count">
+                {{ getTotalItems(order) }} articles
+              </div>
+              <div class="order-total">
+                €{{ order.total.toFixed(2) }}
+              </div>
+            </div>
+
+            <div class="order-items-preview">
+              <div *ngFor="let item of order.items.slice(0, 2)" class="item-preview">
+                {{ item.quantity }}x {{ item.name }}
+              </div>
+              <div *ngIf="order.items.length > 2" class="more-items">
+                +{{ order.items.length - 2 }} autres
+              </div>
+            </div>
+
+            <div class="order-actions">
+              <button 
+                *ngFor="let action of getNextActions(order.status)"
+                class="action-btn start"
+                (click)="updateOrderStatus(order.id, action.nextStatus)">
+                {{ action.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preparing Orders -->
+      <div *ngIf="getOrdersByStatus(OrderStatus.EN_PREPARATION).length > 0" class="orders-section">
+        <div class="section-header preparing">
+          <div class="section-title">
+            <span class="section-icon">👨‍🍳</span>
+            <h2>En préparation ({{ getOrdersByStatus(OrderStatus.EN_PREPARATION).length }})</h2>
+          </div>
+          <div class="section-subtitle">Commandes actuellement en cours de préparation</div>
+        </div>
+
+        <div class="orders-grid">
+          <div *ngFor="let order of getOrdersByStatus(OrderStatus.EN_PREPARATION)" 
+               class="order-card" 
+               [class]="getPriorityClass(order)">
+            
+            <div class="order-header">
+              <div class="order-id">{{ order.id }}</div>
+              <div class="order-time">{{ getElapsedTime(order.createdAt) }}</div>
+            </div>
+
+            <div class="order-info">
+              <div class="order-table">
+                <span class="table-icon">🪑</span>
+                <span>Table {{ order.tableNumber }}</span>
+              </div>
+              <div class="order-items-count">
+                {{ getTotalItems(order) }} articles
+              </div>
+              <div class="order-total">
+                €{{ order.total.toFixed(2) }}
+              </div>
+            </div>
+
+            <div class="order-items-preview">
+              <div *ngFor="let item of order.items.slice(0, 2)" class="item-preview">
+                {{ item.quantity }}x {{ item.name }}
+              </div>
+              <div *ngIf="order.items.length > 2" class="more-items">
+                +{{ order.items.length - 2 }} autres
+              </div>
+            </div>
+
+            <div class="order-actions">
+              <button 
+                *ngFor="let action of getNextActions(order.status)"
+                class="action-btn ready"
+                (click)="updateOrderStatus(order.id, action.nextStatus)">
+                {{ action.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ready Orders -->
+      <div *ngIf="getOrdersByStatus(OrderStatus.PRET).length > 0" class="orders-section">
+        <div class="section-header ready">
+          <div class="section-title">
+            <span class="section-icon">✅</span>
+            <h2>Prêts à récupérer ({{ getOrdersByStatus(OrderStatus.PRET).length }})</h2>
+          </div>
+          <div class="section-subtitle">Commandes prêtes à être livrées aux clients</div>
+        </div>
+
+        <div class="orders-grid">
+          <div *ngFor="let order of getOrdersByStatus(OrderStatus.PRET)" 
+               class="order-card" 
+               [class]="getPriorityClass(order)">
+            
+            <div class="order-header">
+              <div class="order-id">{{ order.id }}</div>
+              <div class="order-time">{{ getElapsedTime(order.createdAt) }}</div>
+            </div>
+
+            <div class="order-info">
+              <div class="order-table">
+                <span class="table-icon">🪑</span>
+                <span>Table {{ order.tableNumber }}</span>
+              </div>
+              <div class="order-items-count">
+                {{ getTotalItems(order) }} articles
+              </div>
+              <div class="order-total">
+                €{{ order.total.toFixed(2) }}
+              </div>
+            </div>
+
+            <div class="order-items-preview">
+              <div *ngFor="let item of order.items.slice(0, 2)" class="item-preview">
+                {{ item.quantity }}x {{ item.name }}
+              </div>
+              <div *ngIf="order.items.length > 2" class="more-items">
+                +{{ order.items.length - 2 }} autres
+              </div>
+            </div>
+
+            <div class="order-actions">
+              <button 
+                *ngFor="let action of getNextActions(order.status)"
+                class="action-btn deliver"
+                (click)="updateOrderStatus(order.id, action.nextStatus)">
+                {{ action.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

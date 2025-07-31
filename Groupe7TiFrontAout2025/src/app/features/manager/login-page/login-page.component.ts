@@ -14,13 +14,15 @@ import {Router} from '@angular/router';
   styleUrl: './login-page.component.css'
 })
 export class LoginPageComponent {
-  username: string = '';
+  username: string = 'admin';
   password: string = '';
   errorMessage: string = '';
 
   constructor(private userService: UserService,private router: Router) {}
 
   onLogin() {
+    console.log('Tentative de connexion avec:', { username: this.username, password: this.password });
+    
     this.userService.login({ username: this.username, password: this.password }).subscribe({
       next: (response) => {
         console.log('Connexion réussie', response);

@@ -25,11 +25,17 @@ export const routes: Routes = [
   // Routes pour le menu client
   { path: 'menu', loadComponent: () => import('./features/client/menu/menu.component').then(m => m.MenuComponent) },
 
+  // Route pour le suivi de commande client
+  { path: 'order-tracking', loadComponent: () => import('./features/client/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent) },
+
+  // Route pour la gestion des commandes (manager)
+  { path: 'order-management', loadComponent: () => import('./features/manager/order-management/order-management.component').then(m => m.OrderManagementComponent) },
+
   // Flow d'accès client sécurisé
   { path: 'geoloc', loadComponent: () => import('./features/client/geoloc-verification/geoloc-verification.component').then(m => m.GeolocVerificationComponent) },
   { path: 'table', loadComponent: () => import('./features/client/table-number/table-number.component').then(m => m.TableNumberComponent) },
   { path: 'session', loadComponent: () => import('./features/client/session-countdown/session-countdown.component').then(m => m.SessionCountdownComponent) },
 
-  // Route par défaut - redirection vers dashboard
-  { path: '**', redirectTo: '/dashboard' }
+  // Route par défaut - redirection vers la page d'accueil
+  { path: '**', redirectTo: '/' }
 ];

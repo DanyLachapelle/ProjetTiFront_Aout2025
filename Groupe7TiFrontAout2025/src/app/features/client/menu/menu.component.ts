@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { MocktailService, Mocktail, Ingredient } from '../../../services/mocktail.service';
 import { Router } from '@angular/router';
 import { SessionService, SessionData } from '../../../services/session.service';
+import { OrderTrackingService } from '../../../services/order-tracking.service';
+import { OrderItem as TrackingOrderItem } from '../../../models/order';
 
 interface OrderItem {
   mocktail: Mocktail;
@@ -64,37 +66,45 @@ export class MenuComponent implements OnInit, OnDestroy {
   constructor(
     private mocktailService: MocktailService, 
     private router: Router,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private orderTrackingService: OrderTrackingService
   ) {}
 
   ngOnInit() {
-    // Charger le timer depuis localStorage ou démarrer à 15 minutes
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const savedTime = localStorage.getItem('menu-timer');
-      if (savedTime) {
-        this.sessionTimeSeconds = parseInt(savedTime);
-        if (this.sessionTimeSeconds <= 0) {
-          this.router.navigate(['/']);
-          return;
+    // Only initialize if we're in browser environment
+    if (typeof window !== 'undefined') {
+      // Charger le timer depuis localStorage ou démarrer à 15 minutes
+      if (window.localStorage) {
+        const savedTime = localStorage.getItem('menu-timer');
+        if (savedTime) {
+          this.sessionTimeSeconds = parseInt(savedTime);
+          if (this.sessionTimeSeconds <= 0) {
+            this.router.navigate(['/']);
+            return;
+          }
+        } else {
+          this.sessionTimeSeconds = 15 * 60; // 15 minutes
         }
       } else {
         this.sessionTimeSeconds = 15 * 60; // 15 minutes
       }
+      
+      this.remainingTime = this.formatTime(this.sessionTimeSeconds);
+      
+      // Démarrer le timer immédiatement
+      this.startSimpleTimer();
+      
+      // Load data from API
+      this.loadMocktails();
+      this.loadIngredients();
+      
+      // Load cart from localStorage if available
+      this.loadCartFromStorage();
     } else {
-      this.sessionTimeSeconds = 15 * 60; // 15 minutes
+      // In SSR, just load data without timer or localStorage
+      this.loadMocktails();
+      this.loadIngredients();
     }
-    
-    this.remainingTime = this.formatTime(this.sessionTimeSeconds);
-    
-    // Démarrer le timer immédiatement
-    this.startSimpleTimer();
-    
-    // Load data from API
-    this.loadMocktails();
-    this.loadIngredients();
-    
-    // Load cart from localStorage if available
-    this.loadCartFromStorage();
   }
 
   ngOnDestroy() {
@@ -387,10 +397,37 @@ export class MenuComponent implements OnInit, OnDestroy {
     
     // Successful payment simulation
     setTimeout(() => {
+      // Convert cart items to tracking order items
+      const trackingItems: TrackingOrderItem[] = this.orderList.map(item => ({
+        id: item.mocktail.id.toString(),
+        name: item.mocktail.name,
+        quantity: item.quantity,
+        price: item.mocktail.price,
+        ingredients: item.mocktail.ingredients.map(ing => ing.name)
+      }));
+
+      // Get table number
+      const tableNumber = this.getTableNumber();
+      const total = this.getOrderTotal();
+
+      // Create order in tracking system
+      const order = this.orderTrackingService.createOrder(tableNumber, trackingItems, total);
+      
       alert('Payment successful! Your order has been recorded.');
+      console.log('Order created:', order);
+      
+      // Clear cart
       this.orderList = [];
       this.saveCartToStorage();
       this.closeFullOrderModal();
+      
+      // Redirect to order tracking
+      this.router.navigate(['/order-tracking']);
     }, 2000);
+  }
+
+  // --- Order Tracking ---
+  goToOrderTracking() {
+    this.router.navigate(['/order-tracking']);
   }
 }
