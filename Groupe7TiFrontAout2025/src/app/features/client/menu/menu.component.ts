@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { MocktailService, Mocktail, Ingredient } from '../../../services/mocktail.service';
 import { Router } from '@angular/router';
 import { SessionService, SessionData } from '../../../services/session.service';
+import { OrderTrackingService } from '../../../services/order-tracking.service';
+import { Order, OrderItem as TrackingOrderItem, OrderStatus } from '../../../models/order';
 
 interface OrderItem {
   mocktail: Mocktail;
@@ -61,10 +63,15 @@ export class MenuComponent implements OnInit, OnDestroy {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
+  // Suivi de commande
+  currentOrder: Order | null = null;
+  hasActiveOrder = false;
+
   constructor(
     private mocktailService: MocktailService, 
     private router: Router,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private orderTrackingService: OrderTrackingService
   ) {}
 
   ngOnInit() {
@@ -95,6 +102,9 @@ export class MenuComponent implements OnInit, OnDestroy {
     
     // Load cart from localStorage if available
     this.loadCartFromStorage();
+    
+    // Vérifier s'il y a une commande active
+    this.checkActiveOrder();
   }
 
   ngOnDestroy() {
@@ -137,7 +147,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   getTableNumber(): string {
     // Récupérer le numéro de table depuis localStorage ou utiliser T01 par défaut
     if (typeof window !== 'undefined' && window.localStorage) {
-      return localStorage.getItem('table-number') || 'T01';
+      return localStorage.getItem('table_number') || localStorage.getItem('table-number') || 'T01';
     }
     return 'T01';
   }
@@ -382,15 +392,69 @@ export class MenuComponent implements OnInit, OnDestroy {
   onPay() {
     if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
     
-    // Here we could integrate a payment system
-    alert(`Payment of €${this.getOrderTotal().toFixed(2)} in progress...`);
+    // Créer une commande dans le système de suivi
+    const trackingItems: TrackingOrderItem[] = this.orderList.map(item => ({
+      id: item.mocktail.id.toString(),
+      name: item.mocktail.name,
+      quantity: item.quantity,
+      unitPrice: item.mocktail.price,
+      totalPrice: item.mocktail.price * item.quantity,
+      ingredients: item.mocktail.ingredients.map(ing => ing.name)
+    }));
+
+    const tableNumberStr = this.getTableNumber();
+    // Extraire le numéro de table (enlever le 'T' si présent)
+    const tableNumber = parseInt(tableNumberStr.replace('T', ''));
+    const sessionId = `table-${tableNumber}-${Date.now()}`;
     
-    // Successful payment simulation
-    setTimeout(() => {
-      alert('Payment successful! Your order has been recorded.');
-      this.orderList = [];
-      this.saveCartToStorage();
-      this.closeFullOrderModal();
-    }, 2000);
+    console.log('Création de commande:', { tableNumber, sessionId, items: trackingItems });
+    
+    // Sauvegarder le numéro de table pour le suivi
+    localStorage.setItem('table_number', tableNumber.toString());
+    
+    // Créer la commande dans le système de suivi
+    const newOrder = this.orderTrackingService.createOrder(
+      tableNumber, 
+      trackingItems, 
+      sessionId
+    );
+    
+    console.log('Commande créée:', newOrder);
+    
+    // Sauvegarder la commande dans localStorage
+    const orderData = {
+      items: this.orderList,
+      total: this.getOrderTotal(),
+      timestamp: new Date().toISOString(),
+      orderId: newOrder.id
+    };
+    localStorage.setItem('current-order', JSON.stringify(orderData));
+    
+    // Vider le panier
+    this.clearOrder();
+    this.saveCartToStorage();
+    
+    // Fermer le modal
+    this.closeFullOrderModal();
+    
+    // Afficher un message de confirmation
+    alert('Order placed successfully! You can track your order status.');
+    
+    // Vérifier s'il y a une commande active
+    this.checkActiveOrder();
+  }
+
+  // Méthodes pour le suivi de commande
+  checkActiveOrder() {
+    this.orderTrackingService.getCurrentUserOrder().subscribe(order => {
+      this.currentOrder = order;
+      this.hasActiveOrder = order !== null && 
+        order.status !== OrderStatus.LIVRE && 
+        order.status !== OrderStatus.ANNULE;
+    });
+  }
+
+  goToOrderTracking() {
+    this.router.navigate(['/order-tracking']);
   }
 }

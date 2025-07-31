@@ -26,6 +26,11 @@
         <span class="dev-menu-icon">🛠️</span>
       </button>
       
+      <!-- TEST DATA BUTTON -->
+      <button class="btn btn-icon test-data-btn" (click)="createTestOrders()" title="Create test orders">
+        <span class="test-data-icon">📋</span>
+      </button>
+      
       <button class="btn btn-icon settings-btn" (click)="showSettings()" title="Settings">
         <span class="settings-icon">⚙️</span>
       </button>
@@ -132,6 +137,42 @@
               <div class="stat-item">
                 <span class="stat-number critical">{{ item.stats.critical }}</span>
                 <span class="stat-text">Critical</span>
+              </div>
+            </div>
+            <div class="menu-action">
+              <span class="action-text">Access</span>
+              <span class="action-arrow">→</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Third row: fourth card centered -->
+        <div class="menu-col menu-col-center">
+          <div class="menu-card" 
+               *ngFor="let item of menuItems.slice(3,4)"
+               [class]="getCardColorClass(item.color)"
+               (click)="navigateTo(item.route)">
+            <div class="menu-card-header">
+              <div class="menu-icon">{{ item.icon }}</div>
+              <h3 class="menu-title">{{ item.title }}</h3>
+            </div>
+            <p class="menu-description">{{ item.description }}</p>
+            <div class="menu-stats" *ngIf="item.id === 'order-tracking'">
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.enAttente }}</span>
+                <span class="stat-text">En attente</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.enPreparation }}</span>
+                <span class="stat-text">En préparation</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.pret }}</span>
+                <span class="stat-text">Prêt</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.total }}</span>
+                <span class="stat-text">Total</span>
               </div>
             </div>
             <div class="menu-action">

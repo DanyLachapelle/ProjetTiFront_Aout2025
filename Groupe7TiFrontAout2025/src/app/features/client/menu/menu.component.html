@@ -6,12 +6,20 @@
         <h1 class="menu-title">Menu</h1>
         <p class="table-number">Table {{ getTableNumber() }}</p>
       </div>
-      <div class="session-timer">
-        <div class="timer-container">
-          <span class="timer-icon">🕐</span>
-          <span class="timer-text">{{ remainingTime }}</span>
-        </div>
+          <div class="session-timer">
+      <div class="timer-container">
+        <span class="timer-icon">🕐</span>
+        <span class="timer-text">{{ remainingTime }}</span>
       </div>
+    </div>
+    
+    <!-- Bouton de suivi de commande -->
+    <div class="order-tracking-section" *ngIf="hasActiveOrder">
+      <button class="tracking-btn" (click)="goToOrderTracking()">
+        <span class="tracking-icon">📋</span>
+        Suivre ma commande
+      </button>
+    </div>
     </div>
 
     <div class="client-info">

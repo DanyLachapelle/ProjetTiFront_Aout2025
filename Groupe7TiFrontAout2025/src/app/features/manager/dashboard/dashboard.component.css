@@ -811,3 +811,23 @@
   font-size: 1.2rem;
   filter: drop-shadow(0 0 2px #fff8);
 }
+
+.test-data-btn {
+  background: #28a745 !important;
+  border: 2px dashed #fff !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 2px #28a745aa;
+  position: relative;
+}
+
+.test-data-btn:hover {
+  background: #218838 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 3px #21883888;
+}
+
+.test-data-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 2px #fff8);
+}

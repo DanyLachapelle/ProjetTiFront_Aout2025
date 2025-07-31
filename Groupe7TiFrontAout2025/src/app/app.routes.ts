@@ -22,8 +22,14 @@ export const routes: Routes = [
   // Routes pour la gestion des ventes
   { path: 'gestion-sales', loadComponent: () => import('./features/manager/gestion-sales/gestion-sales.component').then(m => m.GestionSalesComponent) },
 
+  // Routes pour la gestion des commandes
+  { path: 'order-management', loadComponent: () => import('./features/manager/order-management/order-management.component').then(m => m.OrderManagementComponent) },
+
   // Routes pour le menu client
   { path: 'menu', loadComponent: () => import('./features/client/menu/menu.component').then(m => m.MenuComponent) },
+
+  // Routes pour le suivi de commande client
+  { path: 'order-tracking', loadComponent: () => import('./features/client/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent) },
 
   // Flow d'accès client sécurisé
   { path: 'geoloc', loadComponent: () => import('./features/client/geoloc-verification/geoloc-verification.component').then(m => m.GeolocVerificationComponent) },
