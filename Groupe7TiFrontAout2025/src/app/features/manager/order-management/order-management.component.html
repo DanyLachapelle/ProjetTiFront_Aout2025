@@ -88,11 +88,7 @@
       <p>Chargement des commandes...</p>
     </div>
 
-    <div class="empty-state" *ngIf="!loading && orders.length === 0">
-      <div class="empty-icon">🍹</div>
-      <h3>Aucune commande active</h3>
-      <p>Toutes les commandes ont été traitées avec succès !</p>
-    </div>
+
 
     <!-- Grille des commandes -->
     <div class="orders-grid" *ngIf="!loading && orders.length > 0">

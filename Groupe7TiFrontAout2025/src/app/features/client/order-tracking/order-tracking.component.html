@@ -12,8 +12,14 @@
     </div>
   </div>
 
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Chargement de vos commandes...</p>
+  </div>
+
   <!-- Error State -->
-  <div class="error-state" *ngIf="error">
+  <div class="error-state" *ngIf="error && !loading">
     <div class="error-icon">⚠️</div>
     <h2>Erreur</h2>
     <p>{{ errorMessage }}</p>
@@ -23,7 +29,7 @@
   </div>
 
   <!-- No Order State -->
-  <div class="no-order-state" *ngIf="!currentOrder && !error && !loading">
+  <div class="no-order-state" *ngIf="currentOrders.length === 0 && !error && !loading">
     <div class="no-order-icon">🍹</div>
     <h2>Aucune commande active</h2>
     <p>Vous n'avez pas de commande en cours.</p>
@@ -32,112 +38,155 @@
     </button>
   </div>
 
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="loading">
-    <div class="loading-spinner"></div>
-    <p>Chargement de votre commande...</p>
-  </div>
+  <!-- Orders Status -->
+  <div class="orders-container" *ngIf="currentOrders.length > 0 && !error && !loading">
+    <div class="order-card" *ngFor="let order of currentOrders; trackBy: trackByOrderId">
+      <div class="status-card">
+        <div class="status-header">
+          <span class="status-icon" [style.color]="getStatusInfo(order.status).color">
+            {{ getStatusInfo(order.status).icon }}
+          </span>
+          <h2>{{ getStatusInfo(order.status).label }}</h2>
+        </div>
+        
+        <p class="status-description">{{ getStatusInfo(order.status).description }}</p>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" 
+                 [style.width.%]="getOrderProgress(order.status)"
+                 [style.background-color]="getStatusInfo(order.status).color">
+            </div>
+          </div>
+          <span class="progress-text">{{ getOrderProgress(order.status) }}%</span>
+        </div>
 
-  <!-- Order Status -->
-  <div class="order-status" *ngIf="currentOrder && !error">
-    <div class="status-card">
-      <div class="status-header">
-        <span class="status-icon" [style.color]="getStatusInfo(currentOrder.status).color">
-          {{ getStatusInfo(currentOrder.status).icon }}
-        </span>
-        <h2>{{ getStatusInfo(currentOrder.status).label }}</h2>
-      </div>
-      
-      <p class="status-description">{{ getStatusInfo(currentOrder.status).description }}</p>
-      
-      <!-- Progress Bar -->
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress-fill" 
-               [style.width.%]="getOrderProgress(currentOrder.status)"
-               [style.background-color]="getStatusInfo(currentOrder.status).color">
+        <!-- Status Icons on one line -->
+        <div class="status-icons-line">
+          <div class="status-icon-item" 
+               [class.active]="getOrderProgress(order.status) >= 25"
+               [class.completed]="getOrderProgress(order.status) > 25">
+            <span class="icon">⏳</span>
+            <span class="label">En attente</span>
+          </div>
+          <div class="status-icon-item" 
+               [class.active]="getOrderProgress(order.status) >= 50"
+               [class.completed]="getOrderProgress(order.status) > 50">
+            <span class="icon">🍹</span>
+            <span class="label">En préparation</span>
+          </div>
+          <div class="status-icon-item" 
+               [class.active]="getOrderProgress(order.status) >= 75"
+               [class.completed]="getOrderProgress(order.status) > 75">
+            <span class="icon">✅</span>
+            <span class="label">Prêt</span>
+          </div>
+          <div class="status-icon-item" 
+               [class.active]="getOrderProgress(order.status) >= 100"
+               [class.completed]="getOrderProgress(order.status) >= 100">
+            <span class="icon">🎉</span>
+            <span class="label">Livré</span>
           </div>
         </div>
-        <span class="progress-text">{{ getOrderProgress(currentOrder.status) }}%</span>
-      </div>
 
-      <!-- Timeline -->
-      <div class="timeline">
-        <div class="timeline-step" 
-             [class.active]="getOrderProgress(currentOrder.status) >= 25"
-             [class.completed]="getOrderProgress(currentOrder.status) > 25">
-          <div class="step-icon">⏳</div>
-          <span class="step-label">En attente</span>
+        <!-- Estimated Time -->
+        <div class="estimated-time">
+          <span class="time-icon">⏱️</span>
+          <span class="time-text">Temps estimé: {{ getEstimatedTimeRemaining(order) }}</span>
         </div>
-        <div class="timeline-step" 
-             [class.active]="getOrderProgress(currentOrder.status) >= 50"
-             [class.completed]="getOrderProgress(currentOrder.status) > 50">
-          <div class="step-icon">🍹</div>
-          <span class="step-label">En préparation</span>
-        </div>
-        <div class="timeline-step" 
-             [class.active]="getOrderProgress(currentOrder.status) >= 75"
-             [class.completed]="getOrderProgress(currentOrder.status) > 75">
-          <div class="step-icon">✅</div>
-          <span class="step-label">Prêt</span>
-        </div>
-        <div class="timeline-step" 
-             [class.active]="getOrderProgress(currentOrder.status) >= 100"
-             [class.completed]="getOrderProgress(currentOrder.status) >= 100">
-          <div class="step-icon">🎉</div>
-          <span class="step-label">Livré</span>
+
+        <!-- Encouraging Message -->
+        <div class="encouraging-message">
+          <p>{{ getEncouragingMessage(order) }}</p>
         </div>
       </div>
 
-      <!-- Estimated Time -->
-      <div class="estimated-time">
-        <span class="time-icon">⏱️</span>
-        <span class="time-text">Temps estimé: {{ getEstimatedTimeRemaining() }}</span>
-      </div>
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <div class="summary-header">
+          <h3>Détails de la commande</h3>
+          <div class="order-info">
+            <span class="order-id">#{{ order.id }}</span>
+            <span class="order-date">{{ formatDate(order.createdAt) }}</span>
+          </div>
+        </div>
 
-      <!-- Encouraging Message -->
-      <div class="encouraging-message">
-        <p>{{ getEncouragingMessage() }}</p>
+        <div class="order-items">
+          <div class="item" *ngFor="let item of order.items">
+            <div class="item-info">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-quantity">x{{ item.quantity }}</span>
+            </div>
+            <span class="item-price">{{ formatPrice(item.totalPrice) }}</span>
+          </div>
+        </div>
+
+        <div class="order-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{ formatPrice(order.totalAmount) }}</span>
+        </div>
+
+        <div class="order-notes" *ngIf="order.notes">
+          <h4>Notes</h4>
+          <p>{{ order.notes }}</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Order Summary -->
-  <div class="order-summary" *ngIf="currentOrder && !error">
-    <div class="summary-header">
-      <h3>Détails de la commande</h3>
-      <div class="order-info">
-        <span class="order-id">#{{ currentOrder.id }}</span>
-        <span class="order-date">{{ formatDate(currentOrder.createdAt) }}</span>
-      </div>
-    </div>
-
-    <div class="order-items">
-      <div class="item" *ngFor="let item of currentOrder.items">
-        <div class="item-info">
-          <span class="item-name">{{ item.name }}</span>
-          <span class="item-quantity">x{{ item.quantity }}</span>
-        </div>
-        <span class="item-price">{{ formatPrice(item.totalPrice) }}</span>
-      </div>
-    </div>
-
-    <div class="order-total">
-      <span class="total-label">Total</span>
-      <span class="total-amount">{{ formatPrice(currentOrder.totalAmount) }}</span>
-    </div>
-
-    <div class="order-notes" *ngIf="currentOrder.notes">
-      <h4>Notes</h4>
-      <p>{{ currentOrder.notes }}</p>
-    </div>
-  </div>
-
-  <!-- Action Buttons -->
-  <div class="action-buttons" *ngIf="currentOrder && !error">
+  <!-- Single Action Button for all orders -->
+  <div class="action-buttons" *ngIf="currentOrders.length > 0 && !error && !loading">
     <button class="refresh-button" (click)="refreshOrder()" [disabled]="loading">
       <span class="refresh-icon">🔄</span>
       Actualiser
     </button>
+  </div>
+
+  <!-- Historique des commandes -->
+  <div class="history-section" *ngIf="!error && !loading">
+    <div class="history-header">
+      <h2>Historique des commandes</h2>
+      <button class="history-toggle" (click)="toggleHistory()">
+        <span class="toggle-icon">{{ showHistory ? '▼' : '▶' }}</span>
+        {{ showHistory ? 'Masquer' : 'Afficher' }} l'historique
+      </button>
+    </div>
+
+    <div class="history-content" *ngIf="showHistory">
+      <div class="history-empty" *ngIf="orderHistory.length === 0">
+        <div class="empty-icon">📋</div>
+        <p>Aucune commande livrée dans l'historique</p>
+      </div>
+
+      <div class="history-list" *ngIf="orderHistory.length > 0">
+        <div class="history-item" *ngFor="let order of orderHistory; trackBy: trackByOrderId">
+          <div class="history-card">
+            <div class="history-header-info">
+              <div class="history-order-id">#{{ order.id.slice(-8) }}</div>
+              <div class="history-date">{{ formatDate(order.updatedAt) }}</div>
+            </div>
+
+            <div class="history-items">
+              <div class="history-item-detail" *ngFor="let item of order.items">
+                <span class="item-name">{{ item.name }}</span>
+                <span class="item-quantity">×{{ item.quantity }}</span>
+                <span class="item-price">{{ formatPrice(item.totalPrice) }}</span>
+              </div>
+            </div>
+
+            <div class="history-total">
+              <span class="total-label">Total</span>
+              <span class="total-amount">{{ formatPrice(order.totalAmount) }}</span>
+            </div>
+
+            <div class="history-status">
+              <span class="status-icon">✅</span>
+              <span class="status-text">Livré</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div> 
