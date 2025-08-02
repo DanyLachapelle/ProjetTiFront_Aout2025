@@ -24,6 +24,11 @@ interface Mocktail {
   }>;
 }
 
+interface Ingredient {
+  id: string;
+  name: string;
+}
+
 interface OrderItem {
   mocktail: Mocktail;
   quantity: number;
@@ -258,7 +263,7 @@ export class MenuComponent implements OnInit {
     // Récupérer le numéro de table depuis localStorage
     if (typeof window !== 'undefined' && window.localStorage) {
       const tableNumber = localStorage.getItem('table_number');
-      console.log('Numéro de table récupéré:', tableNumber);
+      //console.log('Numéro de table récupéré:', tableNumber);
       return tableNumber || 'T01';
     }
     return 'T01';
@@ -274,6 +279,8 @@ export class MenuComponent implements OnInit {
     this.mocktailService.getAll().subscribe({
       next: (mocktails) => {
         this.mocktails = mocktails;
+        this.extractAllIngredients();
+        this.filterMocktails();
         this.isLoading = false;
       },
       error: (error) => {
@@ -475,9 +482,10 @@ export class MenuComponent implements OnInit {
   }
 
   // Méthodes pour le suivi de commande
-  allIngredients: any;
-  excludedIngredients: any;
-  filteredMocktails: (NgIterable<unknown> & NgIterable<any>) | undefined | null;
+  allIngredients: string[] = [];
+  excludedIngredients: string[] = [];
+
+  filteredMocktails: Mocktail[] = [];
   expandedMocktailId: any;
 
   checkActiveOrder() {
@@ -494,30 +502,67 @@ export class MenuComponent implements OnInit {
   }
 
   clearAllergenFilters() {
-
+    this.excludedIngredients = [];
+    this.filterMocktails();
   }
 
-  isIngredientExcluded(ingredient: any) {
-
+  isIngredientExcluded(ingredientName: string): boolean {
+    return this.excludedIngredients.includes(ingredientName);
   }
 
-  toggleExcludedIngredient(ingredient: any) {
-
+  // --- Allergen filtering ---
+  toggleExcludedIngredient(ingredientName: string) {
+    const index = this.excludedIngredients.indexOf(ingredientName);
+    if (index > -1) {
+      this.excludedIngredients.splice(index, 1);
+    } else {
+      this.excludedIngredients.push(ingredientName);
+    }
+    this.filterMocktails();
   }
 
-  toggleIngredients(id) {
-
+  private extractAllIngredients() {
+    const ingredientSet = new Set<string>();
+    this.mocktails.forEach(mocktail => {
+      mocktail.ingredients.forEach(ingredient => {
+        // ici on prend juste le nom de l'ingrédient,
+        // tu peux adapter si tu as un champ allergène spécifique
+        ingredientSet.add(ingredient.name.trim());
+      });
+    });
+    this.allIngredients = Array.from(ingredientSet).sort();
   }
+
+// --- Ingredients display ---
+  toggleIngredients(mocktailId: number) {
+    this.expandedMocktailId = this.expandedMocktailId === mocktailId ? null : mocktailId;
+  }
+
 
   filterMocktails() {
+    this.filteredMocktails = this.mocktails.filter(mocktail => {
+      // Check if mocktail contains excluded ingredients
+      const hasExcludedIngredient = this.excludedIngredients.some(excludedIngredient =>
+        mocktail.ingredients.some(ingredient =>
+          ingredient.name.toLowerCase().includes(excludedIngredient.toLowerCase())
+        )
+      );
 
+      return !hasExcludedIngredient;
+    });
   }
 
+  // --- Modal quantity controls ---
   decreaseModalQuantity() {
-
+    if (this.selectedQuantity > this.MIN_QUANTITY) {
+      this.selectedQuantity--;
+    }
   }
 
   increaseModalQuantity() {
-
+    if (this.selectedQuantity < this.MAX_QUANTITY) {
+      this.selectedQuantity++;
+    }
   }
+
 }
