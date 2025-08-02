@@ -145,9 +145,11 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   // Méthodes pour la session
   getTableNumber(): string {
-    // Récupérer le numéro de table depuis localStorage ou utiliser T01 par défaut
+    // Récupérer le numéro de table depuis localStorage
     if (typeof window !== 'undefined' && window.localStorage) {
-      return localStorage.getItem('table_number') || localStorage.getItem('table-number') || 'T01';
+      const tableNumber = localStorage.getItem('table_number');
+      console.log('Numéro de table récupéré:', tableNumber);
+      return tableNumber || 'T01';
     }
     return 'T01';
   }
@@ -409,9 +411,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     
     console.log('Création de commande:', { tableNumber, sessionId, items: trackingItems });
     
-    // Sauvegarder le numéro de table pour le suivi
-    localStorage.setItem('table_number', tableNumber.toString());
-    
     // Créer la commande dans le système de suivi
     const newOrder = this.orderTrackingService.createOrder(
       tableNumber, 
@@ -420,15 +419,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     );
     
     console.log('Commande créée:', newOrder);
-    
-    // Sauvegarder la commande dans localStorage
-    const orderData = {
-      items: this.orderList,
-      total: this.getOrderTotal(),
-      timestamp: new Date().toISOString(),
-      orderId: newOrder.id
-    };
-    localStorage.setItem('current-order', JSON.stringify(orderData));
     
     // Vider le panier
     this.clearOrder();

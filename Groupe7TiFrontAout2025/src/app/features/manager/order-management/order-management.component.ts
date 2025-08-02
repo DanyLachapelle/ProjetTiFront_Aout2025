@@ -75,9 +75,11 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   private loadOrders() {
     this.ordersSubscription = this.orderTrackingService.getOrders().subscribe({
       next: (orders) => {
+        console.log('Toutes les commandes reçues:', orders);
         this.orders = orders
           .filter(order => order.status !== OrderStatus.LIVRE && order.status !== OrderStatus.ANNULE)
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        console.log('Commandes filtrées (non livrées):', this.orders);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des commandes:', error);

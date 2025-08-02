@@ -335,10 +335,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Create test orders
-  createTestOrders(): void {
-    this.orderTrackingService.createTestOrders();
-    this.loadOrderStats(); // Reload stats after creating test data
-    alert('Test orders created successfully!');
-  }
+
 }

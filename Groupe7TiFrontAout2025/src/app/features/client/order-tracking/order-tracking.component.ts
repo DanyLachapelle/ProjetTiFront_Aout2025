@@ -13,13 +13,16 @@ import { Order, OrderStatus } from '../../../models/order';
   styleUrl: './order-tracking.component.css'
 })
 export class OrderTrackingComponent implements OnInit, OnDestroy {
-  currentOrder: Order | null = null;
+  currentOrders: Order[] = [];
+  orderHistory: Order[] = [];
   loading = false;
   isSyncing = false;
   error = false;
   errorMessage = '';
+  showHistory = false;
   
-  private orderSubscription?: Subscription;
+  private ordersSubscription?: Subscription;
+  private historySubscription?: Subscription;
   private autoRefreshSubscription?: Subscription;
 
   constructor(
@@ -30,13 +33,17 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (typeof window !== 'undefined') {
       this.loadCurrentOrder();
+      this.loadOrderHistory();
       this.startAutoRefresh();
     }
   }
 
   ngOnDestroy() {
-    if (this.orderSubscription) {
-      this.orderSubscription.unsubscribe();
+    if (this.ordersSubscription) {
+      this.ordersSubscription.unsubscribe();
+    }
+    if (this.historySubscription) {
+      this.historySubscription.unsubscribe();
     }
     if (this.autoRefreshSubscription) {
       this.autoRefreshSubscription.unsubscribe();
@@ -52,22 +59,39 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   private syncData() {
     this.isSyncing = true;
     this.loadCurrentOrder();
+    this.loadOrderHistory();
     setTimeout(() => {
       this.isSyncing = false;
     }, 1000);
   }
 
   private loadCurrentOrder() {
-    this.orderSubscription = this.orderTrackingService.getCurrentUserOrder().subscribe({
-      next: (order) => {
-        this.currentOrder = order;
+    this.loading = true;
+    this.ordersSubscription = this.orderTrackingService.getCurrentUserOrders().subscribe({
+      next: (orders) => {
+        this.currentOrders = orders;
         this.error = false;
         this.errorMessage = '';
+        this.loading = false;
+        console.log('Commandes chargées:', orders);
       },
       error: (error) => {
-        console.error('Erreur lors du chargement de la commande:', error);
+        console.error('Erreur lors du chargement des commandes:', error);
         this.error = true;
-        this.errorMessage = 'Erreur lors du chargement de votre commande';
+        this.errorMessage = 'Erreur lors du chargement de vos commandes';
+        this.loading = false;
+      }
+    });
+  }
+
+  private loadOrderHistory() {
+    this.historySubscription = this.orderTrackingService.getOrderHistory().subscribe({
+      next: (history) => {
+        this.orderHistory = history;
+        console.log('Historique chargé:', history);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement de l\'historique:', error);
       }
     });
   }
@@ -80,14 +104,12 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     return this.orderTrackingService.getOrderProgress(status);
   }
 
-  getEstimatedTimeRemaining(): string {
-    if (!this.currentOrder) return '';
-    return this.orderTrackingService.getEstimatedTimeRemaining(this.currentOrder);
+  getEstimatedTimeRemaining(order: Order): string {
+    return this.orderTrackingService.getEstimatedTimeRemaining(order);
   }
 
-  getEncouragingMessage(): string {
-    if (!this.currentOrder) return '';
-    return this.orderTrackingService.getEncouragingMessage(this.currentOrder);
+  getEncouragingMessage(order: Order): string {
+    return this.orderTrackingService.getEncouragingMessage(order);
   }
 
   refreshOrder() {
@@ -102,9 +124,16 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     this.router.navigate(['/menu']);
   }
 
-  getTotalItems(): number {
-    if (!this.currentOrder) return 0;
-    return this.currentOrder.items.reduce((total, item) => total + item.quantity, 0);
+  getTotalItems(order: Order): number {
+    return order.items.reduce((total: number, item: any) => total + item.quantity, 0);
+  }
+
+  trackByOrderId(index: number, order: Order): string {
+    return order.id;
+  }
+
+  toggleHistory() {
+    this.showHistory = !this.showHistory;
   }
 
   formatDate(date: Date): string {
