@@ -1,11 +1,37 @@
 <div class="client-container">
   <header class="client-header">
+    <!-- En-tête avec numéro de table et décompte -->
+    <div class="session-header">
+      <div class="session-info">
+        <h1 class="menu-title">Menu</h1>
+        <p class="table-number">Table {{ getTableNumber() }}</p>
+      </div>
+          <div class="session-timer">
+      <div class="timer-container">
+        <span class="timer-icon">🕐</span>
+        <span class="timer-text">{{ remainingTime }}</span>
+      </div>
+    </div>
+    
+
+    </div>
+
     <div class="client-info">
       <div class="client-logo-title">
-        <img src="assets/favicon.png" alt="Logo Helha Fresh" class="client-logo-img" />
+        <img src="assets/favicon.png" alt="Helha Fresh Logo" class="client-logo-img" />
         <h1>Helha Fresh</h1>
       </div>
       <p>Savor every sip, summer is too short to be bored.</p>
+      
+      <!-- Bouton de suivi de commande -->
+      <div class="tracking-button-container">
+        <button 
+          class="btn btn-tracking" 
+          (click)="goToOrderTracking()"
+          title="Suivre ma commande">
+          📍 Suivre ma commande
+        </button>
+      </div>
     </div>
     
     <!-- Panier en haut à droite -->
@@ -22,7 +48,7 @@
       </div>
       
       <div *ngIf="isCartEmpty()" class="cart-empty">
-        No order
+        No items in cart
       </div>
       
       <div class="cart-footer" *ngIf="!isCartEmpty()">
@@ -30,11 +56,11 @@
           <span>Total:</span>
           <span class="cart-total-price">€{{ getOrderTotal().toFixed(2) }}</span>
         </div>
-        <button 
-          class="btn btn-primary cart-pay" 
-          (click)="$event.stopPropagation(); openFullOrderModal();">
-          Pay
-        </button>
+                  <button 
+            class="btn btn-primary cart-pay" 
+            (click)="$event.stopPropagation(); openFullOrderModal();">
+            Checkout
+          </button>
       </div>
     </div>
 
@@ -43,7 +69,7 @@
       <div class="order-modal order-modal-large" (click)="$event.stopPropagation()">
         <button class="modal-close" (click)="closeFullOrderModal()" title="Close">✕</button>
         <div class="order-modal-content">
-          <h2 style="margin-bottom:1.2rem; color: #111;">Your Order</h2>
+          <h2 style="margin-bottom:1.2rem; color: #111;">Your Cart</h2>
           
           <div class="cart-list-full">
             <div class="cart-item" *ngFor="let item of orderList">
@@ -79,12 +105,12 @@
           </div>
           
           <div class="modal-actions">
-            <button 
-              class="btn btn-primary" 
-              (click)="onPay()"
-              [disabled]="getOrderTotal() <= 0">
-              Pay €{{ getOrderTotal().toFixed(2) }}
-            </button>
+                          <button 
+                class="btn btn-primary" 
+                (click)="onPay()"
+                [disabled]="getOrderTotal() <= 0">
+                Place Order €{{ getOrderTotal().toFixed(2) }}
+              </button>
             <button class="btn btn-outline" (click)="closeFullOrderModal()">
               Continue
             </button>
@@ -95,41 +121,109 @@
   </header>
 
   <main class="client-menu">
-    <h2>Our Mocktails Menu</h2>
-    <p class="menu-subtitle">Discover our delicious non-alcoholic beverages</p>
+    <div class="menu-header">
+      <h2>Our Mocktails Menu</h2>
+      <p class="menu-subtitle">Discover our delicious non-alcoholic beverages</p>
+    </div>
+    
+    <!-- Filtres d'allergènes uniquement -->
+    <div class="allergen-section" *ngIf="allIngredients.length > 0">
+      <div class="allergen-header">
+        <h3>🚫 Allergen Filters</h3>
+        <button 
+          class="allergen-clear-btn" 
+          (click)="clearAllergenFilters()"
+          *ngIf="excludedIngredients.length > 0">
+          Clear all
+        </button>
+      </div>
+      
+      <div class="allergen-tags">
+        <button 
+          class="allergen-tag" 
+          *ngFor="let ingredient of allIngredients"
+          [class.excluded]="isIngredientExcluded(ingredient)"
+          (click)="toggleExcludedIngredient(ingredient)">
+          {{ ingredient }}
+          <span class="exclude-icon" *ngIf="isIngredientExcluded(ingredient)">✕</span>
+        </button>
+      </div>
+    </div>
     
     <div class="mocktails-grid">
       <div 
         class="mocktail-card" 
-        *ngFor="let mocktail of mocktails" 
+        *ngFor="let mocktail of filteredMocktails" 
         [class.unavailable]="!mocktail.available"
         [class.adding-to-cart]="isAddingToCart && selectedMocktail?.id === mocktail.id">
-        <div class="mocktail-image">
-          <span class="mocktail-emoji">{{ mocktail.image }}</span>
-          <div class="availability-badge" *ngIf="!mocktail.available">
-            Unavailable
+        
+        <div class="mocktail-image-container">
+          <div class="mocktail-image">
+            <span class="mocktail-emoji">{{ mocktail.image }}</span>
+            <div class="availability-badge" *ngIf="!mocktail.available">
+              Unavailable
+            </div>
+          </div>
+          <div class="mocktail-price-badge">
+            €{{ mocktail.price.toFixed(2) }}
           </div>
         </div>
+        
         <div class="mocktail-content">
           <h3>{{ mocktail.name }}</h3>
           <p>{{ mocktail.description }}</p>
+          
+          <!-- Bouton pour voir les ingrédients -->
+          <button 
+            class="ingredients-toggle-btn" 
+            (click)="toggleIngredients(mocktail.id)"
+            [class.expanded]="expandedMocktailId === mocktail.id">
+            <span class="toggle-icon">{{ expandedMocktailId === mocktail.id ? '▼' : '▶' }}</span>
+            {{ expandedMocktailId === mocktail.id ? 'Hide' : 'Show' }} ingredients
+          </button>
+          
+          <!-- Section ingrédients dépliable -->
+          <div class="ingredients-section" *ngIf="expandedMocktailId === mocktail.id">
+            <div class="ingredients-header">
+              <h4>Ingredients:</h4>
+              <span class="ingredients-count">{{ mocktail.ingredients.length }} ingredient(s)</span>
+            </div>
+            <div class="ingredients-list">
+              <div class="ingredient-item" *ngFor="let ingredient of mocktail.ingredients">
+                <span class="ingredient-name">{{ ingredient.name }}</span>
+                <span class="ingredient-quantity">{{ ingredient.quantity }}{{ ingredient.unit }}</span>
+              </div>
+            </div>
+          </div>
+          
           <div class="mocktail-footer">
-            <span class="price">€{{ mocktail.price.toFixed(2) }}</span>
             <button 
-              class="btn btn-primary" 
+              class="btn btn-primary order-btn" 
               [disabled]="!mocktail.available" 
               (click)="openOrderModal(mocktail)">
-              {{ mocktail.available ? 'Order' : 'Unavailable' }}
+              <span class="btn-icon">{{ mocktail.available ? '🛒' : '❌' }}</span>
+              {{ mocktail.available ? 'Add to Order' : 'Unavailable' }}
             </button>
           </div>
         </div>
       </div>
     </div>
     
+    <!-- Message si aucun mocktail trouvé -->
+    <div class="empty-state" *ngIf="filteredMocktails.length === 0">
+      <div class="empty-icon">🍹</div>
+      <h3>No mocktail found</h3>
+      <p>{{ excludedIngredients.length > 0 ? 'No mocktail matches your allergen filters.' : 'No mocktail available at the moment.' }}</p>
+      <button class="btn btn-outline" (click)="clearAllergenFilters(); filterMocktails()" *ngIf="excludedIngredients.length > 0">
+        Clear allergen filters
+      </button>
+    </div>
+    
     <!-- Bouton Quitter sous la grille -->
-    <div style="display: flex; justify-content: center; margin-top: 2.5rem;">
-      <button class="btn btn-primary btn-quit" (click)="onQuit()">
-        Quit
+    <div class="quit-section">
+      <button class="btn btn-quit" (click)="onQuit()">
+        <span class="btn-icon">🚪</span>
+        Quit Menu
       </button>
     </div>
 
@@ -138,13 +232,13 @@
       <div class="order-modal" (click)="$event.stopPropagation()">
         <button class="modal-close" (click)="closeOrderModal()" title="Close">✕</button>
         <div class="order-modal-content">
-          <img 
-            [src]="'assets/favicon.png'" 
-            alt="Mocktail" 
-            class="modal-mocktail-img" 
-            *ngIf="selectedMocktail">
-          <h2 *ngIf="selectedMocktail">{{ selectedMocktail.name }}</h2>
-          <p *ngIf="selectedMocktail">{{ selectedMocktail.description }}</p>
+          <div class="modal-mocktail-info" *ngIf="selectedMocktail">
+            <div class="modal-mocktail-image">
+              <span class="modal-mocktail-emoji">{{ selectedMocktail.image }}</span>
+            </div>
+            <h2>{{ selectedMocktail.name }}</h2>
+            <p>{{ selectedMocktail.description }}</p>
+          </div>
           
           <div class="modal-row">
             <span>Price:</span>
@@ -153,14 +247,28 @@
           
           <div class="modal-row">
             <label for="quantity">Quantity:</label>
-            <input 
-              id="quantity" 
-              type="number" 
-              [min]="MIN_QUANTITY" 
-              [max]="MAX_QUANTITY" 
-              [(ngModel)]="selectedQuantity" 
-              (input)="onQuantityChange($event)"
-              class="modal-qty-input" />
+            <div class="quantity-controls">
+              <button 
+                class="qty-btn modal-qty-btn" 
+                (click)="decreaseModalQuantity()"
+                [disabled]="selectedQuantity <= MIN_QUANTITY">
+                -
+              </button>
+              <input 
+                id="quantity" 
+                type="number" 
+                [min]="MIN_QUANTITY" 
+                [max]="MAX_QUANTITY" 
+                [(ngModel)]="selectedQuantity" 
+                (input)="onQuantityChange($event)"
+                class="modal-qty-input" />
+              <button 
+                class="qty-btn modal-qty-btn" 
+                (click)="increaseModalQuantity()"
+                [disabled]="selectedQuantity >= MAX_QUANTITY">
+                +
+              </button>
+            </div>
           </div>
           
           <div class="modal-actions">
@@ -168,6 +276,7 @@
               class="btn btn-primary" 
               (click)="addToOrder()"
               [disabled]="selectedQuantity < MIN_QUANTITY || selectedQuantity > MAX_QUANTITY">
+              <span class="btn-icon">🛒</span>
               Add to Order
             </button>
             <button class="btn btn-outline" (click)="closeOrderModal()">

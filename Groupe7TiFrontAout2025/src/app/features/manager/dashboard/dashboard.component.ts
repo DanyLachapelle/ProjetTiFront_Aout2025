@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MocktailService, Mocktail} from '../../../services/mocktail.service';
 import {Ingredient, IngredientService} from '../../../services/ingredient.service';
+import { OrderTrackingService } from '../../../services/order-tracking.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -61,6 +62,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     },
     {
+      id: 'order-management',
+      title: 'Commandes et Suivi',
+      description: 'Gérer les commandes en temps réel et suivre leur progression',
+      icon: '📋',
+      color: 'success',
+      route: '/order-management',
+      stats: {
+        pending: 0,
+        preparing: 0,
+        ready: 0,
+        total: 0
+      }
+    },
+    {
       id: 'gestion-ingredients',
       title: 'Ingredients Management',
       description: 'Manage stocks and restocking alerts',
@@ -86,6 +101,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
         week: '€647.80',
         month: '€2847.50'
       }
+    },
+    {
+      id: 'order-tracking',
+      title: 'Order Tracking',
+      description: 'Manage and track customer orders in real-time',
+      icon: '📋',
+      color: 'success',
+      route: '/order-management',
+      stats: {
+        enAttente: 0,
+        enPreparation: 0,
+        pret: 0,
+        total: 0
+      }
     }
   ];
 
@@ -108,7 +137,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private mocktailService: MocktailService,
-    private ingredientService: IngredientService // Assuming ingredient service is similar to mocktail service
+    private ingredientService: IngredientService, // Assuming ingredient service is similar to mocktail service
+    private orderTrackingService: OrderTrackingService
   ) {}
 
   ngOnInit(): void {
@@ -122,6 +152,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadMocktailsStats();
 
     this.loadIngredientStats();
+    this.loadOrderStats();
   }
 
   ngOnDestroy(): void {
@@ -325,5 +356,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Load order statistics
+  private loadOrderStats(): void {
+    const stats = this.orderTrackingService.getOrderStats();
+    const orderTrackingItem = this.menuItems.find(item => item.id === 'order-tracking');
+    if (orderTrackingItem) {
+      orderTrackingItem.stats = {
+        enAttente: stats.enAttente,
+        enPreparation: stats.enPreparation,
+        pret: stats.pret,
+        total: stats.total
+      };
+    }
+  }
 
 }

@@ -4,7 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import {MocktailService} from '../../../services/mocktail.service';
 import {SaleService} from '../../../services/sale.service';
-
+import { Router } from '@angular/router';
+import { SessionService, SessionData } from '../../../services/session.service';
+import { OrderTrackingService } from '../../../services/order-tracking.service';
+import { Order, OrderItem as TrackingOrderItem, OrderStatus } from '../../../models/order';
 
 
 interface Mocktail {
@@ -35,10 +38,6 @@ interface OrderItem {
 })
 export class MenuComponent implements OnInit {
 
-  constructor(
-    private mocktailService: MocktailService,
-    private saleService: SaleService
-  ) {}
 
   // Mocktails data
   // mocktails: Mocktail[] = [
@@ -150,13 +149,66 @@ export class MenuComponent implements OnInit {
   readonly MAX_QUANTITY = 10;
   readonly MIN_QUANTITY = 1;
 
+  // Session management
+  sessionData: SessionData | null = null;
+  remainingTime = '15:00';
+  private timerInterval: any;
+  private sessionTimeSeconds = 15 * 60; // 15 minutes en secondes
+
+  // Méthode pour formater le temps en MM:SS
+  private formatTime(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  // Suivi de commande
+  currentOrder: Order | null = null;
+  hasActiveOrder = false;
+
+  constructor(
+    private mocktailService: MocktailService,
+    private router: Router,
+    private sessionService: SessionService,
+    private orderTrackingService: OrderTrackingService,
+    private saleService: SaleService
+  ) {}
+
   // ngOnInit() {
   //   // Load cart from localStorage if available
   //   this.loadCartFromStorage();
   // }
   ngOnInit() {
+    // Charger le timer depuis localStorage ou démarrer à 15 minutes
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const savedTime = localStorage.getItem('menu-timer');
+      if (savedTime) {
+        this.sessionTimeSeconds = parseInt(savedTime);
+        if (this.sessionTimeSeconds <= 0) {
+          this.router.navigate(['/']);
+          return;
+        }
+      } else {
+        this.sessionTimeSeconds = 15 * 60; // 15 minutes
+      }
+    } else {
+      this.sessionTimeSeconds = 15 * 60; // 15 minutes
+    }
+
+    this.remainingTime = this.formatTime(this.sessionTimeSeconds);
+
+    // Démarrer le timer immédiatement
+    this.startSimpleTimer();
+
+    // Load data from API
     this.loadMocktails();
+    //this.loadIngredients();
+
+    // Load cart from localStorage if available
     this.loadCartFromStorage();
+
+    // Vérifier s'il y a une commande active
+    this.checkActiveOrder();
   }
   // ngOnDestroy() {
   //   // Save cart to localStorage
@@ -164,6 +216,57 @@ export class MenuComponent implements OnInit {
   //   this.loadCartFromStorage()
   // }
 
+
+  ngOnDestroy() {
+    // Save cart to localStorage
+    this.saveCartToStorage();
+
+    // Nettoyer le timer
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+
+    // Sauvegarder le temps restant avant de quitter
+    if (this.sessionTimeSeconds > 0 && typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('menu-timer', this.sessionTimeSeconds.toString());
+    }
+  }
+
+  // Méthode simple inspirée du code React
+  private startSimpleTimer(): void {
+    this.timerInterval = setInterval(() => {
+      this.sessionTimeSeconds = this.sessionTimeSeconds - 1;
+      this.remainingTime = this.formatTime(this.sessionTimeSeconds);
+
+      // Sauvegarder le temps restant dans localStorage
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('menu-timer', this.sessionTimeSeconds.toString());
+      }
+
+      if (this.sessionTimeSeconds <= 0) {
+        clearInterval(this.timerInterval);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.removeItem('menu-timer'); // Nettoyer localStorage
+        }
+        this.router.navigate(['/']);
+      }
+    }, 1000);
+  }
+
+  // Méthodes pour la session
+  getTableNumber(): string {
+    // Récupérer le numéro de table depuis localStorage
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const tableNumber = localStorage.getItem('table_number');
+      console.log('Numéro de table récupéré:', tableNumber);
+      return tableNumber || 'T01';
+    }
+    return 'T01';
+  }
+
+  getFormattedRemainingTime(): string {
+    return this.sessionService.formatRemainingTime();
+  }
 
 
   loadMocktails() {
@@ -334,21 +437,6 @@ export class MenuComponent implements OnInit {
   }
 
   // --- Payment management ---
-  // onPay() {
-  //   if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
-  //
-  //   // Here we could integrate a payment system
-  //   alert(`Payment of €${this.getOrderTotal().toFixed(2)} in progress...`);
-  //
-  //   // Successful payment simulation
-  //   setTimeout(() => {
-  //     alert('Payment successful! Your order has been recorded.');
-  //     this.orderList = [];
-  //     this.saveCartToStorage();
-  //     this.closeFullOrderModal();
-  //   }, 2000);
-  // }
-
   onPay() {
     if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
 
@@ -386,8 +474,17 @@ export class MenuComponent implements OnInit {
     }, 2000); // Délai de 2 secondes simulant un paiement
   }
 
+  // Méthodes pour le suivi de commande
+  checkActiveOrder() {
+    this.orderTrackingService.getCurrentUserOrder().subscribe(order => {
+      this.currentOrder = order;
+      this.hasActiveOrder = order !== null &&
+        order.status !== OrderStatus.LIVRE &&
+        order.status !== OrderStatus.ANNULE;
+    });
+  }
 
-
-
-
+  goToOrderTracking() {
+    this.router.navigate(['/order-tracking']);
+  }
 }

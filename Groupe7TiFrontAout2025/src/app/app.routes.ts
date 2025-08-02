@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './features/menuPrincipal/home/home.component';
+import {LoginPageComponent} from './features/manager/login-page/login-page.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', component: HomeComponent  },
 
   // Routes pour la page de connexion
   { path: 'login', loadComponent: () => import('./features/manager/login-page/login-page.component').then(m => m.LoginPageComponent) },
@@ -20,8 +22,19 @@ export const routes: Routes = [
   // Routes pour la gestion des ventes
   { path: 'gestion-sales', loadComponent: () => import('./features/manager/gestion-sales/gestion-sales.component').then(m => m.GestionSalesComponent) },
 
+  // Routes pour la gestion des commandes
+  { path: 'order-management', loadComponent: () => import('./features/manager/order-management/order-management.component').then(m => m.OrderManagementComponent) },
+
   // Routes pour le menu client
   { path: 'menu', loadComponent: () => import('./features/client/menu/menu.component').then(m => m.MenuComponent) },
+
+  // Routes pour le suivi de commande client
+  { path: 'order-tracking', loadComponent: () => import('./features/client/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent) },
+
+  // Flow d'accès client sécurisé
+  { path: 'geoloc', loadComponent: () => import('./features/client/geoloc-verification/geoloc-verification.component').then(m => m.GeolocVerificationComponent) },
+  { path: 'table', loadComponent: () => import('./features/client/table-number/table-number.component').then(m => m.TableNumberComponent) },
+  { path: 'session', loadComponent: () => import('./features/client/session-countdown/session-countdown.component').then(m => m.SessionCountdownComponent) },
 
   // Route par défaut - redirection vers dashboard
   { path: '**', redirectTo: '/dashboard' }

@@ -7,29 +7,31 @@
         <div class="current-date">{{ getCurrentDate() }}</div>
       </div>
     </div>
-    
+
     <div class="header-center">
       <div class="logo-section">
         <img src="assets/favicon.png" alt="Logo Helha Fresh" class="logo-img" />
         <h1>Helha Fresh</h1>
       </div>
     </div>
-    
+
     <div class="header-right">
       <button class="btn btn-icon notification-btn" (click)="showNotifications()" title="Notifications">
         <span class="notification-icon">🔔</span>
         <span class="notification-badge" *ngIf="activeAlerts.length > 0">{{ activeAlerts.length }}</span>
       </button>
-      
+
       <!-- TEMPORARY DEV BUTTON -->
       <button class="btn btn-icon dev-menu-btn" (click)="navigateTo('/menu')" title="DEV: Menu Access (to remove)">
         <span class="dev-menu-icon">🛠️</span>
       </button>
-      
+
+
+
       <button class="btn btn-icon settings-btn" (click)="showSettings()" title="Settings">
         <span class="settings-icon">⚙️</span>
       </button>
-      
+
       <button class="btn btn-outline logout-btn" (click)="logout()">
         <span class="logout-icon">🚪</span>
         Logout
@@ -44,7 +46,7 @@
         <!-- First row: two cards side by side -->
         <div class="menu-row">
           <div class="menu-col menu-col-left">
-            <div class="menu-card" 
+            <div class="menu-card"
                  *ngFor="let item of menuItems.slice(0,1)"
                  [class]="getCardColorClass(item.color)"
                  (click)="navigateTo(item.route)">
@@ -74,7 +76,7 @@
             </div>
           </div>
           <div class="menu-col menu-col-right">
-            <div class="menu-card" 
+            <div class="menu-card"
                  *ngFor="let item of menuItems.slice(2,3)"
                  [class]="getCardColorClass(item.color)"
                  (click)="navigateTo(item.route)">
@@ -104,10 +106,10 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Second row: third card centered -->
         <div class="menu-col menu-col-center">
-          <div class="menu-card" 
+          <div class="menu-card"
                *ngFor="let item of menuItems.slice(1,2)"
                [class]="getCardColorClass(item.color)"
                (click)="navigateTo(item.route)">
@@ -140,6 +142,42 @@
             </div>
           </div>
         </div>
+
+        <!-- Third row: fourth card centered -->
+        <div class="menu-col menu-col-center">
+          <div class="menu-card"
+               *ngFor="let item of menuItems.slice(3,4)"
+               [class]="getCardColorClass(item.color)"
+               (click)="navigateTo(item.route)">
+            <div class="menu-card-header">
+              <div class="menu-icon">{{ item.icon }}</div>
+              <h3 class="menu-title">{{ item.title }}</h3>
+            </div>
+            <p class="menu-description">{{ item.description }}</p>
+            <div class="menu-stats" *ngIf="item.id === 'order-tracking'">
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.enAttente }}</span>
+                <span class="stat-text">En attente</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.enPreparation }}</span>
+                <span class="stat-text">En préparation</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.pret }}</span>
+                <span class="stat-text">Prêt</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ item.stats.total }}</span>
+                <span class="stat-text">Total</span>
+              </div>
+            </div>
+            <div class="menu-action">
+              <span class="action-text">Access</span>
+              <span class="action-arrow">→</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -150,9 +188,9 @@
       <button class="modal-close" (click)="closeNotifications()" title="Close">✕</button>
       <div class="modal-content">
         <h2>🔔 Notifications</h2>
-        
+
         <div class="notifications-list" *ngIf="activeAlerts.length > 0">
-          <div class="notification-item" 
+          <div class="notification-item"
                *ngFor="let alert of activeAlerts"
                [class]="getAlertSeverityClass(alert.severity)">
             <div class="notification-icon">{{ alert.icon }}</div>
@@ -162,7 +200,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="no-notifications" *ngIf="activeAlerts.length === 0">
           <span class="no-notifications-icon">✅</span>
           <p>No active notifications</p>
@@ -177,28 +215,28 @@
       <button class="modal-close" (click)="closeSettings()" title="Close">✕</button>
       <div class="modal-content">
         <h2>⚙️ Settings</h2>
-        
+
         <div class="settings-section">
           <h3>Change password</h3>
           <form class="password-form" (ngSubmit)="changePassword()">
             <div class="form-group">
               <label for="current-password">Current password</label>
-              <input type="password" id="current-password" [(ngModel)]="passwordForm.currentPassword" 
+              <input type="password" id="current-password" [(ngModel)]="passwordForm.currentPassword"
                      name="currentPassword" class="form-input" required>
             </div>
-            
+
             <div class="form-group">
               <label for="new-password">New password</label>
-              <input type="password" id="new-password" [(ngModel)]="passwordForm.newPassword" 
+              <input type="password" id="new-password" [(ngModel)]="passwordForm.newPassword"
                      name="newPassword" class="form-input" required>
             </div>
-            
+
             <div class="form-group">
               <label for="confirm-password">Confirm new password</label>
-              <input type="password" id="confirm-password" [(ngModel)]="passwordForm.confirmPassword" 
+              <input type="password" id="confirm-password" [(ngModel)]="passwordForm.confirmPassword"
                      name="confirmPassword" class="form-input" required>
             </div>
-            
+
             <div class="modal-actions">
               <button type="submit" class="btn btn-primary">Change password</button>
               <button type="button" class="btn btn-outline" (click)="closeSettings()">Cancel</button>
