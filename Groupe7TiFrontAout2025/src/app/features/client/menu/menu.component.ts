@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Component, OnInit, OnDestroy, NgIterable} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -475,6 +475,11 @@ export class MenuComponent implements OnInit {
   }
 
   // Méthodes pour le suivi de commande
+  allIngredients: any;
+  excludedIngredients: any;
+  filteredMocktails: (NgIterable<unknown> & NgIterable<any>) | undefined | null;
+  expandedMocktailId: any;
+
   checkActiveOrder() {
     this.orderTrackingService.getCurrentUserOrder().subscribe(order => {
       this.currentOrder = order;
@@ -486,5 +491,33 @@ export class MenuComponent implements OnInit {
 
   goToOrderTracking() {
     this.router.navigate(['/order-tracking']);
+  }
+
+  clearAllergenFilters() {
+
+  }
+
+  isIngredientExcluded(ingredient: any) {
+
+  }
+
+  toggleExcludedIngredient(ingredient: any) {
+
+  }
+
+  toggleIngredients(id) {
+
+  }
+
+  filterMocktails() {
+
+  }
+
+  decreaseModalQuantity() {
+
+  }
+
+  increaseModalQuantity() {
+
   }
 }
