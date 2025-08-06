@@ -119,21 +119,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ];
 
   // Active alerts
-  activeAlerts = [
-    {
-      type: 'stock',
-      message: 'Critical stock: Fresh mint (5g remaining)',
-      severity: 'critical',
-      icon: '⚠️'
-    },
-    {
-      type: 'stock',
-      message: 'Low stock: Pineapple juice (15cl remaining)',
-      severity: 'warning',
-      icon: '⚠️'
-    }
-  ];
-
+  // activeAlerts = [
+  //   {
+  //     type: 'stock',
+  //     message: 'Critical stock: Fresh mint (5g remaining)',
+  //     severity: 'critical',
+  //     icon: '⚠️'
+  //   },
+  //   {
+  //     type: 'stock',
+  //     message: 'Low stock: Pineapple juice (15cl remaining)',
+  //     severity: 'warning',
+  //     icon: '⚠️'
+  //   }
+  // ];
+  activeAlerts: { message: string; severity: string; icon: string; type: string }[] = [];
   constructor(
     private router: Router,
     private mocktailService: MocktailService,
@@ -332,14 +332,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.ingredientService.GetAll().subscribe({
       next: (data: any) => {
         const ingredients = Array.isArray(data) ? data : data.ingredients;
+
         if (!Array.isArray(ingredients)) {
           console.error('Les ingrédients ne sont pas un tableau:', ingredients);
           return;
         }
+
+        // Calcul des statuts
         const good = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'good').length;
         const warning = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'warning').length;
         const critical = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'critical').length;
 
+        // Mise à jour de la carte des stats
         const ingredientCard = this.menuItems.find(item => item.id === 'gestion-ingredients');
         if (ingredientCard) {
           ingredientCard.stats = {
@@ -349,12 +353,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
             critical
           };
         }
+
+        // 💡 Génération dynamique des alertes
+        this.activeAlerts = ingredients
+          .filter(i => {
+            const status = this.getStockStatus(i.quantity, i.restock_threshold);
+            return status === 'critical' || status === 'warning';
+          })
+          .map(i => {
+            const status = this.getStockStatus(i.quantity, i.restock_threshold);
+            return {
+              type: 'stock',
+              message: `${status === 'critical' ? 'Critical' : 'Low'} stock: ${i.name} (${i.quantity}${i.unit} remaining)`,
+              severity: status,
+              icon: '⚠️'
+            };
+          });
+
+        // Log des alertes pour vérification
+        console.log('🔔 Alertes actives:', this.activeAlerts);
       },
       error: (err) => {
         console.error('Erreur chargement ingrédients :', err);
       }
     });
   }
+
 
   // Load order statistics
   private loadOrderStats(): void {

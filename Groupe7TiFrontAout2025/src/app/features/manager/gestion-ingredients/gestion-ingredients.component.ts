@@ -33,6 +33,7 @@ export class GestionIngredientsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadIngredients();
+    const alerts = this.getStockAlerts();
   }
 
   loadIngredients(): void {
@@ -53,8 +54,31 @@ export class GestionIngredientsComponent implements OnInit {
 
 
         this.updateStatistics();
+
+        // 🔔 Maintenant que les ingrédients sont chargés, appelle getStockAlerts()
+        const alerts = this.getStockAlerts();
+        console.log('📢 Alerts après chargement:', alerts);
       },
+      error: (err) => {
+        console.error('Erreur lors du chargement des ingrédients:', err);
+      }
     });
+  }
+
+  getStockAlerts(): { message: string; severity: string; icon: string; type: string }[] {
+    const alerts = [];
+
+    for (const ingredient of this.ingredients) {
+      if (ingredient.status === 'critical' || ingredient.status === 'warning') {
+        alerts.push({
+          type: 'stock',
+          message: `${ingredient.status === 'critical' ? 'Critical' : 'Low'} stock: ${ingredient.name} (${ingredient.quantity}${ingredient.unit} remaining)`,
+          severity: ingredient.status,
+          icon: '⚠️'
+        });
+      }
+    }
+    return alerts;
   }
 
   // Filter and search properties
