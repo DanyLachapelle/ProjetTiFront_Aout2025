@@ -447,11 +447,12 @@ export class MenuComponent implements OnInit {
   onPay() {
     if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
 
+    const tableNumber = this.getTableNumber();
     // Affiche une alerte de traitement du paiement
     alert(`Paiement de ${this.getOrderTotal().toFixed(2)} € en cours...`);
 
     setTimeout(() => {
-      this.saleService.createSale().subscribe({
+      this.saleService.createSale({tableNumber}).subscribe({
         next: sale => {
           const saleId = sale.id;
 
