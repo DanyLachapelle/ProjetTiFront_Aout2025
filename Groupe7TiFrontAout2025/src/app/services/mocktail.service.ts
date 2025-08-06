@@ -18,10 +18,11 @@ export interface Mocktail {
 }
 
 export interface Ingredient {
+  stockStatus:string;
   id: number
   name: string
-  stock: number
-  limit: number
+  quantity: number
+  restock_threshold: number
   unit: string
 }
 

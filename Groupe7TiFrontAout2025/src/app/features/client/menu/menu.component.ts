@@ -26,8 +26,10 @@ interface Mocktail {
 }
 
 interface Ingredient {
+  stockStatus: string;
   id: string;
   name: string;
+  quantity: number;
 }
 
 interface OrderItem {
@@ -150,7 +152,7 @@ export class MenuComponent implements OnInit {
   // Animations and states
   isAddingToCart = false;
   cartAnimation = false;
-
+  availableIngredients: Ingredient[] = [];
   // Validation
   readonly MAX_QUANTITY = 10;
   readonly MIN_QUANTITY = 1;
@@ -216,6 +218,8 @@ export class MenuComponent implements OnInit {
 
     // Vérifier s'il y a une commande active
     this.checkActiveOrder();
+
+    this.loadAvailableIngredients();
   }
   // ngOnDestroy() {
   //   // Save cart to localStorage
@@ -239,6 +243,17 @@ export class MenuComponent implements OnInit {
     }
   }
 
+  loadAvailableIngredients() {
+    this.ingredientService.GetAll().subscribe({
+      next: (response) => {
+        this.availableIngredients = response.ingredients.filter((ing: { available: any; }) => ing.available);
+        console.log('Ingrédients disponibles:', this.availableIngredients);
+      },
+      error: (err) => {
+        console.error('Erreur chargement ingrédients:', err);
+      }
+    });
+  }
   // Méthode simple inspirée du code React
   private startSimpleTimer(): void {
     this.timerInterval = setInterval(() => {
@@ -278,19 +293,55 @@ export class MenuComponent implements OnInit {
 
   loadMocktails() {
     this.isLoading = true;
+
     this.mocktailService.getAll().subscribe({
       next: (mocktails) => {
         this.mocktails = mocktails;
         this.extractAllIngredients();
-        this.filterMocktails();
-        this.isLoading = false;
+
+        this.ingredientService.GetAll().subscribe({
+          next: (response: { ingredients: Ingredient[] }) => {
+            const ingredientsList: Ingredient[] = response.ingredients;
+
+            console.log('Ingrédients reçus avec stockStatus:', ingredientsList);
+
+            // Créer un mapping { nom_ingredient -> stockStatus }
+            const ingredientStatusMap: { [name: string]: string } = {};
+            ingredientsList.forEach((ing: Ingredient) => {
+              ingredientStatusMap[ing.name] = ing.stockStatus;
+            });
+
+            // 🔴 FILTRER les mocktails : tous les ingrédients doivent avoir un stockStatus === 'good'
+            this.mocktails = this.mocktails.filter(mocktail => {
+              return mocktail.ingredients.every(ing => {
+                const status = ingredientStatusMap[ing.name];
+                return status === 'good';
+              });
+            });
+
+            console.log('Mocktails disponibles (tous ingrédients = good):', this.mocktails.map(m => ({
+              name: m.name,
+              ingredients: m.ingredients.map(i => i.name)
+            })));
+
+            this.filterMocktails();
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Erreur récupération ingrédients:', error);
+            this.isLoading = false;
+          }
+        });
       },
       error: (error) => {
-        console.error('Error loading mocktails:', error);
+        console.error('Erreur chargement mocktails:', error);
         this.isLoading = false;
       }
     });
   }
+
+
+
 
   // --- Cart management ---
   openOrderModal(mocktail: Mocktail) {
@@ -585,7 +636,7 @@ export class MenuComponent implements OnInit {
         )
       );
 
-      return !hasExcludedIngredient;
+      return mocktail.available && !hasExcludedIngredient;
     });
   }
 
@@ -602,4 +653,41 @@ export class MenuComponent implements OnInit {
     }
   }
 
+  // Fonction utilitaire pour status stock
+  getStockStatus(quantity: number, threshold: number): 'critical' | 'warning' | 'good' {
+    if (quantity <= 0) return 'critical';
+    if (quantity <= threshold) return 'warning';
+    return 'good';
+  }
+
+// Nouvelle fonction pour mettre à jour la disponibilité des mocktails
+  updateMocktailAvailability(ingredientsStock: { [id: string]: number }, threshold: number = 5) {
+    this.mocktails.forEach(mocktail => {
+      // Pour chaque ingrédient du mocktail, on récupère la quantité en stock
+      // ingredientsStock est un objet { ingredientId: quantityInStock }
+      // On doit associer par nom d'ingrédient aux IDs stockés dans ingredientsStock
+      // Ici, on suppose que tu as un moyen de relier ingredient.name => ingredient.id dans ingredientsStock
+      // Sinon, il faudra un mapping nom => id en plus
+
+      const isAvailable = mocktail.ingredients.every(ingredient => {
+        // Trouver l'ingrédient dans le stock (par nom ou id)
+        // Ici je suppose que tu as un mapping id par nom, sinon adapter
+        const stockQty = ingredientsStock[ingredient.name]; // ou [ingredient.id] selon structure
+
+        // S'il manque info stock, on considère pas disponible
+        if (stockQty === undefined) return false;
+
+        // Calculer status stock
+        const status = this.getStockStatus(stockQty, threshold);
+
+        // Si stock critique, mocktail non dispo
+        return status !== 'critical';
+      });
+
+      mocktail.available = isAvailable;
+    });
+
+    // Appliquer filtrage après update
+    this.filterMocktails();
+  }
 }

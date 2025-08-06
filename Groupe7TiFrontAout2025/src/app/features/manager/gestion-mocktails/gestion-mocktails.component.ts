@@ -17,6 +17,8 @@ interface MocktailForm {
   }>;
 }
 
+
+
 @Component({
   selector: 'app-gestion-mocktails',
   standalone: true,
@@ -67,8 +69,9 @@ export class GestionMocktailsComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.loadMocktails();
     this.loadIngredients();
+    this.loadMocktails();
+
   }
 
   // --- Load data from API ---
@@ -76,7 +79,29 @@ export class GestionMocktailsComponent implements OnInit {
     this.mocktailService.getAll().subscribe({
       next: (data) => {
         this.mocktails = data;
+
+        // Synchronisation avec le stock des ingrédients
+        this.mocktails.forEach(mocktail => {
+          let isAvailable = true;
+
+          for (const ing of mocktail.ingredients) {
+            const ingredientInStock = this.ingredients.find(i => i.name === ing.name);
+            if (ingredientInStock) {
+              // Utiliser directement le statut backend
+              const status = ingredientInStock.stockStatus;
+
+              if (status === 'critical' || status === 'warning') {
+                isAvailable = false;
+                break;
+              }
+            }
+          }
+          mocktail.available = isAvailable;
+        });
+
+        console.log('Mocktails après mise à jour disponibilité:', this.mocktails.map(m => ({ name: m.name, available: m.available })));
         this.filterMocktails();
+
       },
       error: (error) => {
         console.error('Erreur lors du chargement des mocktails:', error);
@@ -84,7 +109,6 @@ export class GestionMocktailsComponent implements OnInit {
       }
     });
   }
-
   loadIngredients() {
     this.mocktailService.getAllIngredients().subscribe({
       next: (data) => {
@@ -356,5 +380,7 @@ export class GestionMocktailsComponent implements OnInit {
       });
     }
   }
+
+
 
 }
