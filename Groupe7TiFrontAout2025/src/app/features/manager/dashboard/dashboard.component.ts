@@ -370,6 +370,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
             };
           });
 
+        // ✅ Logs utiles
+        console.log('📦 Ingrédients reçus :', ingredients.map(i => ({
+          name: i.name,
+          quantity: i.quantity,
+          threshold: i.restock_threshold,
+          status: this.getStockStatus(i.quantity, i.restock_threshold)
+        })));
+
+        console.log('📊 Statistiques ingrédients :', {
+          total: ingredients.length,
+          good,
+          warning,
+          critical
+        });
+
+        console.log('🧾 Carte mise à jour (gestion-ingredients) :', ingredientCard);
+
         // Log des alertes pour vérification
         console.log('🔔 Alertes actives:', this.activeAlerts);
       },

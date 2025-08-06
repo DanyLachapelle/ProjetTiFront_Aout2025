@@ -77,7 +77,7 @@
           </div>
           <div class="menu-col menu-col-right">
             <div class="menu-card"
-                 *ngFor="let item of menuItems.slice(2,3)"
+                 *ngFor="let item of menuItems.slice(1,2)"
                  [class]="getCardColorClass(item.color)"
                  (click)="navigateTo(item.route)">
               <div class="menu-card-header">
@@ -110,7 +110,7 @@
         <!-- Second row: third card centered -->
         <div class="menu-col menu-col-center">
           <div class="menu-card"
-               *ngFor="let item of menuItems.slice(1,2)"
+               *ngFor="let item of menuItems.slice(2,3)"
                [class]="getCardColorClass(item.color)"
                (click)="navigateTo(item.route)">
             <div class="menu-card-header">
