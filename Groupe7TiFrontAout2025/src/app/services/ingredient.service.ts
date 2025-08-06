@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {Observable} from 'rxjs';
 
+
 export interface DeleteIngredientOutput {
   success: boolean;
   message: string;
@@ -65,5 +66,10 @@ export class IngredientService {
     );
   }
 
-
+  DecreaseQuantity(id: number, quantity: number): Observable<{ success: boolean; message: string }> {
+    return this._http.put<{ success: boolean; message: string }>(
+      `http://localhost:5201/api/ingredients/decreaseQuantity/${id}`,
+       quantity
+    );
+  }
 }

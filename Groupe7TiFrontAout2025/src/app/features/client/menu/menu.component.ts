@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { SessionService, SessionData } from '../../../services/session.service';
 import { OrderTrackingService } from '../../../services/order-tracking.service';
 import { Order, OrderItem as TrackingOrderItem, OrderStatus } from '../../../models/order';
+import {IngredientService} from '../../../services/ingredient.service';
 
 
 interface Mocktail {
@@ -176,7 +177,8 @@ export class MenuComponent implements OnInit {
     private router: Router,
     private sessionService: SessionService,
     private orderTrackingService: OrderTrackingService,
-    private saleService: SaleService
+    private saleService: SaleService,
+    private ingredientService: IngredientService
   ) {}
 
   // ngOnInit() {
@@ -448,11 +450,10 @@ export class MenuComponent implements OnInit {
     if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
 
     const tableNumber = this.getTableNumber();
-    // Affiche une alerte de traitement du paiement
     alert(`Paiement de ${this.getOrderTotal().toFixed(2)} € en cours...`);
 
     setTimeout(() => {
-      this.saleService.createSale({tableNumber}).subscribe({
+      this.saleService.createSale({ tableNumber }).subscribe({
         next: sale => {
           const saleId = sale.id;
 
@@ -464,14 +465,48 @@ export class MenuComponent implements OnInit {
             }).toPromise()
           );
 
-          Promise.all(itemRequests).then(() => {
-            alert('Paiement réussi ! Commande enregistrée.');
-            this.orderList = [];
-            this.saveCartToStorage();
-            this.closeFullOrderModal();
-          }).catch(err => {
-            console.error('Erreur en ajoutant les items :', err);
-            alert('Erreur pendant l’enregistrement de la commande.');
+          // 👉 Nouvelle logique pour calculer les ingrédients consommés
+          const ingredientConsumptionMap: { [name: string]: number } = {};
+
+          this.orderList.forEach(orderItem => {
+            orderItem.mocktail.ingredients.forEach(ingredient => {
+              const totalUsed = ingredient.quantity * orderItem.quantity;
+              if (ingredientConsumptionMap[ingredient.name]) {
+                ingredientConsumptionMap[ingredient.name] += totalUsed;
+              } else {
+                ingredientConsumptionMap[ingredient.name] = totalUsed;
+              }
+            });
+          });
+
+          // 👉 Récupérer les ingrédients pour avoir leur ID
+          this.ingredientService.GetAll().subscribe(response => {
+            const ingredientsList = response.ingredients; // <-- ici on récupère le tableau
+            const updateRequests = [];
+
+            for (const name in ingredientConsumptionMap) {
+              const ingredient = ingredientsList.find((i: { name: string; }) => i.name === name);
+              if (ingredient) {
+                const consumedQty = ingredientConsumptionMap[name];
+                updateRequests.push(
+                  this.ingredientService
+                    .DecreaseQuantity(ingredient.id, consumedQty)
+                    .toPromise()
+                );
+              } else {
+                console.warn(`Ingrédient non trouvé : ${name}`);
+              }
+            }
+            // 👉 Attendre que tous les updates soient faits
+            Promise.all([...itemRequests, ...updateRequests]).then(() => {
+              alert('Paiement réussi ! Commande enregistrée.');
+              this.orderList = [];
+              this.saveCartToStorage();
+              this.closeFullOrderModal();
+            }).catch(err => {
+              console.error('Erreur lors du traitement :', err);
+              alert('Erreur pendant l’enregistrement de la commande ou la mise à jour du stock.');
+            });
           });
         },
         error: err => {
@@ -479,8 +514,9 @@ export class MenuComponent implements OnInit {
           alert('Impossible de créer la vente.');
         }
       });
-    }, 2000); // Délai de 2 secondes simulant un paiement
+    }, 2000);
   }
+
 
   // Méthodes pour le suivi de commande
   allIngredients: string[] = [];
