@@ -412,9 +412,9 @@ export class GestionSalesComponent implements OnInit {
   }
 
   getTotalMocktailsSold() {
-    if (!this.sales) return 0; // ou [] pour un tableau vide
+    if (!this.filteredSales) return 0; // ou [] pour un tableau vide
 
-    return this.sales.reduce((acc, sale) => acc + (sale.items?.length || 0), 0);
+    return this.filteredSales.reduce((acc, sale) => acc + (sale.items?.length || 0), 0);
   }
 
   getAverageOrderValue(): number {
