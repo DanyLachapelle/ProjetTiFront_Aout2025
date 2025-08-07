@@ -23,11 +23,18 @@
         </div>
         <div class="stat-item">
           <span class="stat-label">Orders</span>
-          <span class="stat-value">{{ sales.length }}</span>
+          <span class="stat-value">{{ filteredSales.length   }}</span>
         </div>
       </div>
     </div>
   </header>
+
+  <div style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; z-index: 1000; border: 1px solid red;">
+    <h3>Debug Info</h3>
+    <p>Total Orders: {{ totalAllOrders }}</p>
+    <p>Sales Length: {{ sales?.length }}</p>
+    <p>Filtered Length: {{ filteredSales?.length }}</p>
+  </div>
 
   <!-- Filtres et recherche -->
   <section class="filters-section">
@@ -115,7 +122,7 @@
         <div class="stat-icon">📦</div>
         <div class="stat-content">
           <h3>Orders</h3>
-          <p class="stat-amount">{{ getFilteredSales().length }}</p>
+          <p class="stat-amount">{{ filteredSales.length  }}</p>
           <span class="stat-period">{{ getFilterPeriodText() }}</span>
         </div>
       </div>

@@ -269,19 +269,21 @@ export class GestionSalesComponent implements OnInit {
     this.updateKPIs();
   }
 
+  totalAllOrders: number = 0;
+
+// Modifiez loadSales()
   loadSales(): void {
     this.saleService.getAllSales().subscribe({
       next: (response) => {
-        console.log('Données des ventes reçues:', response.sales)
         this.sales = response.sales;
+        this.totalAllOrders = this.sales.length; // Total TOUTES pages
         this.filteredSales = [...this.sales];
         this.applyFilters();
-        if (this.displayMode === 'statistics') {
-          this.updateCharts();
-          this.updateKPIs();
-        }
+
+        console.log('Total commandes:', this.totalAllOrders); // Vérifiez dans la console
+        console.log('Debug - Sales array:', this.sales);
       },
-      error: (err) => console.error('Error loading sales:', err)
+      error: (err) => console.error('Erreur chargement:', err)
     });
   }
 
