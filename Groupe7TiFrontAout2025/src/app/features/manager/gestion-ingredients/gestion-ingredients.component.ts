@@ -103,7 +103,7 @@ export class GestionIngredientsComponent implements OnInit {
     type: 'liquide' as 'liquide' | 'solide',
     stock: 0,
     limit: 1,
-    allergen: undefined
+    allergen: 'none' // Valeur par défaut
   };
 
   editLimitIngredient: Ingredient | null = null;
@@ -337,13 +337,13 @@ export class GestionIngredientsComponent implements OnInit {
 
   // Modal methods - Add ingredient
   openAddIngredientModal(): void {
-    this.  newIngredientForm = {
-    name: '',
-    type: 'liquide',
-    stock: 0,
-    limit: 1,
-    allergen: undefined // ou null si le backend accepte
-  };
+    this.newIngredientForm = {
+      name: '',
+      type: 'liquide',
+      stock: 0,
+      limit: 1,
+      allergen: 'none' // Toujours par défaut "none"
+    };
     this.showAddIngredientModal = true;
   }
 
@@ -377,8 +377,8 @@ export class GestionIngredientsComponent implements OnInit {
       name: this.newIngredientForm.name,
       quantity: Number(this.newIngredientForm.stock),
       restock_threshold: Number(this.newIngredientForm.limit),
-      unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g',
-      allergen: this.newIngredientForm.allergen || '' // ou null si backend accepte
+      unit: this.newIngredientForm.type === 'liquide' ? 'cl' : 'g',
+      allergen: this.newIngredientForm.allergen || 'none' // S'assurer que ce ne soit jamais vide
     };
 
 
