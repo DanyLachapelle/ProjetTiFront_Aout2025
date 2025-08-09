@@ -273,17 +273,38 @@ export class GestionSalesComponent implements OnInit {
 
 // Modifiez loadSales()
   loadSales(): void {
+    console.log('🔄 Chargement des ventes...');
     this.saleService.getAllSales().subscribe({
       next: (response) => {
-        this.sales = response.sales;
+        console.log('✅ Réponse getAllSales:', response);
+        console.log('✅ Type de response:', typeof response);
+        console.log('✅ Keys de response:', Object.keys(response));
+        
+        // Le backend renvoie { Sales: [...] } avec S majuscule
+        const backendSales = response.Sales || response.sales || [];
+        
+        // Transformer les données du backend vers le format frontend
+        this.sales = backendSales.map((sale: any) => ({
+          saleDate: sale.SaleDate || sale.saleDate,
+          totalAmount: sale.TotalAmount || sale.totalAmount,
+          items: (sale.Items || sale.items || []).map((item: any) => ({
+            mocktailName: item.MocktailName || item.mocktailName,
+            quantity: item.Quantity || item.quantity,
+            price: item.UnitPrice || item.unitPrice
+          }))
+        }));
+        
         this.totalAllOrders = this.sales.length; // Total TOUTES pages
         this.filteredSales = [...this.sales];
         this.applyFilters();
 
-        console.log('Total commandes:', this.totalAllOrders); // Vérifiez dans la console
-        console.log('Debug - Sales array:', this.sales);
+        console.log('📊 Total commandes:', this.totalAllOrders);
+        console.log('📋 Sales array:', this.sales);
       },
-      error: (err) => console.error('Erreur chargement:', err)
+      error: (err) => {
+        console.error('❌ Erreur chargement ventes:', err);
+        console.error('❌ Détails:', err.error);
+      }
     });
   }
 
@@ -499,10 +520,38 @@ export class GestionSalesComponent implements OnInit {
 
 
   refreshData(): void {
-    // Simulate data refresh
+    // Recharger les données depuis le serveur
+    this.loadSales();
     this.applyFilters();
     this.currentPage = 1;
     this.expandedSaleIndex = null;
+  }
+
+  // Méthode de test pour créer une vente fictive
+  testCreateSale(): void {
+    console.log('🧪 Test de création de vente...');
+    const testSaleData = {
+      tableNumber: 'TEST-T01',
+      items: [
+        {
+          mocktailId: 1,
+          quantity: 2,
+          unitPrice: 8.50
+        }
+      ]
+    };
+
+    this.saleService.createSale(testSaleData).subscribe({
+      next: (response) => {
+        console.log('✅ Vente test créée:', response);
+        alert('Vente test créée ! Rechargement des données...');
+        this.refreshData();
+      },
+      error: (err) => {
+        console.error('❌ Erreur création vente test:', err);
+        alert('Erreur lors de la création de la vente test. Voir console.');
+      }
+    });
   }
 
   // Mise à jour des graphiques

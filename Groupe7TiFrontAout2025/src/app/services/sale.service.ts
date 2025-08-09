@@ -28,7 +28,7 @@ export class SaleService {
   //   });
   // }
 
-  createSale(data: { tableNumber: string }) {
+  createSale(data: { tableNumber: string; items?: any[] }) {
     return this._http.post<any>('http://localhost:5201/api/SaleCommand/CreateSale', data);
   }
 
@@ -36,8 +36,9 @@ export class SaleService {
     return this._http.post('http://localhost:5201/api/SaleItemCommand/AddSaleItem', payload);
   }
 
-  getAllSales(): Observable<{ sales: Sale[] }> {
-    return this._http.get<{ sales: Sale[] }>(`${this.baseUrl}/SaleQuery/GetAllSales`);
+  getAllSales(): Observable<any> {
+    console.log('🌐 Appel getAllSales vers:', `${this.baseUrl}/SaleQuery/GetAllSales`);
+    return this._http.get<any>(`${this.baseUrl}/SaleQuery/GetAllSales`);
   }
 
 }

@@ -498,25 +498,41 @@ export class MenuComponent implements OnInit {
 
   // --- Payment management ---
   onPay() {
-    if (this.orderList.length === 0 || this.getOrderTotal() <= 0) return;
+    console.log('🎯 onPay() appelée !', {
+      orderListLength: this.orderList.length,
+      total: this.getOrderTotal(),
+      orderList: this.orderList
+    });
+
+    if (this.orderList.length === 0 || this.getOrderTotal() <= 0) {
+      console.log('❌ Commande vide ou total invalide');
+      return;
+    }
 
     const tableNumber = this.getTableNumber();
+    console.log('📍 Table number:', tableNumber);
     alert(`Paiement de ${this.getOrderTotal().toFixed(2)} € en cours...`);
 
     setTimeout(() => {
-      this.saleService.createSale({ tableNumber }).subscribe({
+      // 🔧 Créer la vente avec tous les items directement
+      const saleData = {
+        tableNumber,
+        items: this.orderList.map(item => ({
+          mocktailId: item.mocktail.id,
+          quantity: item.quantity,
+          unitPrice: item.mocktail.price
+        }))
+      };
+
+      console.log('📦 SaleData à envoyer:', saleData);
+
+      this.saleService.createSale(saleData).subscribe({
         next: sale => {
+          console.log('✅ Réponse createSale reçue:', sale);
           const saleId = sale.id;
+          console.log('📝 SaleId:', saleId);
 
-          const itemRequests = this.orderList.map(item =>
-            this.saleService.addItemToSale({
-              saleId: saleId,
-              mocktailId: item.mocktail.id,
-              quantity: item.quantity
-            }).toPromise()
-          );
-
-          // 👉 Nouvelle logique pour calculer les ingrédients consommés
+          // 👉 Maintenant calculer les ingrédients consommés
           const ingredientConsumptionMap: { [name: string]: number } = {};
 
           this.orderList.forEach(orderItem => {
@@ -530,9 +546,9 @@ export class MenuComponent implements OnInit {
             });
           });
 
-          // 👉 Récupérer les ingrédients pour avoir leur ID
+          // 👉 Récupérer les ingrédients pour avoir leur ID et mettre à jour le stock
           this.ingredientService.GetAll().subscribe(response => {
-            const ingredientsList = response.ingredients; // <-- ici on récupère le tableau
+            const ingredientsList = response.ingredients;
             const updateRequests = [];
 
             for (const name in ingredientConsumptionMap) {
@@ -548,21 +564,24 @@ export class MenuComponent implements OnInit {
                 console.warn(`Ingrédient non trouvé : ${name}`);
               }
             }
-            // 👉 Attendre que tous les updates soient faits
-            Promise.all([...itemRequests, ...updateRequests]).then(() => {
+            
+            // 👉 Attendre que toutes les mises à jour du stock soient faites
+            Promise.all(updateRequests).then(() => {
               alert('Paiement réussi ! Commande enregistrée.');
               this.orderList = [];
               this.saveCartToStorage();
               this.closeFullOrderModal();
             }).catch(err => {
-              console.error('Erreur lors du traitement :', err);
-              alert('Erreur pendant l’enregistrement de la commande ou la mise à jour du stock.');
+              console.error('Erreur lors de la mise à jour du stock :', err);
+              alert('Erreur pendant la mise à jour du stock.');
             });
           });
         },
         error: err => {
-          console.error('Erreur création vente :', err);
-          alert('Impossible de créer la vente.');
+          console.error('❌ ERREUR création vente :', err);
+          console.error('❌ Détails erreur:', err.error);
+          console.error('❌ Status:', err.status);
+          alert('Impossible de créer la vente. Voir console pour détails.');
         }
       });
     }, 2000);
