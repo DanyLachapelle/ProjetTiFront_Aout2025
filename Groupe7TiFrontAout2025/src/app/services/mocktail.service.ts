@@ -61,30 +61,30 @@ export class MocktailService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Mocktail[]> {
-    return this.http.get<Mocktail[]>(`http://localhost:5201/api/MocktailQuery/getAllMocktails`);
+    return this.http.get<Mocktail[]>(`${environment.apiUrl}/MocktailQuery/getAllMocktails`);
   }
   getById(id: number): Observable<Mocktail> {
     return this.http.get<Mocktail>(`${this.apiUrl}/${id}`);
   }
 
   create(mocktail: CreateMocktailRequest): Observable<Mocktail> {
-    return this.http.post<Mocktail>(`http://localhost:5201/api/MocktailCommand/CreateMocktail`, mocktail);
+    return this.http.post<Mocktail>(`${environment.apiUrl}/MocktailCommand/CreateMocktail`, mocktail);
   }
 
 
   update(id: number, mocktail: UpdateMocktailRequest): Observable<Mocktail> {
-    return this.http.put<Mocktail>(`http://localhost:5201/api/MocktailCommand/UpdateMocktail/${id}`, mocktail);
+    return this.http.put<Mocktail>(`${environment.apiUrl}/MocktailCommand/UpdateMocktail/${id}`, mocktail);
   }
 
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`http://localhost:5201/api/MocktailCommand/DeleteMocktail/${id}`);
+    return this.http.delete<void>(`${environment.apiUrl}/MocktailCommand/DeleteMocktail/${id}`);
   }
 
 
   // Nouvelle méthode pour récupérer tous les ingrédients
   getAllIngredients(): Observable<Ingredient[]> {
-    return this.http.get<{ ingredients: Ingredient[] }>(`${environment.apiUrl.replace('/mocktail', '')}/ingredients/getAllIngredients`)
+    return this.http.get<{ ingredients: Ingredient[] }>(`${environment.ingredientApiUrl}/getAllIngredients`)
       .pipe(
         map(response => response.ingredients)
       );

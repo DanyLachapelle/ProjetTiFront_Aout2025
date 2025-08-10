@@ -6,8 +6,8 @@ import {MocktailService} from '../../../services/mocktail.service';
 import {SaleService} from '../../../services/sale.service';
 import { Router } from '@angular/router';
 import { SessionService, SessionData } from '../../../services/session.service';
-import { OrderTrackingService } from '../../../services/order-tracking.service';
-import { Order, OrderItem as TrackingOrderItem, OrderStatus } from '../../../models/order';
+
+
 import {IngredientService} from '../../../services/ingredient.service';
 
 
@@ -171,14 +171,13 @@ export class MenuComponent implements OnInit {
   }
 
   // Suivi de commande
-  currentOrder: Order | null = null;
-  hasActiveOrder = false;
+
 
   constructor(
     private mocktailService: MocktailService,
     private router: Router,
     private sessionService: SessionService,
-    private orderTrackingService: OrderTrackingService,
+
     private saleService: SaleService,
     private ingredientService: IngredientService
   ) {}
@@ -216,8 +215,7 @@ export class MenuComponent implements OnInit {
     // Load cart from localStorage if available
     this.loadCartFromStorage();
 
-    // Vérifier s'il y a une commande active
-    this.checkActiveOrder();
+
 
     this.loadAvailableIngredients();
   }
@@ -532,6 +530,10 @@ export class MenuComponent implements OnInit {
           const saleId = sale.id;
           console.log('📝 SaleId:', saleId);
 
+          // Sauvegarder l'ID de la commande active pour le suivi
+          localStorage.setItem('activeOrderId', saleId.toString());
+          console.log('💾 Commande active sauvegardée:', saleId);
+
           // 👉 Maintenant calculer les ingrédients consommés
           const ingredientConsumptionMap: { [name: string]: number } = {};
 
@@ -595,18 +597,9 @@ export class MenuComponent implements OnInit {
   filteredMocktails: Mocktail[] = [];
   expandedMocktailId: any;
 
-  checkActiveOrder() {
-    this.orderTrackingService.getCurrentUserOrder().subscribe(order => {
-      this.currentOrder = order;
-      this.hasActiveOrder = order !== null &&
-        order.status !== OrderStatus.LIVRE &&
-        order.status !== OrderStatus.ANNULE;
-    });
-  }
 
-  goToOrderTracking() {
-    this.router.navigate(['/order-tracking']);
-  }
+
+
 
   clearAllergenFilters() {
     this.excludedIngredients = [];
@@ -679,7 +672,7 @@ export class MenuComponent implements OnInit {
     return 'good';
   }
 
-// Nouvelle fonction pour mettre à jour la disponibilité des mocktails
+  // Nouvelle fonction pour mettre à jour la disponibilité des mocktails
   updateMocktailAvailability(ingredientsStock: { [id: string]: number }, threshold: number = 5) {
     this.mocktails.forEach(mocktail => {
       // Pour chaque ingrédient du mocktail, on récupère la quantité en stock
@@ -708,5 +701,18 @@ export class MenuComponent implements OnInit {
 
     // Appliquer filtrage après update
     this.filterMocktails();
+  }
+
+  // Méthode pour la navigation vers le suivi de commande
+  goToOrderTracking() {
+    this.router.navigate(['/order-tracking']);
+  }
+
+
+
+  // Vérifier s'il y a une commande active
+  hasActiveOrder(): boolean {
+    const activeOrderId = localStorage.getItem('activeOrderId');
+    return activeOrderId !== null;
   }
 }

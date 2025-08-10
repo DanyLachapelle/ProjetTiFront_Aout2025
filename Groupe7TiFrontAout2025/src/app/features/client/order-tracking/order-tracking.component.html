@@ -1,192 +1,219 @@
-<div class="order-tracking-container">
-  <!-- Header -->
-  <div class="header">
-    <button class="back-button" (click)="backToMenu()">
-      <span class="back-icon">←</span>
-      Retour au menu
-    </button>
-    <h1>Suivi de Commande</h1>
-    <div class="sync-indicator" *ngIf="isSyncing">
-      <span class="sync-icon spinning">🔄</span>
-      <span class="sync-text">Synchronisation...</span>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="loading">
-    <div class="loading-spinner"></div>
-    <p>Chargement de vos commandes...</p>
-  </div>
-
-  <!-- Error State -->
-  <div class="error-state" *ngIf="error && !loading">
-    <div class="error-icon">⚠️</div>
-    <h2>Erreur</h2>
-    <p>{{ errorMessage }}</p>
-    <button class="retry-button" (click)="refreshOrder()">
-      Réessayer
-    </button>
-  </div>
-
-  <!-- No Order State -->
-  <div class="no-order-state" *ngIf="currentOrders.length === 0 && !error && !loading">
-    <div class="no-order-icon">🍹</div>
-    <h2>Aucune commande active</h2>
-    <p>Vous n'avez pas de commande en cours.</p>
-    <button class="menu-button" (click)="backToMenu()">
-      Commander maintenant
-    </button>
-  </div>
-
-  <!-- Orders Status -->
-  <div class="orders-container" *ngIf="currentOrders.length > 0 && !error && !loading">
-    <div class="order-card" *ngFor="let order of currentOrders; trackBy: trackByOrderId">
-      <div class="status-card">
-        <div class="status-header">
-          <span class="status-icon" [style.color]="getStatusInfo(order.status).color">
-            {{ getStatusInfo(order.status).icon }}
-          </span>
-          <h2>{{ getStatusInfo(order.status).label }}</h2>
-        </div>
-        
-        <p class="status-description">{{ getStatusInfo(order.status).description }}</p>
-        
-        <!-- Progress Bar -->
-        <div class="progress-container">
-          <div class="progress-bar">
-            <div class="progress-fill" 
-                 [style.width.%]="getOrderProgress(order.status)"
-                 [style.background-color]="getStatusInfo(order.status).color">
-            </div>
-          </div>
-          <span class="progress-text">{{ getOrderProgress(order.status) }}%</span>
-        </div>
-
-        <!-- Status Icons on one line -->
-        <div class="status-icons-line">
-          <div class="status-icon-item" 
-               [class.active]="getOrderProgress(order.status) >= 25"
-               [class.completed]="getOrderProgress(order.status) > 25">
-            <span class="icon">⏳</span>
-            <span class="label">En attente</span>
-          </div>
-          <div class="status-icon-item" 
-               [class.active]="getOrderProgress(order.status) >= 50"
-               [class.completed]="getOrderProgress(order.status) > 50">
-            <span class="icon">🍹</span>
-            <span class="label">En préparation</span>
-          </div>
-          <div class="status-icon-item" 
-               [class.active]="getOrderProgress(order.status) >= 75"
-               [class.completed]="getOrderProgress(order.status) > 75">
-            <span class="icon">✅</span>
-            <span class="label">Prêt</span>
-          </div>
-          <div class="status-icon-item" 
-               [class.active]="getOrderProgress(order.status) >= 100"
-               [class.completed]="getOrderProgress(order.status) >= 100">
-            <span class="icon">🎉</span>
-            <span class="label">Livré</span>
-          </div>
-        </div>
-
-        <!-- Estimated Time -->
-        <div class="estimated-time">
-          <span class="time-icon">⏱️</span>
-          <span class="time-text">Temps estimé: {{ getEstimatedTimeRemaining(order) }}</span>
-        </div>
-
-        <!-- Encouraging Message -->
-        <div class="encouraging-message">
-          <p>{{ getEncouragingMessage(order) }}</p>
-        </div>
+<!-- ===== PAGE SUIVI DE COMMANDE CLIENT ===== -->
+<div class="tracking-container">
+  <!-- Header avec session info -->
+  <header class="tracking-header">
+    <div class="session-info">
+      <div class="table-info">
+        <span class="table-label">Table</span>
+        <span class="table-number">{{ getTableNumber() }}</span>
       </div>
-
-      <!-- Order Summary -->
-      <div class="order-summary">
-        <div class="summary-header">
-          <h3>Détails de la commande</h3>
-          <div class="order-info">
-            <span class="order-id">#{{ order.id }}</span>
-            <span class="order-date">{{ formatDate(order.createdAt) }}</span>
-          </div>
-        </div>
-
-        <div class="order-items">
-          <div class="item" *ngFor="let item of order.items">
-            <div class="item-info">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-quantity">x{{ item.quantity }}</span>
-            </div>
-            <span class="item-price">{{ formatPrice(item.totalPrice) }}</span>
-          </div>
-        </div>
-
-        <div class="order-total">
-          <span class="total-label">Total</span>
-          <span class="total-amount">{{ formatPrice(order.totalAmount) }}</span>
-        </div>
-
-        <div class="order-notes" *ngIf="order.notes">
-          <h4>Notes</h4>
-          <p>{{ order.notes }}</p>
-        </div>
+      <div class="timer-info" [class.session-warning]="!hasValidSession()">
+        <span class="timer-icon">⏰</span>
+        <span class="timer-text">{{ getFormattedRemainingTime() }}</span>
+        <span *ngIf="!hasValidSession()" class="session-warning-text">Session expirée</span>
       </div>
     </div>
-  </div>
+    
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshOrder()" title="Actualiser">
+        🔄
+      </button>
+      <button class="btn-back" (click)="goBackToMenu()" title="Retour au menu">
+        ← Menu
+      </button>
+    </div>
+  </header>
 
-  <!-- Single Action Button for all orders -->
-  <div class="action-buttons" *ngIf="currentOrders.length > 0 && !error && !loading">
-    <button class="refresh-button" (click)="refreshOrder()" [disabled]="loading">
-      <span class="refresh-icon">🔄</span>
-      Actualiser
-    </button>
-  </div>
+  <!-- Contenu principal -->
+  <main class="tracking-main">
+    <!-- État de chargement -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement de votre commande...</p>
+    </div>
 
-  <!-- Historique des commandes -->
-  <div class="history-section" *ngIf="!error && !loading">
-    <div class="history-header">
-      <h2>Historique des commandes</h2>
-      <button class="history-toggle" (click)="toggleHistory()">
-        <span class="toggle-icon">{{ showHistory ? '▼' : '▶' }}</span>
-        {{ showHistory ? 'Masquer' : 'Afficher' }} l'historique
+    <!-- État d'erreur -->
+    <div *ngIf="error && !isLoading" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h2>Erreur</h2>
+      <p>{{ error }}</p>
+      <button class="btn-primary" (click)="goBackToMenu()">
+        Retour au menu
       </button>
     </div>
 
-    <div class="history-content" *ngIf="showHistory">
-      <div class="history-empty" *ngIf="orderHistory.length === 0">
-        <div class="empty-icon">📋</div>
-        <p>Aucune commande livrée dans l'historique</p>
+    <!-- Contenu de suivi -->
+    <div *ngIf="order && !isLoading" class="tracking-content">
+      <!-- En-tête de la commande -->
+      <div class="order-header">
+        <h1>Suivi de votre commande</h1>
+        <div class="order-meta">
+          <span class="order-id">Commande #{{ order.id }}</span>
+          <span class="order-date">{{ getFormattedDate(order.saleDate) }}</span>
+        </div>
+        <div class="last-update">
+          Dernière mise à jour : {{ getLastUpdateTime() }}
+        </div>
       </div>
 
-      <div class="history-list" *ngIf="orderHistory.length > 0">
-        <div class="history-item" *ngFor="let order of orderHistory; trackBy: trackByOrderId">
-          <div class="history-card">
-            <div class="history-header-info">
-              <div class="history-order-id">#{{ order.id.slice(-8) }}</div>
-              <div class="history-date">{{ formatDate(order.updatedAt) }}</div>
+      <!-- Statut actuel -->
+      <div class="current-status" *ngIf="getCurrentStatus()">
+        <div class="status-card" [style.border-color]="getCurrentStatus()?.color">
+          <div class="status-icon" [style.color]="getCurrentStatus()?.color">
+            {{ getCurrentStatus()?.icon }}
+          </div>
+          <div class="status-info">
+            <h2 class="status-label">{{ getCurrentStatus()?.label }}</h2>
+            <p class="status-message">{{ getCurrentStatus()?.message }}</p>
+            <div class="estimated-time">
+              <span class="time-icon">⏱️</span>
+              <span class="time-text">{{ getEstimatedTimeRemaining() }}</span>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div class="history-items">
-              <div class="history-item-detail" *ngFor="let item of order.items">
-                <span class="item-name">{{ item.name }}</span>
-                <span class="item-quantity">×{{ item.quantity }}</span>
-                <span class="item-price">{{ formatPrice(item.totalPrice) }}</span>
+      <!-- Barre de progression -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <h3>Progression de votre commande</h3>
+          <span class="progress-percentage">{{ getProgressPercentage() }}%</span>
+        </div>
+        
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+        </div>
+
+        <!-- Timeline des étapes -->
+        <div class="timeline">
+          <div class="timeline-step" 
+               *ngFor="let status of ['PENDING', 'IN_PREPARATION', 'READY', 'DELIVERED']; let i = index"
+               [class.active]="getCurrentStatus()?.status === status"
+               [class.completed]="getProgressPercentage() > STATUS_CONFIG[status].progress">
+            <div class="step-icon" [style.background-color]="STATUS_CONFIG[status].color">
+              {{ STATUS_CONFIG[status].icon }}
+            </div>
+            <div class="step-label">{{ STATUS_CONFIG[status].label }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détails de la commande -->
+      <div class="order-details">
+        <h3>Détails de votre commande</h3>
+        
+                 <div class="order-items">
+           <div *ngIf="order.items.length === 0" class="order-item empty">
+             <div class="item-info">
+               <span class="item-name">Aucun détail disponible</span>
+             </div>
+           </div>
+           <div class="order-item" *ngFor="let item of order.items">
+             <div class="item-info">
+               <span class="item-name">{{ item.mocktailName }}</span>
+               <span class="item-quantity">x{{ item.quantity }}</span>
+             </div>
+             <div class="item-price">
+               <span class="unit-price">{{ item.unitPrice.toFixed(2) }}€</span>
+               <span class="total-price">{{ item.itemTotal.toFixed(2) }}€</span>
+             </div>
+           </div>
+         </div>
+
+        <div class="order-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{ order.totalAmount.toFixed(2) }}€</span>
+        </div>
+      </div>
+
+      <!-- Messages d'encouragement -->
+      <div class="encouragement-message" *ngIf="getCurrentStatus()">
+        <div class="message-icon">💬</div>
+        <p>{{ getCurrentStatus()?.message }}</p>
+      </div>
+
+      <!-- Section Historique des Commandes -->
+      <div class="history-section">
+        <div class="history-header">
+          <h3>Historique de vos commandes</h3>
+          <button class="btn-refresh-history" (click)="refreshHistory()" title="Actualiser l'historique">
+            🔄 Actualiser
+          </button>
+        </div>
+
+        <!-- État de chargement de l'historique -->
+        <div *ngIf="isLoadingHistory" class="history-loading">
+          <div class="loading-spinner-small"></div>
+          <p>Chargement de l'historique...</p>
+        </div>
+
+        <!-- État d'erreur de l'historique -->
+        <div *ngIf="historyError && !isLoadingHistory" class="history-error">
+          <p>{{ historyError }}</p>
+          <button class="btn-retry" (click)="refreshHistory()">Réessayer</button>
+        </div>
+
+        <!-- Liste de l'historique -->
+        <div *ngIf="!isLoadingHistory && !historyError" class="history-content">
+          <!-- État vide -->
+          <div *ngIf="orderHistory.length === 0" class="history-empty">
+            <div class="empty-icon">📋</div>
+            <p>Aucune autre commande trouvée</p>
+          </div>
+
+          <!-- Liste des commandes -->
+          <div *ngIf="orderHistory.length > 0" class="history-list">
+            <div *ngFor="let historyOrder of orderHistory" class="history-order-card">
+              <!-- En-tête de la commande historique -->
+              <div class="history-order-header">
+                <div class="history-order-info">
+                  <h4 class="history-order-number">Commande #{{ historyOrder.id }}</h4>
+                  <span class="history-order-date">{{ getFormattedDate(historyOrder.saleDate) }}</span>
+                </div>
+                <div class="history-order-status">
+                  <div 
+                    class="history-status-badge" 
+                    [style.background-color]="getStatusConfig(historyOrder.status).color">
+                    <span class="history-status-icon">{{ getStatusConfig(historyOrder.status).icon }}</span>
+                    <span class="history-status-label">{{ getStatusConfig(historyOrder.status).label }}</span>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div class="history-total">
-              <span class="total-label">Total</span>
-              <span class="total-amount">{{ formatPrice(order.totalAmount) }}</span>
-            </div>
+              <!-- Résumé de la commande historique -->
+              <div class="history-order-summary">
+                <div class="history-summary-item">
+                  <span class="history-summary-label">Articles</span>
+                  <span class="history-summary-value">{{ getItemsSummary(historyOrder.items) }}</span>
+                </div>
+                <div class="history-summary-item">
+                  <span class="history-summary-label">Total</span>
+                  <span class="history-summary-value">{{ historyOrder.totalAmount.toFixed(2) }}€</span>
+                </div>
+              </div>
 
-            <div class="history-status">
-              <span class="status-icon">✅</span>
-              <span class="status-text">Livré</span>
+              <!-- Barre de progression de la commande historique -->
+              <div class="history-order-progress">
+                <div class="history-progress-bar">
+                  <div 
+                    class="history-progress-fill" 
+                    [style.width.%]="getStatusConfig(historyOrder.status).progress"
+                    [style.background-color]="getStatusConfig(historyOrder.status).color">
+                  </div>
+                </div>
+                <span class="history-progress-text">{{ getStatusConfig(historyOrder.status).progress }}% terminé</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </main>
+
+  <!-- Région live pour les lecteurs d'écran -->
+  <div class="sr-only" aria-live="polite" aria-atomic="true">
+    <span *ngIf="getCurrentStatus()">
+      Statut de la commande : {{ getCurrentStatus()?.label }}
+    </span>
   </div>
-</div> 
+</div>

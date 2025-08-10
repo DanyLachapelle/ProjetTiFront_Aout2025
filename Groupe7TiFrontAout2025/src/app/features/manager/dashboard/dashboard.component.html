@@ -1,194 +1,240 @@
-<div class="container">
-  <!-- Dashboard header -->
-  <header class="header">
-    <div class="header-left">
-      <div class="header-time">
-        <div class="current-time">{{ getCurrentTime() }}</div>
-        <div class="current-date">{{ getCurrentDate() }}</div>
+<!-- ===== DASHBOARD MANAGER PROFESSIONNEL ===== -->
+<div class="dashboard-container">
+  <!-- Header moderne avec navigation -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <!-- Logo et titre -->
+      <div class="brand-section">
+        <div class="logo-container">
+          <img src="assets/Helha_Fresh.png" alt="Helha Fresh" class="brand-logo">
+          <div class="logo-glow"></div>
+        </div>
+        <div class="brand-info">
+          <h1 class="brand-title">Helha Fresh</h1>
+          <p class="brand-subtitle">Dashboard Manager</p>
+        </div>
       </div>
-    </div>
 
-    <div class="header-center">
-      <div class="logo-section">
-        <img src="assets/favicon.png" alt="Logo Helha Fresh" class="logo-img" />
-        <h1>Helha Fresh</h1>
+      <!-- Informations temps réel -->
+      <div class="time-section">
+        <div class="time-display">
+          <div class="current-time">{{ getCurrentTime() }}</div>
+          <div class="current-date">{{ getCurrentDate() }}</div>
+        </div>
+        <div class="time-indicator">
+          <div class="time-dot"></div>
+        </div>
       </div>
-    </div>
 
-    <div class="header-right">
-      <button class="btn btn-icon notification-btn" (click)="showNotifications()" title="Notifications">
-        <span class="notification-icon">🔔</span>
-        <span class="notification-badge" *ngIf="activeAlerts.length > 0">{{ activeAlerts.length }}</span>
-      </button>
+      <!-- Actions utilisateur -->
+      <div class="user-actions">
+        <button class="action-btn notification-btn" (click)="showNotifications()" title="Notifications">
+          <span class="action-icon">🔔</span>
+          <span class="notification-badge" *ngIf="activeAlerts.length > 0">{{ activeAlerts.length }}</span>
+        </button>
 
-      <!-- TEMPORARY DEV BUTTON -->
-      <button class="btn btn-icon dev-menu-btn" (click)="navigateTo('/menu')" title="DEV: Menu Access (to remove)">
-        <span class="dev-menu-icon">🛠️</span>
-      </button>
+        <button class="action-btn settings-btn" (click)="showSettings()" title="Paramètres">
+          <span class="action-icon">⚙️</span>
+        </button>
 
+        <button class="action-btn dev-btn" (click)="navigateTo('/menu')" title="DEV: Accès Menu">
+          <span class="action-icon">🛠️</span>
+        </button>
 
-
-      <button class="btn btn-icon settings-btn" (click)="showSettings()" title="Settings">
-        <span class="settings-icon">⚙️</span>
-      </button>
-
-      <button class="btn btn-outline logout-btn" (click)="logout()">
-        <span class="logout-icon">🚪</span>
-        Logout
-      </button>
+        <button class="logout-btn" (click)="logout()">
+          <span class="logout-icon">🚪</span>
+          <span class="logout-text">Déconnexion</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- Central area with centered background image -->
-  <div class="dashboard-bg-center">
-    <section class="menu-section">
-      <div class="menu-columns">
-        <!-- First row: two cards side by side -->
-        <div class="menu-row">
-          <div class="menu-col menu-col-left">
-            <div class="menu-card"
-                 *ngFor="let item of menuItems.slice(0,1)"
-                 [class]="getCardColorClass(item.color)"
-                 (click)="navigateTo(item.route)">
-              <div class="menu-card-header">
-                <div class="menu-icon">{{ item.icon }}</div>
-                <h3 class="menu-title">{{ item.title }}</h3>
-              </div>
-              <p class="menu-description">{{ item.description }}</p>
-              <div class="menu-stats" *ngIf="item.id === 'gestion-mocktails'">
-                <div class="stat-item">
-                  <span class="stat-number">{{ item.stats.total }}</span>
-                  <span class="stat-text">Total</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number available">{{ item.stats.available }}</span>
-                  <span class="stat-text">Available</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number unavailable">{{ item.stats.unavailable }}</span>
-                  <span class="stat-text">Unavailable</span>
-                </div>
-              </div>
-              <div class="menu-action">
-                <span class="action-text">Access</span>
-                <span class="action-arrow">→</span>
-              </div>
-            </div>
-          </div>
-          <div class="menu-col menu-col-right">
-            <div class="menu-card"
-                 *ngFor="let item of menuItems.slice(1,2)"
-                 [class]="getCardColorClass(item.color)"
-                 (click)="navigateTo(item.route)">
-              <div class="menu-card-header">
-                <div class="menu-icon">{{ item.icon }}</div>
-                <h3 class="menu-title">{{ item.title }}</h3>
-              </div>
-              <p class="menu-description">{{ item.description }}</p>
-              <div class="menu-stats" *ngIf="item.id === 'gestion-sales'">
-                <div class="stat-item">
-                  <span class="stat-number">{{ item.stats.today }}</span>
-                  <span class="stat-text">Today</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number">{{ item.stats.week }}</span>
-                  <span class="stat-text">This week</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number">{{ item.stats.month }}</span>
-                  <span class="stat-text">This month</span>
-                </div>
-              </div>
-              <div class="menu-action">
-                <span class="action-text">Access</span>
-                <span class="action-arrow">→</span>
-              </div>
-            </div>
+  <!-- Contenu principal -->
+  <main class="dashboard-main">
+    <!-- Section de statistiques rapides -->
+    <section class="quick-stats">
+      <div class="stats-grid">
+        <div class="stat-card total-mocktails">
+          <div class="stat-icon">🍹</div>
+          <div class="stat-content">
+            <div class="stat-number">{{ getMocktailsStats().total }}</div>
+            <div class="stat-label">Mocktails Total</div>
           </div>
         </div>
 
-        <!-- Second row: third card centered -->
-        <div class="menu-col menu-col-center">
-          <div class="menu-card"
-               *ngFor="let item of menuItems.slice(2,3)"
-               [class]="getCardColorClass(item.color)"
-               (click)="navigateTo(item.route)">
-            <div class="menu-card-header">
-              <div class="menu-icon">{{ item.icon }}</div>
-              <h3 class="menu-title">{{ item.title }}</h3>
-            </div>
-            <p class="menu-description">{{ item.description }}</p>
-            <div class="menu-stats" *ngIf="item.id === 'gestion-ingredients'">
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.total }}</span>
-                <span class="stat-text">Total</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number good">{{ item.stats.good }}</span>
-                <span class="stat-text">OK</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number warning">{{ item.stats.warning }}</span>
-                <span class="stat-text">Warning</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number critical">{{ item.stats.critical }}</span>
-                <span class="stat-text">Critical</span>
-              </div>
-            </div>
-            <div class="menu-action">
-              <span class="action-text">Access</span>
-              <span class="action-arrow">→</span>
-            </div>
+        <div class="stat-card pending-orders">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-content">
+            <div class="stat-number">{{ getOrdersStats().pending }}</div>
+            <div class="stat-label">Commandes en attente</div>
           </div>
         </div>
 
-        <!-- Third row: fourth card centered -->
-        <div class="menu-col menu-col-center">
-          <div class="menu-card"
-               *ngFor="let item of menuItems.slice(3,4)"
-               [class]="getCardColorClass(item.color)"
-               (click)="navigateTo(item.route)">
-            <div class="menu-card-header">
-              <div class="menu-icon">{{ item.icon }}</div>
-              <h3 class="menu-title">{{ item.title }}</h3>
-            </div>
-            <p class="menu-description">{{ item.description }}</p>
-            <div class="menu-stats" *ngIf="item.id === 'order-tracking'">
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.enAttente }}</span>
-                <span class="stat-text">En attente</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.enPreparation }}</span>
-                <span class="stat-text">En préparation</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.pret }}</span>
-                <span class="stat-text">Prêt</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ item.stats.total }}</span>
-                <span class="stat-text">Total</span>
-              </div>
-            </div>
-            <div class="menu-action">
-              <span class="action-text">Access</span>
-              <span class="action-arrow">→</span>
-            </div>
+        <div class="stat-card today-sales">
+          <div class="stat-icon">💰</div>
+          <div class="stat-content">
+            <div class="stat-number">{{ getSalesStats().today }}</div>
+            <div class="stat-label">Ventes aujourd'hui</div>
+          </div>
+        </div>
+
+        <div class="stat-card critical-ingredients">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-content">
+            <div class="stat-number">{{ getIngredientsStats().critical }}</div>
+            <div class="stat-label">Ingrédients critiques</div>
           </div>
         </div>
       </div>
     </section>
-  </div>
 
-  <!-- Notifications modal -->
+    <!-- Section des modules principaux -->
+    <section class="main-modules">
+      <div class="modules-grid">
+        <!-- Module Gestion Mocktails -->
+        <div class="module-card mocktails-module" 
+             *ngFor="let item of menuItems.slice(0,1)"
+             (click)="navigateTo(item.route)">
+          <div class="module-header">
+            <div class="module-icon">{{ item.icon }}</div>
+            <h3 class="module-title">{{ item.title }}</h3>
+          </div>
+          <p class="module-description">{{ item.description }}</p>
+          
+          <div class="module-stats">
+            <div class="stat-row">
+              <div class="stat-item">
+                <span class="stat-value">{{ item.stats.total }}</span>
+                <span class="stat-label">Total</span>
+              </div>
+              <div class="stat-item available">
+                <span class="stat-value">{{ item.stats.available }}</span>
+                <span class="stat-label">Disponible</span>
+              </div>
+              <div class="stat-item unavailable">
+                <span class="stat-value">{{ item.stats.unavailable }}</span>
+                <span class="stat-label">Indisponible</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-action">
+            <span class="action-text">Accéder</span>
+            <span class="action-arrow">→</span>
+          </div>
+        </div>
+
+        <!-- Module Historique des Ventes -->
+        <div class="module-card sales-module" 
+             *ngFor="let item of menuItems.slice(1,2)"
+             (click)="navigateTo(item.route)">
+          <div class="module-header">
+            <div class="module-icon">{{ item.icon }}</div>
+            <h3 class="module-title">{{ item.title }}</h3>
+          </div>
+          <p class="module-description">{{ item.description }}</p>
+          
+          <div class="module-stats">
+            <div class="stat-row">
+              <div class="stat-item">
+                <span class="stat-value">{{ item.stats.today }}</span>
+                <span class="stat-label">Aujourd'hui</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ item.stats.week }}</span>
+                <span class="stat-label">Cette semaine</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ item.stats.month }}</span>
+                <span class="stat-label">Ce mois</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-action">
+            <span class="action-text">Accéder</span>
+            <span class="action-arrow">→</span>
+          </div>
+        </div>
+
+        <!-- Module Gestion Ingrédients -->
+        <div class="module-card ingredients-module" 
+             *ngFor="let item of menuItems.slice(2,3)"
+             (click)="navigateTo(item.route)">
+          <div class="module-header">
+            <div class="module-icon">{{ item.icon }}</div>
+            <h3 class="module-title">{{ item.title }}</h3>
+          </div>
+          <p class="module-description">{{ item.description }}</p>
+          
+          <div class="module-stats">
+            <div class="stat-row">
+              <div class="stat-item good">
+                <span class="stat-value">{{ item.stats.good }}</span>
+                <span class="stat-label">OK</span>
+              </div>
+              <div class="stat-item warning">
+                <span class="stat-value">{{ item.stats.warning }}</span>
+                <span class="stat-label">Attention</span>
+              </div>
+              <div class="stat-item critical">
+                <span class="stat-value">{{ item.stats.critical }}</span>
+                <span class="stat-label">Critique</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-action">
+            <span class="action-text">Accéder</span>
+            <span class="action-arrow">→</span>
+          </div>
+        </div>
+
+        <!-- Module Gestion Commandes -->
+        <div class="module-card orders-module" 
+             *ngFor="let item of menuItems.slice(3,4)"
+             (click)="navigateTo(item.route)">
+          <div class="module-header">
+            <div class="module-icon">{{ item.icon }}</div>
+            <h3 class="module-title">{{ item.title }}</h3>
+          </div>
+          <p class="module-description">{{ item.description }}</p>
+          
+          <div class="module-stats">
+            <div class="stat-row">
+              <div class="stat-item pending">
+                <span class="stat-value">{{ item.stats.pending }}</span>
+                <span class="stat-label">En attente</span>
+              </div>
+              <div class="stat-item preparing">
+                <span class="stat-value">{{ item.stats.preparing }}</span>
+                <span class="stat-label">En préparation</span>
+              </div>
+              <div class="stat-item ready">
+                <span class="stat-value">{{ item.stats.ready }}</span>
+                <span class="stat-label">Prêtes</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-action">
+            <span class="action-text">Accéder</span>
+            <span class="action-arrow">→</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Notifications -->
   <div class="modal-backdrop" *ngIf="showNotificationsModal" (click)="closeNotifications()">
     <div class="modal notifications-modal" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="closeNotifications()" title="Close">✕</button>
-      <div class="modal-content">
+      <div class="modal-header">
         <h2>🔔 Notifications</h2>
-
+        <button class="modal-close" (click)="closeNotifications()" title="Fermer">✕</button>
+      </div>
+      
+      <div class="modal-content">
         <div class="notifications-list" *ngIf="activeAlerts.length > 0">
           <div class="notification-item"
                *ngFor="let alert of activeAlerts"
@@ -196,55 +242,56 @@
             <div class="notification-icon">{{ alert.icon }}</div>
             <div class="notification-content">
               <p class="notification-message">{{ alert.message }}</p>
-              <span class="notification-time">5 minutes ago</span>
+              <span class="notification-time">Il y a 5 minutes</span>
             </div>
           </div>
         </div>
 
         <div class="no-notifications" *ngIf="activeAlerts.length === 0">
           <span class="no-notifications-icon">✅</span>
-          <p>No active notifications</p>
+          <p>Aucune notification active</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Settings modal -->
+  <!-- Modal Paramètres -->
   <div class="modal-backdrop" *ngIf="showSettingsModal" (click)="closeSettings()">
     <div class="modal settings-modal" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="closeSettings()" title="Close">✕</button>
+      <div class="modal-header">
+        <h2>⚙️ Paramètres</h2>
+        <button class="modal-close" (click)="closeSettings()" title="Fermer">✕</button>
+      </div>
+      
       <div class="modal-content">
-        <h2>⚙️ Settings</h2>
-
         <div class="settings-section">
-          <h3>Change password</h3>
+          <h3>Changer le mot de passe</h3>
           <form class="password-form" (ngSubmit)="changePassword()">
             <div class="form-group">
-              <label for="current-password">Current password</label>
+              <label for="current-password">Mot de passe actuel</label>
               <input type="password" id="current-password" [(ngModel)]="passwordForm.currentPassword"
                      name="currentPassword" class="form-input" required>
             </div>
 
             <div class="form-group">
-              <label for="new-password">New password</label>
+              <label for="new-password">Nouveau mot de passe</label>
               <input type="password" id="new-password" [(ngModel)]="passwordForm.newPassword"
                      name="newPassword" class="form-input" required>
             </div>
 
             <div class="form-group">
-              <label for="confirm-password">Confirm new password</label>
+              <label for="confirm-password">Confirmer le nouveau mot de passe</label>
               <input type="password" id="confirm-password" [(ngModel)]="passwordForm.confirmPassword"
                      name="confirmPassword" class="form-input" required>
             </div>
 
             <div class="modal-actions">
-              <button type="submit" class="btn btn-primary">Change password</button>
-              <button type="button" class="btn btn-outline" (click)="closeSettings()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
+              <button type="button" class="btn btn-outline" (click)="closeSettings()">Annuler</button>
             </div>
           </form>
         </div>
       </div>
     </div>
   </div>
-
 </div>

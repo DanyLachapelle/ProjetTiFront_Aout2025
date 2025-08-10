@@ -1,15 +1,67 @@
-<div class="geoloc-card">
-  <div class="geoloc-icon">
-    <span style="font-size: 2.5rem; color: #5bbd95;">&#128205;</span>
+<!-- ===== PAGE VÉRIFICATION GÉOLOCALISATION ===== -->
+<div class="geoloc-container">
+  <!-- Carte principale -->
+  <div class="geoloc-card">
+    <!-- En-tête avec icône -->
+    <div class="geoloc-header">
+      <div class="geoloc-icon-container">
+        <div class="geoloc-icon">
+          📍
+        </div>
+        <div class="geoloc-icon-glow"></div>
+      </div>
+      <h1 class="geoloc-title">Vérification de Position</h1>
+    </div>
+
+    <!-- Message d'explication -->
+    <div class="geoloc-message">
+      <div class="message-icon">
+        ⚠️
+      </div>
+      <p class="message-text">
+        Nous devons vérifier que vous êtes bien dans notre établissement pour des raisons de sécurité.
+      </p>
+    </div>
+
+    <!-- Bouton d'autorisation -->
+    <div class="geoloc-action">
+      <button 
+        class="geoloc-btn" 
+        (click)="requestGeolocation()" 
+        [disabled]="loading"
+        [class.loading]="loading">
+        
+        <div class="btn-content" *ngIf="!loading">
+          <span class="btn-icon">📍</span>
+          <span class="btn-text">Autoriser la Géolocalisation</span>
+        </div>
+        
+        <div class="btn-loading" *ngIf="loading">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">Vérification en cours...</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="error" class="geoloc-error">
+      <div class="error-icon">❌</div>
+      <p class="error-text">{{ error }}</p>
+      <button class="error-retry-btn" (click)="requestGeolocation()">
+        Réessayer
+      </button>
+    </div>
+
+    <!-- Informations de sécurité -->
+    <div class="geoloc-info">
+      <div class="info-item">
+        <span class="info-icon">🔒</span>
+        <span class="info-text">Vos données sont protégées</span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">⚡</span>
+        <span class="info-text">Vérification instantanée</span>
+      </div>
+    </div>
   </div>
-  <h2>Vérification Position</h2>
-  <div class="geoloc-warning">
-    <span style="font-size: 1.2em; margin-right: 0.5em;">&#9888;&#65039;</span>
-    Nous devons vérifier que vous êtes bien dans notre établissement pour des raisons de sécurité.
-  </div>
-  <button class="geoloc-btn" (click)="requestGeolocation()" [disabled]="loading">
-    <span style="font-size: 1.2em; margin-right: 0.5em;">&#128205;</span>
-    Autoriser la Géolocalisation
-  </button>
-  <div *ngIf="error" class="geoloc-error">{{ error }}</div>
 </div>

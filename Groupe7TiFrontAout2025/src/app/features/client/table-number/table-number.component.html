@@ -1,13 +1,93 @@
-<div class="table-card">
-  <div class="table-icon">
-    <span style="font-size: 2.5rem; color: #5bbd95;">&#128337;</span>
+<!-- ===== PAGE SAISIE NUMÉRO DE TABLE ===== -->
+<div class="table-container">
+  <!-- Carte principale -->
+  <div class="table-card">
+    <!-- En-tête avec icône -->
+    <div class="table-header">
+      <div class="table-icon-container">
+        <div class="table-icon">
+          🍽️
+        </div>
+        <div class="table-icon-glow"></div>
+      </div>
+      <h1 class="table-title">Numéro de Table</h1>
+    </div>
+
+    <!-- Message d'information sur la session -->
+    <div class="session-info">
+      <div class="session-icon">
+        ⏰
+      </div>
+      <div class="session-content">
+        <h3 class="session-title">Session Limitée</h3>
+        <p class="session-text">
+          Votre session sera active pendant <strong>15 minutes</strong> après validation. 
+          Cela nous permet d'assurer la sécurité et la fluidité du service.
+        </p>
+      </div>
+    </div>
+
+    <!-- Formulaire de saisie -->
+    <div class="table-form">
+      <div class="input-group">
+        <label for="tableNumber" class="input-label">Votre numéro de table</label>
+        <div class="input-container">
+          <input 
+            id="tableNumber" 
+            [(ngModel)]="tableNumber" 
+            (input)="onTableNumberInput($event)"
+            (keydown)="onTableNumberKeydown($event)"
+            (focus)="onTableNumberFocus($event)"
+            placeholder="T01, T02, T10..." 
+            class="table-input"
+            [class.error]="error"
+            autocomplete="off"
+            maxlength="3" />
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="input-hint">
+          <span class="hint-icon">📍</span>
+          <span class="hint-text">Vous trouverez ce numéro sur votre table</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bouton de validation -->
+    <div class="table-action">
+      <button 
+        class="table-btn" 
+        (click)="validateAndContinue()" 
+        [disabled]="loading || tableNumber.length < 2"
+        [class.loading]="loading">
+        
+        <div class="btn-content" *ngIf="!loading">
+          <span class="btn-icon">✅</span>
+          <span class="btn-text">Confirmer et Continuer</span>
+        </div>
+        
+        <div class="btn-loading" *ngIf="loading">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">Validation en cours...</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="error" class="table-error">
+      <div class="error-icon">❌</div>
+      <p class="error-text">{{ error }}</p>
+    </div>
+
+    <!-- Informations supplémentaires -->
+    <div class="table-info">
+      <div class="info-item">
+        <span class="info-icon">🔒</span>
+        <span class="info-text">Sécurisé et confidentiel</span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">⚡</span>
+        <span class="info-text">Validation instantanée</span>
+      </div>
+    </div>
   </div>
-  <h2>Numéro de Table</h2>
-  <label for="tableNumber">Votre numéro de table</label>
-  <input id="tableNumber" [(ngModel)]="tableNumber" placeholder="Ex: T01, T02, T10..." class="table-input" />
-  <div class="table-hint">Vous trouverez ce numéro sur votre table</div>
-  <button class="table-btn" (click)="validateAndContinue()" [disabled]="loading">
-    Confirmer et Continuer
-  </button>
-  <div *ngIf="error" class="table-error">{{ error }}</div>
 </div>

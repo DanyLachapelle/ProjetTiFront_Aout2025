@@ -108,9 +108,11 @@
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Tracking Button */
+/* Bouton de suivi de commande */
 .tracking-button-container {
   margin-top: 15px;
+  display: flex;
+  justify-content: center;
 }
 
 .btn-tracking {
@@ -124,6 +126,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 300px;
 }
 
 .btn-tracking:hover {
@@ -1327,42 +1331,6 @@
     padding: 1rem 1.5rem;
     font-size: 1rem;
   }
-
-  .tracking-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.8rem;
-  }
 }
 
-/* ===== ORDER TRACKING SECTION ===== */
-.order-tracking-section {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
 
-.tracking-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
-}
-
-.tracking-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
-  background: linear-gradient(135deg, #047857 0%, #059669 100%);
-}
-
-.tracking-icon {
-  font-size: 1.1rem;
-}

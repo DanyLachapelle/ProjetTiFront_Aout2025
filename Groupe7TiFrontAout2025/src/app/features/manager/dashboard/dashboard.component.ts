@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MocktailService, Mocktail} from '../../../services/mocktail.service';
 import {Ingredient, IngredientService} from '../../../services/ingredient.service';
-import { OrderTrackingService } from '../../../services/order-tracking.service';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -61,20 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         unavailable: 0
       }
     },
-    {
-      id: 'order-management',
-      title: 'Commandes et Suivi',
-      description: 'Gérer les commandes en temps réel et suivre leur progression',
-      icon: '📋',
-      color: 'success',
-      route: '/order-management',
-      stats: {
-        pending: 0,
-        preparing: 0,
-        ready: 0,
-        total: 0
-      }
-    },
+
     {
       id: 'gestion-ingredients',
       title: 'Ingredients Management',
@@ -103,19 +90,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     },
     {
-      id: 'order-tracking',
-      title: 'Order Tracking',
-      description: 'Manage and track customer orders in real-time',
+      id: 'gestion-commandes',
+      title: 'Orders Management',
+      description: 'Track and manage active orders in real-time',
       icon: '📋',
       color: 'success',
-      route: '/order-management',
+      route: '/orders',
       stats: {
-        enAttente: 0,
-        enPreparation: 0,
-        pret: 0,
+        pending: 0,
+        preparing: 0,
+        ready: 0,
         total: 0
       }
-    }
+    },
+
   ];
 
   // Active alerts
@@ -138,7 +126,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private mocktailService: MocktailService,
     private ingredientService: IngredientService, // Assuming ingredient service is similar to mocktail service
-    private orderTrackingService: OrderTrackingService
+
   ) {}
 
   ngOnInit(): void {
@@ -152,7 +140,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadMocktailsStats();
 
     this.loadIngredientStats();
-    this.loadOrderStats();
+
   }
 
   ngOnDestroy(): void {
@@ -396,19 +384,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-
-  // Load order statistics
-  private loadOrderStats(): void {
-    const stats = this.orderTrackingService.getOrderStats();
-    const orderTrackingItem = this.menuItems.find(item => item.id === 'order-tracking');
-    if (orderTrackingItem) {
-      orderTrackingItem.stats = {
-        enAttente: stats.enAttente,
-        enPreparation: stats.enPreparation,
-        pret: stats.pret,
-        total: stats.total
-      };
-    }
+  // Méthodes pour les statistiques rapides
+  getMocktailsStats() {
+    const mocktailsItem = this.menuItems.find(item => item.id === 'gestion-mocktails');
+    return mocktailsItem ? mocktailsItem.stats : { total: 0, available: 0, unavailable: 0 };
   }
 
+  getOrdersStats() {
+    const ordersItem = this.menuItems.find(item => item.id === 'gestion-commandes');
+    return ordersItem ? ordersItem.stats : { pending: 0, preparing: 0, ready: 0 };
+  }
+
+  getSalesStats() {
+    const salesItem = this.menuItems.find(item => item.id === 'gestion-sales');
+    return salesItem ? salesItem.stats : { today: 0, week: 0, month: 0 };
+  }
+
+  getIngredientsStats() {
+    const ingredientsItem = this.menuItems.find(item => item.id === 'gestion-ingredients');
+    return ingredientsItem ? ingredientsItem.stats : { total: 0, good: 0, warning: 0, critical: 0 };
+  }
 }
