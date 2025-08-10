@@ -1,0 +1,225 @@
+<!-- ===== PAGE GESTION DES COMMANDES MANAGER ===== -->
+<div class="orders-container">
+  <!-- Header -->
+  <header class="orders-header">
+    <div class="header-content">
+      <h1>Gestion des Commandes</h1>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-label">Commandes actives</span>
+          <span class="stat-value">{{ getActiveOrdersCount() }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">En attente</span>
+          <span class="stat-value pending">{{ getOrdersByStatus('PENDING') }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">En préparation</span>
+          <span class="stat-value preparing">{{ getOrdersByStatus('IN_PREPARATION') }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Prêtes</span>
+          <span class="stat-value ready">{{ getOrdersByStatus('READY') }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshOrders()" title="Actualiser">
+        🔄 Actualiser
+      </button>
+    </div>
+  </header>
+
+  <!-- Filtres et contrôles -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label for="statusFilter">Statut</label>
+        <select 
+          id="statusFilter" 
+          [(ngModel)]="statusFilter" 
+          (change)="onStatusFilterChange()"
+          class="filter-select">
+          <option value="ALL">Tous les statuts</option>
+          <option value="PENDING">En attente</option>
+          <option value="IN_PREPARATION">En préparation</option>
+          <option value="READY">Prêtes</option>
+          <option value="DELIVERED">Livrées</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="dateFilter">Date</label>
+        <input 
+          type="date" 
+          id="dateFilter" 
+          [(ngModel)]="dateFilter" 
+          (change)="onDateFilterChange()"
+          class="filter-input">
+      </div>
+
+      <div class="filter-group">
+        <label for="tableFilter">Table</label>
+        <input 
+          type="text" 
+          id="tableFilter" 
+          [(ngModel)]="tableFilter" 
+          (input)="onTableFilterChange()"
+          placeholder="Rechercher par table..."
+          class="filter-input">
+      </div>
+
+      <div class="filter-group">
+        <label for="sortBy">Tri</label>
+        <select 
+          id="sortBy" 
+          [(ngModel)]="sortBy" 
+          (change)="onSortChange()"
+          class="filter-select">
+          <option value="date">Plus récentes</option>
+          <option value="priority">Priorité (plus anciennes)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <main class="orders-main">
+    <!-- État de chargement -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement des commandes...</p>
+    </div>
+
+    <!-- État d'erreur -->
+    <div *ngIf="error && !isLoading" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h2>Erreur</h2>
+      <p>{{ error }}</p>
+      <button class="btn-primary" (click)="refreshOrders()">
+        Réessayer
+      </button>
+    </div>
+
+    <!-- Liste des commandes -->
+    <div *ngIf="!isLoading && !error" class="orders-content">
+      <!-- État vide -->
+      <div *ngIf="filteredOrders.length === 0" class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h2>Aucune commande trouvée</h2>
+        <p>Aucune commande ne correspond aux critères sélectionnés.</p>
+      </div>
+
+      <!-- Liste des commandes -->
+      <div *ngIf="filteredOrders.length > 0" class="orders-list">
+        <div 
+          *ngFor="let order of filteredOrders" 
+          class="order-card"
+          [class.priority-high]="getOrderPriority(order.saleDate) === 'high'"
+          [class.priority-medium]="getOrderPriority(order.saleDate) === 'medium'">
+          
+          <!-- En-tête de la commande -->
+          <div class="order-header">
+            <div class="order-info">
+              <h3 class="order-id">Commande #{{ order.id }}</h3>
+              <div class="order-meta">
+                <span class="table-number">Table {{ order.tableNumber }}</span>
+                <span class="order-time">{{ getFormattedDate(order.saleDate) }}</span>
+                <span class="order-age" [class.urgent]="getOrderPriority(order.saleDate) === 'high'">
+                  {{ getOrderAge(order.saleDate) }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="order-status">
+              <div class="status-badge" [style.background-color]="getStatusConfig(order.status).color">
+                <span class="status-icon">{{ getStatusConfig(order.status).icon }}</span>
+                <span class="status-label">{{ getStatusConfig(order.status).label }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Détails de la commande -->
+          <div class="order-details">
+            <div class="order-items">
+              <div class="items-summary">
+                <span class="items-count">{{ getTotalItems(order.items) }} article(s)</span>
+                <span class="items-text">{{ getItemsSummary(order.items) }}</span>
+              </div>
+              
+                             <div class="items-list">
+                 <div *ngIf="order.items.length === 0" class="item-row empty">
+                   <span class="item-name">Aucun détail disponible</span>
+                 </div>
+                 <div *ngFor="let item of order.items" class="item-row">
+                   <span class="item-name">{{ item.mocktailName }}</span>
+                   <span class="item-quantity">x{{ item.quantity }}</span>
+                   <span class="item-price">{{ item.itemTotal.toFixed(2) }}€</span>
+                 </div>
+               </div>
+            </div>
+
+            <div class="order-total">
+              <span class="total-label">Total</span>
+              <span class="total-amount">{{ order.totalAmount.toFixed(2) }}€</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="order-actions">
+            <button 
+              *ngIf="canAdvanceStatus(order)"
+              class="btn-action"
+              [style.background-color]="getStatusConfig(order.status).color"
+              (click)="advanceOrderStatus(order)"
+              [disabled]="processingOrderId === order.id">
+              <span *ngIf="processingOrderId === order.id" class="loading-dots">...</span>
+              <span *ngIf="processingOrderId !== order.id">
+                {{ getStatusConfig(order.status).actionLabel }}
+              </span>
+            </button>
+            
+            <span *ngIf="!canAdvanceStatus(order)" class="status-complete">
+              Commande terminée
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Styles pour les animations de toast -->
+<style>
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .loading-dots {
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+</style>

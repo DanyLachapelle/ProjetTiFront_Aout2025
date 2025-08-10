@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order Tracking</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test du Système de Suivi de Commandes</h1>
+    
+    <div class="test-section">
+        <h2>1. Test de Connectivité Backend</h2>
+        <button onclick="testBackendConnectivity()">Tester la connectivité</button>
+        <div id="connectivity-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test de Récupération des Commandes</h2>
+        <button onclick="testGetAllOrders()">Récupérer toutes les commandes</button>
+        <div id="orders-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test de Commande Spécifique</h2>
+        <input type="number" id="orderId" placeholder="ID de commande" value="1013">
+        <button onclick="testGetOrderById()">Récupérer la commande</button>
+        <div id="order-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test de localStorage</h2>
+        <button onclick="setActiveOrder()">Définir commande active (ID: 1013)</button>
+        <button onclick="getActiveOrder()">Récupérer commande active</button>
+        <button onclick="clearActiveOrder()">Effacer commande active</button>
+        <div id="localstorage-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Test de Navigation</h2>
+        <button onclick="goToOrderTracking()">Aller au suivi de commande</button>
+        <button onclick="goToOrdersManager()">Aller à la gestion des commandes</button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5201/api';
+
+        async function testBackendConnectivity() {
+            const resultDiv = document.getElementById('connectivity-result');
+            resultDiv.innerHTML = '<p>🔄 Test en cours...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/SaleQuery/GetAllSales`);
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <p>✅ Connectivité réussie !</p>
+                            <p>📊 ${data.sales?.length || 0} commandes trouvées</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <p>❌ Erreur de connectivité : ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testGetAllOrders() {
+            const resultDiv = document.getElementById('orders-result');
+            resultDiv.innerHTML = '<p>🔄 Récupération en cours...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/SaleQuery/GetAllSales`);
+                const data = await response.json();
+                
+                const activeOrders = data.sales.filter(order => order.status !== 'DELIVERED');
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <p>✅ ${data.sales.length} commandes totales</p>
+                        <p>📋 ${activeOrders.length} commandes actives</p>
+                        <h4>Commandes actives :</h4>
+                        <pre>${JSON.stringify(activeOrders.slice(0, 5), null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <p>❌ Erreur : ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testGetOrderById() {
+            const orderId = document.getElementById('orderId').value;
+            const resultDiv = document.getElementById('order-result');
+            resultDiv.innerHTML = '<p>🔄 Récupération en cours...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/SaleQuery/GetSaleById/${orderId}`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <p>✅ Commande #${orderId} récupérée</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <p>❌ Erreur : ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function setActiveOrder() {
+            const orderId = document.getElementById('orderId').value || '1013';
+            localStorage.setItem('activeOrderId', orderId);
+            document.getElementById('localstorage-result').innerHTML = `
+                <div class="success">
+                    <p>✅ Commande active définie : ID ${orderId}</p>
+                </div>
+            `;
+        }
+
+        function getActiveOrder() {
+            const activeOrderId = localStorage.getItem('activeOrderId');
+            document.getElementById('localstorage-result').innerHTML = `
+                <div class="success">
+                    <p>📋 Commande active : ${activeOrderId || 'Aucune'}</p>
+                </div>
+            `;
+        }
+
+        function clearActiveOrder() {
+            localStorage.removeItem('activeOrderId');
+            document.getElementById('localstorage-result').innerHTML = `
+                <div class="success">
+                    <p>🗑️ Commande active effacée</p>
+                </div>
+            `;
+        }
+
+        function goToOrderTracking() {
+            window.open('http://localhost:4201/order-tracking', '_blank');
+        }
+
+        function goToOrdersManager() {
+            window.open('http://localhost:4201/orders', '_blank');
+        }
+
+        // Test automatique au chargement
+        window.onload = function() {
+            console.log('🧪 Page de test chargée');
+            testBackendConnectivity();
+        };
+    </script>
+</body>
+</html>
+
+
