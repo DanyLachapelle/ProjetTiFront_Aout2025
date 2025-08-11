@@ -24,6 +24,12 @@ export const routes: Routes = [
   // Routes pour le menu client
   { path: 'menu', loadComponent: () => import('./features/client/menu/menu.component').then(m => m.MenuComponent), canActivate: [authGuard] },
 
+  //Routes pour le menu mdp-oublié
+  { path: 'forgot-password', loadComponent: () => import('./features/manager/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
+
+  //Routes pour le menu reset-mdp
+  { path: 'reset-password', loadComponent: () => import('./features/manager/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
+
   // Route par défaut - redirection vers dashboard
   { path: '**', redirectTo: '/dashboard' }
 ];
