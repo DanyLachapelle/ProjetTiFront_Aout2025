@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SessionService } from '../../../services/session.service';
-
+import { TableService, TableDto } from '../../../services/table.service';
 
 @Component({
   selector: 'app-table-number',
@@ -12,90 +12,98 @@ import { SessionService } from '../../../services/session.service';
   templateUrl: './table-number.component.html',
   styleUrl: './table-number.component.css'
 })
-export class TableNumberComponent {
-  tableNumber = 'T';
+export class TableNumberComponent implements OnInit {
+  selectedTableNumber = '';
+  availableTables: TableDto[] = [];
   error: string | null = null;
   loading = false;
+  isLoadingTables = true;
 
   constructor(
     private router: Router, 
     private sessionService: SessionService,
-
+    private tableService: TableService
   ) {}
 
-  // Méthode pour gérer la saisie automatique
-  onTableNumberInput(event: any) {
-    let value = event.target.value;
-    
-    // S'assurer que ça commence toujours par "T"
-    if (!value.startsWith('T')) {
-      value = 'T' + value.replace(/^T/i, '');
-    }
-    
-    // Supprimer tous les caractères non numériques après le T
-    const numericPart = value.substring(1).replace(/\D/g, '');
-    
-    // Limiter à 2 chiffres maximum
-    if (numericPart.length > 2) {
-      value = 'T' + numericPart.substring(0, 2);
-    } else {
-      value = 'T' + numericPart;
-    }
-    
-    this.tableNumber = value;
+  ngOnInit() {
+    this.loadAvailableTables();
   }
 
-  // Méthode pour gérer les touches spéciales
-  onTableNumberKeydown(event: any) {
-    // Permettre: backspace, delete, tab, escape, enter, et les chiffres
-    if ([8, 9, 27, 13, 46].indexOf(event.keyCode) !== -1 ||
-        // Permettre Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-        (event.keyCode === 65 && event.ctrlKey === true) ||
-        (event.keyCode === 67 && event.ctrlKey === true) ||
-        (event.keyCode === 86 && event.ctrlKey === true) ||
-        (event.keyCode === 88 && event.ctrlKey === true) ||
-        // Permettre les chiffres (0-9)
-        (event.keyCode >= 48 && event.keyCode <= 57) ||
-        (event.keyCode >= 96 && event.keyCode <= 105)) {
-      return;
-    }
-    
-    // Empêcher toutes les autres touches
-    event.preventDefault();
+  loadAvailableTables() {
+    this.isLoadingTables = true;
+    this.error = null;
+
+    this.tableService.getAllTables().subscribe({
+      next: (response) => {
+        // Trier les tables par numéro (du plus petit au plus grand)
+        this.availableTables = response.tables.sort((a, b) => {
+          const aNumber = this.extractTableNumber(a.tableNumber);
+          const bNumber = this.extractTableNumber(b.tableNumber);
+          return aNumber - bNumber;
+        });
+        
+        this.isLoadingTables = false;
+        
+        // Sélectionner la première table par défaut
+        if (this.availableTables.length > 0) {
+          this.selectedTableNumber = this.availableTables[0].tableNumber;
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des tables:', error);
+        this.error = 'Impossible de charger les tables disponibles.';
+        this.isLoadingTables = false;
+        
+        // Fallback : créer des tables par défaut
+        this.availableTables = this.generateDefaultTables();
+        if (this.availableTables.length > 0) {
+          this.selectedTableNumber = this.availableTables[0].tableNumber;
+        }
+      }
+    });
   }
 
-  // Méthode pour gérer le focus
-  onTableNumberFocus(event: any) {
-    // Sélectionner automatiquement la partie numérique
-    const input = event.target;
-    if (input.value.length > 1) {
-      input.setSelectionRange(1, input.value.length);
+  private extractTableNumber(tableNumber: string): number {
+    // Extraire le numéro après "T" et le convertir en entier
+    if (tableNumber.startsWith('T')) {
+      const numberPart = tableNumber.substring(1);
+      const number = parseInt(numberPart, 10);
+      return isNaN(number) ? Number.MAX_SAFE_INTEGER : number;
     }
+    return Number.MAX_SAFE_INTEGER; // Placer les tables non numériques à la fin
+  }
+
+  private generateDefaultTables(): TableDto[] {
+    // Générer les tables T01 à T20 par défaut
+    const defaultTables: TableDto[] = [];
+    for (let i = 1; i <= 20; i++) {
+      defaultTables.push({
+        tableNumber: `T${i.toString().padStart(2, '0')}`,
+        displayName: `Table T${i.toString().padStart(2, '0')}`,
+        isAvailable: true
+      });
+    }
+    return defaultTables;
   }
 
   validateAndContinue() {
     this.error = null;
-    const regex = /^T\d{1,2}$/i;
-    if (!regex.test(this.tableNumber.trim())) {
-      this.error = "Veuillez entrer un numéro de table valide (ex: T01, T10).";
+    
+    if (!this.selectedTableNumber) {
+      this.error = "Please select a table number.";
       return;
     }
-    
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const newTableNumber = this.tableNumber.trim();
-      const newTableNum = parseInt(newTableNumber.replace('T', ''));
-      
-      // Récupérer l'ancien numéro de table
-      const oldTableNumber = localStorage.getItem('table_number');
-      const oldTableNum = oldTableNumber ? parseInt(oldTableNumber.replace('T', '')) : null;
-      
 
+    this.loading = true;
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const newTableNumber = this.selectedTableNumber.trim();
       
       // Nettoyer les données globales non organisées
       localStorage.removeItem('current-order');
       localStorage.removeItem('current_order');
       localStorage.removeItem('helha-fresh-cart');
-      localStorage.removeItem('mocktail_orders'); // Ancienne clé globale
+      localStorage.removeItem('mocktail_orders');
       
       // Sauvegarder le nouveau numéro de table
       localStorage.setItem('table_number', newTableNumber);
