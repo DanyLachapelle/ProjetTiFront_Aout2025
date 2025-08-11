@@ -1,9 +1,8 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './features/menuPrincipal/home/home.component';
 import {LoginPageComponent} from './features/manager/login-page/login-page.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', loadComponent: () => import('./features/menuPrincipal/home/home.component').then(m => m.HomeComponent) },
 
   // Routes pour la page de connexion
   { path: 'login', loadComponent: () => import('./features/manager/login-page/login-page.component').then(m => m.LoginPageComponent) },

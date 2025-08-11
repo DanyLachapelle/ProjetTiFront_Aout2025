@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { QrService } from '../../../services/qr.service';
@@ -8,6 +8,8 @@ import { QrService } from '../../../services/qr.service';
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class HomeComponent implements OnInit, OnDestroy {
   /** 5 minutes en secondes */
@@ -84,8 +86,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/geoloc'], { queryParams: { token: this.qrToken } });
   }
 
-  onAccessAdmin(): void {
-    this.router.navigate(['/admin/login']);
+  onAccessDashboard(): void {
+    this.router.navigate(['/login']);
   }
 
   onRefreshQR(): void {

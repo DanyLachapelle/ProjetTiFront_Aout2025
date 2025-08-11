@@ -40,3 +40,13 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Build files
+*/bin/
+*/obj/
+**/bin/
+**/obj/
+
+# IDE files
+.idea/
+.vs/
