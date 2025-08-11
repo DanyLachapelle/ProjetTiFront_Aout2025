@@ -1,37 +1,72 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { GeolocationService, LocationResult } from '../../../services/geolocation.service';
+import { LocationMapComponent } from '../../../components/location-map/location-map.component';
 
 @Component({
   selector: 'app-geoloc-verification',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LocationMapComponent],
   templateUrl: './geoloc-verification.component.html',
   styleUrl: './geoloc-verification.component.css'
 })
 export class GeolocVerificationComponent {
   error: string | null = null;
   loading = false;
+  locationResult: LocationResult | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private geolocationService: GeolocationService
+  ) {}
 
   requestGeolocation() {
     this.error = null;
     this.loading = true;
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // Ici tu peux vérifier la position si besoin
-          this.router.navigate(['/table']);
-        },
-        (err) => {
-          this.error = "La géolocalisation est requise pour continuer.";
+    this.locationResult = null;
+
+    this.geolocationService.verifyLocation().subscribe({
+      next: (result) => {
+        this.locationResult = result;
+        
+        if (result.isWithinEstablishment) {
+          console.log('✅ Utilisateur dans l\'établissement - Accès accordé');
+          this.loading = false;
+        } else {
+          console.log('❌ Utilisateur hors de l\'établissement');
+          this.error = `You are too far from our establishment (${this.geolocationService.formatDistance(result.distance)} away). Please come to our establishment to access our services.`;
           this.loading = false;
         }
-      );
-    } else {
-      this.error = "La géolocalisation n'est pas supportée par ce navigateur.";
-      this.loading = false;
-    }
+      },
+      error: (errorMessage) => {
+        console.error('❌ Erreur géolocalisation:', errorMessage);
+        this.error = errorMessage;
+        this.loading = false;
+      }
+    });
+  }
+
+  proceedToMenu() {
+    console.log('🍹 Redirection vers le menu');
+    this.router.navigate(['/table']);
+  }
+
+  getFormattedDistance(): string {
+    if (!this.locationResult) return '';
+    return this.geolocationService.formatDistance(this.locationResult.distance);
+  }
+
+  getFormattedCoordinates(): string {
+    if (!this.locationResult) return '';
+    return this.geolocationService.formatCoordinates(
+      this.locationResult.userPosition.latitude,
+      this.locationResult.userPosition.longitude
+    );
+  }
+
+  getAccuracyInfo(): string {
+    if (!this.locationResult?.demoInfo?.accuracy) return '';
+    return `±${Math.round(this.locationResult.demoInfo.accuracy)}m`;
   }
 }
