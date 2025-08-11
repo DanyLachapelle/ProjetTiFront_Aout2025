@@ -14,6 +14,7 @@ export interface Mocktail {
     name: string
     quantity: number
     unit: string
+    allergen: string // Champ allergène obligatoire
   }>
 }
 

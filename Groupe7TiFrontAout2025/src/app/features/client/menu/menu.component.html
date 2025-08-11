@@ -127,13 +127,13 @@
     </div>
 
     <!-- Filtres d'allergènes uniquement -->
-    <div class="allergen-section" *ngIf="allIngredients.length > 0">
+    <div class="allergen-section" *ngIf="availableAllergens.length > 0">
       <div class="allergen-header">
         <h3>🚫 Allergen Filters</h3>
         <button
           class="allergen-clear-btn"
           (click)="clearAllergenFilters()"
-          *ngIf="excludedIngredients.length > 0">
+          *ngIf="excludedAllergens.length > 0">
           Clear all
         </button>
       </div>
@@ -141,11 +141,13 @@
       <div class="allergen-tags">
         <button
           class="allergen-tag"
-          *ngFor="let ingredient of allIngredients"
-          [class.excluded]="isIngredientExcluded(ingredient)"
-          (click)="toggleExcludedIngredient(ingredient)">
-          {{ ingredient }}
-          <span class="exclude-icon" *ngIf="isIngredientExcluded(ingredient)">✕</span>
+          *ngFor="let allergen of availableAllergens"
+          [class.excluded]="isAllergenExcluded(allergen.name)"
+          [class.unused]="!isAllergenUsed(allergen.name)"
+          (click)="toggleExcludedAllergen(allergen.name)"
+          [title]="allergen.description + (isAllergenUsed(allergen.name) ? '' : ' (Non utilisé actuellement)')">
+          {{ allergen.icon }} {{ allergen.displayName }}
+          <span class="exclude-icon" *ngIf="isAllergenExcluded(allergen.name)">✕</span>
         </button>
       </div>
     </div>
@@ -189,8 +191,15 @@
             </div>
             <div class="ingredients-list">
               <div class="ingredient-item" *ngFor="let ingredient of mocktail.ingredients">
-                <span class="ingredient-name">{{ ingredient.name }}</span>
-                <span class="ingredient-quantity">{{ ingredient.quantity }}{{ ingredient.unit }}</span>
+                <div class="ingredient-info">
+                  <span class="ingredient-name">{{ ingredient.name }}</span>
+                  <span class="ingredient-quantity">{{ ingredient.quantity }}{{ ingredient.unit }}</span>
+                </div>
+                <div class="ingredient-allergen" *ngIf="ingredient.allergen && ingredient.allergen !== 'none'">
+                  <span class="allergen-badge" [title]="getAllergenDescription(ingredient.allergen)">
+                    {{ getAllergenIcon(ingredient.allergen) }} {{ getAllergenDisplayName(ingredient.allergen) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -212,8 +221,8 @@
     <div class="empty-state" *ngIf="filteredMocktails?.length === 0">
       <div class="empty-icon">🍹</div>
       <h3>No mocktail found</h3>
-      <p>{{ excludedIngredients.length > 0 ? 'No mocktail matches your allergen filters.' : 'No mocktail available at the moment.' }}</p>
-      <button class="btn btn-outline" (click)="clearAllergenFilters(); filterMocktails()" *ngIf="excludedIngredients.length > 0">
+      <p>{{ excludedAllergens.length > 0 ? 'No mocktail matches your allergen filters.' : 'No mocktail available at the moment.' }}</p>
+      <button class="btn btn-outline" (click)="clearAllergenFilters(); filterMocktails()" *ngIf="excludedAllergens.length > 0">
         Clear allergen filters
       </button>
     </div>
@@ -233,15 +242,15 @@
         <div class="order-modal-content">
           <div class="modal-mocktail-info" *ngIf="selectedMocktail">
             <div class="modal-mocktail-image">
-              <span class="modal-mocktail-emoji">{{ selectedMocktail.image }}</span>
+              <span class="modal-mocktail-emoji">{{ selectedMocktail?.image }}</span>
             </div>
-            <h2>{{ selectedMocktail.name }}</h2>
-            <p>{{ selectedMocktail.description }}</p>
+            <h2>{{ selectedMocktail?.name }}</h2>
+            <p>{{ selectedMocktail?.description }}</p>
           </div>
 
           <div class="modal-row">
             <span>Price:</span>
-            <span class="modal-price">€{{ selectedMocktail?.price?.toFixed(2) || '0.00' }}</span>
+            <span class="modal-price">€{{ getSelectedMocktailPrice() }}</span>
           </div>
 
           <div class="modal-row">

@@ -1,15 +1,12 @@
-import {Component, OnInit, OnDestroy, NgIterable} from '@angular/core';
+import { Component, OnInit, OnDestroy, NgIterable } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
-import {MocktailService} from '../../../services/mocktail.service';
-import {SaleService} from '../../../services/sale.service';
-import { Router } from '@angular/router';
+import { MocktailService } from '../../../services/mocktail.service';
+import { SaleService } from '../../../services/sale.service';
 import { SessionService, SessionData } from '../../../services/session.service';
-
-
-import {IngredientService} from '../../../services/ingredient.service';
-
+import { IngredientService } from '../../../services/ingredient.service';
+import { AllergenService, AllergenInfo, IngredientWithAllergen } from '../../../services/allergen.service';
 
 interface Mocktail {
   id: number;
@@ -22,6 +19,7 @@ interface Mocktail {
     name: string;
     quantity: number;
     unit: string;
+    allergen: string; // Champ allergène obligatoire
   }>;
 }
 
@@ -30,6 +28,7 @@ interface Ingredient {
   id: string;
   name: string;
   quantity: number;
+  allergen?: string; // Ajout du champ allergène
 }
 
 interface OrderItem {
@@ -40,120 +39,27 @@ interface OrderItem {
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [CommonModule, FormsModule,HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './menu.component.html',
-  styleUrl: './menu.component.css'
+  styleUrls: ['./menu.component.css']
 })
-export class MenuComponent implements OnInit {
-
-
+export class MenuComponent implements OnInit, OnDestroy {
   // Mocktails data
-  // mocktails: Mocktail[] = [
-  //   {
-  //     id: 1,
-  //     name: 'Virgin Mojito',
-  //     description: 'Refreshing with fresh mint and lime',
-  //     price: 8.50,
-  //     available: true,
-  //     image: '🍹',
-  //     ingredients: [
-  //       { name: 'Fresh mint', quantity: 5, unit: 'g' },
-  //       { name: 'Lime', quantity: 20, unit: 'g' },
-  //       { name: 'Sugar syrup', quantity: 1.5, unit: 'cl' },
-  //       { name: 'Sparkling water', quantity: 20, unit: 'cl' }
-  //     ]
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Virgin Colada',
-  //     description: 'Exotic with coconut and pineapple',
-  //     price: 9.00,
-  //     available: true,
-  //     image: '🥤',
-  //     ingredients: [
-  //       { name: 'Pineapple juice', quantity: 15, unit: 'cl' },
-  //       { name: 'Coconut milk', quantity: 8, unit: 'cl' },
-  //       { name: 'Sugar syrup', quantity: 1, unit: 'cl' }
-  //     ]
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Sunset Spritz',
-  //     description: 'Blood orange, grenadine and sparkling water',
-  //     price: 7.50,
-  //     available: false,
-  //     image: '🌅',
-  //     ingredients: [
-  //       { name: 'Blood orange juice', quantity: 12, unit: 'cl' },
-  //       { name: 'Grenadine', quantity: 3, unit: 'cl' },
-  //       { name: 'Sparkling water', quantity: 10, unit: 'cl' }
-  //     ]
-  //   },
-  //   {
-  //     id: 4,
-  //     name: 'Berry Fizz',
-  //     description: 'Red berries, lemon and sparkling water',
-  //     price: 8.00,
-  //     available: true,
-  //     image: '🍓',
-  //     ingredients: [
-  //       { name: 'Red berries', quantity: 8, unit: 'g' },
-  //       { name: 'Lemon juice', quantity: 5, unit: 'cl' },
-  //       { name: 'Sparkling water', quantity: 15, unit: 'cl' }
-  //     ]
-  //   },
-  //   {
-  //     id: 5,
-  //     name: 'Tropical Dream',
-  //     description: 'Mango, passion fruit and coconut milk',
-  //     price: 9.20,
-  //     available: true,
-  //     image: '🥭',
-  //     ingredients: [
-  //       { name: 'Mango juice', quantity: 10, unit: 'cl' },
-  //       { name: 'Passion fruit juice', quantity: 5, unit: 'cl' },
-  //       { name: 'Coconut milk', quantity: 8, unit: 'cl' }
-  //     ]
-  //   },
-  //   {
-  //     id: 6,
-  //     name: 'Green Detox',
-  //     description: 'Cucumber, green apple and mint',
-  //     price: 8.80,
-  //     available: true,
-  //     image: '🥒',
-  //     ingredients: [
-  //       { name: 'Cucumber', quantity: 10, unit: 'g' },
-  //       { name: 'Green apple', quantity: 10, unit: 'g' },
-  //       { name: 'Fresh mint', quantity: 3, unit: 'g' }
-  //     ]
-  //   },
-  //   {
-  //     id: 7,
-  //     name: 'Pink Lemonade',
-  //     description: 'Lemon, raspberry and agave syrup',
-  //     price: 7.80,
-  //     available: true,
-  //     image: '🍋',
-  //     ingredients: [
-  //       { name: 'Lemon juice', quantity: 8, unit: 'cl' },
-  //       { name: 'Raspberries', quantity: 6, unit: 'g' },
-  //       { name: 'Agave syrup', quantity: 1.2, unit: 'cl' }
-  //     ]
-  //   }
-  // ];
   mocktails: Mocktail[] = []; // Remplace le tableau statique
-  // --- Cart and modals management ---
+
+  // Modal state
   showOrderModal = false;
   selectedMocktail: Mocktail | null = null;
   selectedQuantity = 1;
   orderList: OrderItem[] = [];
   isLoading = true;
-  // Animations and states
+
+  // Cart animation
   isAddingToCart = false;
   cartAnimation = false;
   availableIngredients: Ingredient[] = [];
-  // Validation
+
+  // Quantity limits
   readonly MAX_QUANTITY = 10;
   readonly MIN_QUANTITY = 1;
 
@@ -163,111 +69,70 @@ export class MenuComponent implements OnInit {
   private timerInterval: any;
   private sessionTimeSeconds = 15 * 60; // 15 minutes en secondes
 
-  // Méthode pour formater le temps en MM:SS
+  // Timer formatting
   private formatTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
-  // Suivi de commande
-
-
   constructor(
     private mocktailService: MocktailService,
     private router: Router,
     private sessionService: SessionService,
-
     private saleService: SaleService,
-    private ingredientService: IngredientService
+    private ingredientService: IngredientService,
+    private allergenService: AllergenService
   ) {}
 
-  // ngOnInit() {
-  //   // Load cart from localStorage if available
-  //   this.loadCartFromStorage();
-  // }
   ngOnInit() {
-    // Charger le timer depuis localStorage ou démarrer à 15 minutes
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const savedTime = localStorage.getItem('menu-timer');
-      if (savedTime) {
-        this.sessionTimeSeconds = parseInt(savedTime);
-        if (this.sessionTimeSeconds <= 0) {
+    this.loadSessionData();
+    this.loadMocktails();
+    this.loadAvailableIngredients();
+    this.startSimpleTimer();
+  }
+
+  loadSessionData() {
+    this.sessionService.getSessionData().subscribe({
+      next: (sessionData) => {
+        this.sessionData = sessionData;
+        if (!sessionData) {
           this.router.navigate(['/']);
           return;
         }
-      } else {
-        this.sessionTimeSeconds = 15 * 60; // 15 minutes
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement de la session:', error);
+        this.router.navigate(['/']);
       }
-    } else {
-      this.sessionTimeSeconds = 15 * 60; // 15 minutes
-    }
-
-    this.remainingTime = this.formatTime(this.sessionTimeSeconds);
-
-    // Démarrer le timer immédiatement
-    this.startSimpleTimer();
-
-    // Load data from API
-    this.loadMocktails();
-    //this.loadIngredients();
-
-    // Load cart from localStorage if available
-    this.loadCartFromStorage();
-
-
-
-    this.loadAvailableIngredients();
+    });
   }
-  // ngOnDestroy() {
-  //   // Save cart to localStorage
-  //   this.loadMocktails();
-  //   this.loadCartFromStorage()
-  // }
-
 
   ngOnDestroy() {
-    // Save cart to localStorage
-    this.saveCartToStorage();
-
-    // Nettoyer le timer
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
-    }
-
-    // Sauvegarder le temps restant avant de quitter
-    if (this.sessionTimeSeconds > 0 && typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('menu-timer', this.sessionTimeSeconds.toString());
     }
   }
 
   loadAvailableIngredients() {
     this.ingredientService.GetAll().subscribe({
-      next: (response) => {
-        this.availableIngredients = response.ingredients.filter((ing: { available: any; }) => ing.available);
-        console.log('Ingrédients disponibles:', this.availableIngredients);
+      next: (response: { ingredients: Ingredient[] }) => {
+        this.availableIngredients = response.ingredients;
       },
-      error: (err) => {
-        console.error('Erreur chargement ingrédients:', err);
+      error: (error) => {
+        console.error('Erreur récupération ingrédients:', error);
       }
     });
   }
-  // Méthode simple inspirée du code React
+
   private startSimpleTimer(): void {
     this.timerInterval = setInterval(() => {
-      this.sessionTimeSeconds = this.sessionTimeSeconds - 1;
-      this.remainingTime = this.formatTime(this.sessionTimeSeconds);
-
-      // Sauvegarder le temps restant dans localStorage
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('menu-timer', this.sessionTimeSeconds.toString());
-      }
-
-      if (this.sessionTimeSeconds <= 0) {
+      if (this.sessionTimeSeconds > 0) {
+        this.sessionTimeSeconds--;
+        this.remainingTime = this.formatTime(this.sessionTimeSeconds);
+      } else {
         clearInterval(this.timerInterval);
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.removeItem('menu-timer'); // Nettoyer localStorage
-        }
+        this.sessionService.endSession();
         this.router.navigate(['/']);
       }
     }, 1000);
@@ -287,7 +152,6 @@ export class MenuComponent implements OnInit {
   getFormattedRemainingTime(): string {
     return this.sessionService.formatRemainingTime();
   }
-
 
   loadMocktails() {
     this.isLoading = true;
@@ -338,9 +202,6 @@ export class MenuComponent implements OnInit {
     });
   }
 
-
-
-
   // --- Cart management ---
   openOrderModal(mocktail: Mocktail) {
     if (!mocktail.available) return;
@@ -373,34 +234,28 @@ export class MenuComponent implements OnInit {
       });
     }
 
-    // Cart animation
-    this.cartAnimation = true;
-    setTimeout(() => {
-      this.cartAnimation = false;
-    }, 300);
-
     // Save to localStorage
     this.saveCartToStorage();
 
-    this.closeOrderModal();
-
-    // Reset animation
+    // Animation delay
     setTimeout(() => {
       this.isAddingToCart = false;
+      this.cartAnimation = true;
+      setTimeout(() => {
+        this.cartAnimation = false;
+      }, 300);
     }, 500);
+
+    this.closeOrderModal();
   }
 
   getOrderTotal(): number {
-    return this.orderList.reduce((sum, item) => sum + item.mocktail.price * item.quantity, 0);
+    return this.orderList.reduce((total, item) => total + (item.mocktail.price * item.quantity), 0);
   }
 
   clearOrder() {
-    if (this.orderList.length === 0) return;
-
-    if (confirm('Are you sure you want to empty your cart?')) {
-      this.orderList = [];
-      this.saveCartToStorage();
-    }
+    this.orderList = [];
+    this.saveCartToStorage();
   }
 
   removeOrderItem(id: number) {
@@ -422,12 +277,9 @@ export class MenuComponent implements OnInit {
     }
   }
 
-  // --- Modal management ---
   showFullOrderModal = false;
 
   openFullOrderModal() {
-    if (this.orderList.length === 0) return;
-
     this.showFullOrderModal = true;
   }
 
@@ -435,22 +287,14 @@ export class MenuComponent implements OnInit {
     this.showFullOrderModal = false;
   }
 
-  // --- Quantity validation ---
   onQuantityChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    let value = parseInt(input.value);
-
-    if (isNaN(value) || value < this.MIN_QUANTITY) {
-      value = this.MIN_QUANTITY;
-    } else if (value > this.MAX_QUANTITY) {
-      value = this.MAX_QUANTITY;
+    const target = event.target as HTMLInputElement;
+    const value = parseInt(target.value);
+    if (value >= this.MIN_QUANTITY && value <= this.MAX_QUANTITY) {
+      this.selectedQuantity = value;
     }
-
-    this.selectedQuantity = value;
-    input.value = value.toString();
   }
 
-  // --- Cart persistence ---
   private saveCartToStorage(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('helha-fresh-cart', JSON.stringify(this.orderList));
@@ -464,191 +308,167 @@ export class MenuComponent implements OnInit {
         try {
           this.orderList = JSON.parse(savedCart);
         } catch (error) {
-          console.error('Error loading cart from localStorage:', error);
+          console.error('Erreur lors du chargement du panier:', error);
           this.orderList = [];
         }
       }
     }
   }
 
-  // --- Utilities ---
   getOrderItemCount(): number {
-    return this.orderList.reduce((sum, item) => sum + item.quantity, 0);
+    return this.orderList.reduce((count, item) => count + item.quantity, 0);
   }
 
   isCartEmpty(): boolean {
     return this.orderList.length === 0;
   }
 
-  // --- Quit button management ---
   onQuit() {
-    if (this.orderList.length > 0) {
-      if (confirm('You have items in your cart. Do you really want to quit?')) {
-        this.clearOrder();
-        // Here we could redirect to another page
-        console.log('Quit menu');
-      }
-    } else {
-      // Here we could redirect to another page
-      console.log('Quit menu');
+    if (confirm('Êtes-vous sûr de vouloir quitter ? Votre panier sera perdu.')) {
+      this.sessionService.endSession();
+      this.router.navigate(['/']);
     }
   }
 
-  // --- Payment management ---
   onPay() {
-    console.log('🎯 onPay() appelée !', {
-      orderListLength: this.orderList.length,
-      total: this.getOrderTotal(),
-      orderList: this.orderList
-    });
-
-    if (this.orderList.length === 0 || this.getOrderTotal() <= 0) {
-      console.log('❌ Commande vide ou total invalide');
+    if (this.orderList.length === 0) {
+      alert('Votre panier est vide !');
       return;
     }
 
     const tableNumber = this.getTableNumber();
     console.log('📍 Table number:', tableNumber);
-    alert(`Paiement de ${this.getOrderTotal().toFixed(2)} € en cours...`);
 
-    setTimeout(() => {
-      // 🔧 Créer la vente avec tous les items directement
-      const saleData = {
-        tableNumber,
-        items: this.orderList.map(item => ({
-          mocktailId: item.mocktail.id,
-          quantity: item.quantity,
-          unitPrice: item.mocktail.price
-        }))
-      };
+    // Préparer les données pour l'API
+    const saleData = {
+      tableNumber,
+      items: this.orderList.map(item => ({
+        mocktailId: item.mocktail.id,
+        quantity: item.quantity,
+        unitPrice: item.mocktail.price
+      }))
+    };
 
-      console.log('📦 SaleData à envoyer:', saleData);
+    console.log('🛒 Données de vente:', saleData);
 
-      this.saleService.createSale(saleData).subscribe({
-        next: sale => {
-          console.log('✅ Réponse createSale reçue:', sale);
-          const saleId = sale.id;
-          console.log('📝 SaleId:', saleId);
-
-          // Sauvegarder l'ID de la commande active pour le suivi
-          localStorage.setItem('activeOrderId', saleId.toString());
-          console.log('💾 Commande active sauvegardée:', saleId);
-
-          // 👉 Maintenant calculer les ingrédients consommés
-          const ingredientConsumptionMap: { [name: string]: number } = {};
-
-          this.orderList.forEach(orderItem => {
-            orderItem.mocktail.ingredients.forEach(ingredient => {
-              const totalUsed = ingredient.quantity * orderItem.quantity;
-              if (ingredientConsumptionMap[ingredient.name]) {
-                ingredientConsumptionMap[ingredient.name] += totalUsed;
-              } else {
-                ingredientConsumptionMap[ingredient.name] = totalUsed;
-              }
-            });
-          });
-
-          // 👉 Récupérer les ingrédients pour avoir leur ID et mettre à jour le stock
-          this.ingredientService.GetAll().subscribe(response => {
-            const ingredientsList = response.ingredients;
-            const updateRequests = [];
-
-            for (const name in ingredientConsumptionMap) {
-              const ingredient = ingredientsList.find((i: { name: string; }) => i.name === name);
-              if (ingredient) {
-                const consumedQty = ingredientConsumptionMap[name];
-                updateRequests.push(
-                  this.ingredientService
-                    .DecreaseQuantity(ingredient.id, consumedQty)
-                    .toPromise()
-                );
-              } else {
-                console.warn(`Ingrédient non trouvé : ${name}`);
-              }
-            }
-            
-            // 👉 Attendre que toutes les mises à jour du stock soient faites
-            Promise.all(updateRequests).then(() => {
-              alert('Paiement réussi ! Commande enregistrée.');
-              this.orderList = [];
-              this.saveCartToStorage();
-              this.closeFullOrderModal();
-            }).catch(err => {
-              console.error('Erreur lors de la mise à jour du stock :', err);
-              alert('Erreur pendant la mise à jour du stock.');
-            });
-          });
-        },
-        error: err => {
-          console.error('❌ ERREUR création vente :', err);
-          console.error('❌ Détails erreur:', err.error);
-          console.error('❌ Status:', err.status);
-          alert('Impossible de créer la vente. Voir console pour détails.');
-        }
-      });
-    }, 2000);
+    this.saleService.createSale(saleData).subscribe({
+      next: (response) => {
+        console.log('✅ Vente créée avec succès:', response);
+        
+        // Vider le panier
+        this.clearOrder();
+        
+        // Afficher un message de succès
+        alert('Commande enregistrée avec succès ! Votre commande sera préparée rapidement.');
+        
+        // Fermer le modal
+        this.closeFullOrderModal();
+        
+        // Rediriger vers le suivi de commande
+        this.router.navigate(['/order-tracking']);
+      },
+      error: (error) => {
+        console.error('❌ Erreur lors de la création de la vente:', error);
+        alert('Erreur lors de l\'enregistrement de la commande. Veuillez réessayer.');
+      }
+    });
   }
 
-
   // Méthodes pour le suivi de commande
-  allIngredients: string[] = [];
-  excludedIngredients: string[] = [];
+  availableAllergens: AllergenInfo[] = [];
+  usedAllergens: string[] = []; // Liste des allergènes actuellement utilisés
+  excludedAllergens: string[] = [];
 
   filteredMocktails: Mocktail[] = [];
   expandedMocktailId: any;
 
-
-
-
-
   clearAllergenFilters() {
-    this.excludedIngredients = [];
+    this.excludedAllergens = [];
     this.filterMocktails();
   }
 
-  isIngredientExcluded(ingredientName: string): boolean {
-    return this.excludedIngredients.includes(ingredientName);
+  isAllergenExcluded(allergenName: string): boolean {
+    return this.excludedAllergens.includes(allergenName);
+  }
+
+  // Vérifier si un allergène est actuellement utilisé
+  isAllergenUsed(allergenName: string): boolean {
+    return this.usedAllergens.includes(allergenName);
   }
 
   // --- Allergen filtering ---
-  toggleExcludedIngredient(ingredientName: string) {
-    const index = this.excludedIngredients.indexOf(ingredientName);
+  toggleExcludedAllergen(allergenName: string) {
+    const index = this.excludedAllergens.indexOf(allergenName);
     if (index > -1) {
-      this.excludedIngredients.splice(index, 1);
+      this.excludedAllergens.splice(index, 1);
     } else {
-      this.excludedIngredients.push(ingredientName);
+      this.excludedAllergens.push(allergenName);
     }
     this.filterMocktails();
   }
 
   private extractAllIngredients() {
-    const ingredientSet = new Set<string>();
-    this.mocktails.forEach(mocktail => {
-      mocktail.ingredients.forEach(ingredient => {
-        // ici on prend juste le nom de l'ingrédient,
-        // tu peux adapter si tu as un champ allergène spécifique
-        ingredientSet.add(ingredient.name.trim());
-      });
+    // Charger tous les allergènes disponibles
+    this.allergenService.getAvailableAllergens().subscribe({
+      next: (allergens) => {
+        this.availableAllergens = allergens;
+        console.log('Tous les allergènes disponibles:', allergens);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des allergènes:', error);
+      }
     });
-    this.allIngredients = Array.from(ingredientSet).sort();
+
+    // Charger les allergènes actuellement utilisés
+    this.allergenService.getUsedAllergens().subscribe({
+      next: (usedAllergens) => {
+        this.usedAllergens = usedAllergens.map(a => a.name);
+        console.log('Allergènes actuellement utilisés:', this.usedAllergens);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des allergènes utilisés:', error);
+      }
+    });
   }
 
-// --- Ingredients display ---
+  // --- Ingredients display ---
   toggleIngredients(mocktailId: number) {
     this.expandedMocktailId = this.expandedMocktailId === mocktailId ? null : mocktailId;
   }
 
+  // Méthodes d'aide pour les allergènes
+  getAllergenIcon(allergenName: string): string {
+    const allergenInfo = this.allergenService.getAllergenInfo(allergenName);
+    return allergenInfo?.icon || '⚠️';
+  }
+
+  getAllergenDisplayName(allergenName: string): string {
+    const allergenInfo = this.allergenService.getAllergenInfo(allergenName);
+    return allergenInfo?.displayName || allergenName;
+  }
+
+  getAllergenDescription(allergenName: string): string {
+    const allergenInfo = this.allergenService.getAllergenInfo(allergenName);
+    return allergenInfo?.description || `Contains ${allergenName}`;
+  }
+
+  // Méthode pour obtenir le prix en toute sécurité
+  getSelectedMocktailPrice(): string {
+    return this.selectedMocktail?.price?.toFixed(2) || '0.00';
+  }
 
   filterMocktails() {
     this.filteredMocktails = this.mocktails.filter(mocktail => {
-      // Check if mocktail contains excluded ingredients
-      const hasExcludedIngredient = this.excludedIngredients.some(excludedIngredient =>
-        mocktail.ingredients.some(ingredient =>
-          ingredient.name.toLowerCase().includes(excludedIngredient.toLowerCase())
-        )
-      );
+      // Vérifier si le mocktail contient des allergènes exclus
+      const hasExcludedAllergen = this.excludedAllergens.some(excludedAllergen => {
+        return mocktail.ingredients.some(ingredient => {
+          // Vérifier si l'ingrédient contient l'allergène exclu
+          return ingredient.allergen === excludedAllergen;
+        });
+      });
 
-      return mocktail.available && !hasExcludedIngredient;
+      // On affiche aussi les mocktails non disponibles, mais ils restent désactivés dans le template
+      return !hasExcludedAllergen;
     });
   }
 
@@ -687,32 +507,27 @@ export class MenuComponent implements OnInit {
         const stockQty = ingredientsStock[ingredient.name]; // ou [ingredient.id] selon structure
 
         // S'il manque info stock, on considère pas disponible
-        if (stockQty === undefined) return false;
+        if (stockQty === undefined) {
+          return false;
+        }
 
-        // Calculer status stock
-        const status = this.getStockStatus(stockQty, threshold);
-
-        // Si stock critique, mocktail non dispo
-        return status !== 'critical';
+        // Vérifier si la quantité en stock est suffisante
+        return stockQty > threshold;
       });
 
       mocktail.available = isAvailable;
     });
 
-    // Appliquer filtrage après update
+    // Mettre à jour la liste filtrée
     this.filterMocktails();
   }
 
-  // Méthode pour la navigation vers le suivi de commande
   goToOrderTracking() {
     this.router.navigate(['/order-tracking']);
   }
 
-
-
-  // Vérifier s'il y a une commande active
   hasActiveOrder(): boolean {
-    const activeOrderId = localStorage.getItem('activeOrderId');
-    return activeOrderId !== null;
+    // Logique pour vérifier s'il y a une commande active
+    return false;
   }
 }
