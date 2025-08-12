@@ -1,13 +1,13 @@
 <div class="management-container">
   <header class="management-header">
     <div class="header-left">
-              <button class="btn btn-outline btn-back" (click)="goBack()" title="Back to dashboard">
-          ← Back
-        </button>
-        <h1 class="management-title">
-          <img src="assets/favicon.png" alt="Logo Helha Fresh" class="management-logo" />
-          Mocktails Management
-        </h1>
+      <button class="btn btn-outline btn-back" (click)="goBack()" title="Back to dashboard">
+        ← Back
+      </button>
+      <h1 class="management-title">
+        <img src="assets/favicon.png" alt="Logo Helha Fresh" class="management-logo" />
+        Mocktails Management
+      </h1>
     </div>
     <button class="btn btn-primary" (click)="openMocktailModal()">
       <span class="btn-icon">+</span>
@@ -39,7 +39,6 @@
           <p>Unavailable</p>
         </div>
       </div>
-
     </div>
 
     <!-- Liste des mocktails -->
@@ -82,14 +81,21 @@
         </div>
       </div>
 
-      <div class="mocktail-item" *ngFor="let mocktail of filteredMocktails" [class.unavailable]="!mocktail.available">
+      <div class="mocktail-item" *ngFor="let mocktail of paginatedMocktails" [class.unavailable]="!mocktail.available">
         <div class="mocktail-info" (click)="toggleIngredients(mocktail.id)">
           <div class="mocktail-header">
             <span class="mocktail-emoji">{{ mocktail.image }}</span>
             <h3>{{ mocktail.name }}</h3>
-            <span class="status-badge" [class.success]="mocktail.available" [class.error]="!mocktail.available">
-              {{ mocktail.available ? 'Available' : 'Unavailable' }}
-            </span>
+                                                   <span class="status-badge" 
+                [class.available]="isMocktailActuallyAvailable(mocktail)"
+                [class.forced-unavailable]="isMocktailForcedUnavailable(mocktail)"
+                [class.out-of-stock]="isMocktailOutOfStock(mocktail) && !isMocktailForcedUnavailable(mocktail)">
+                {{ 
+                  isMocktailForcedUnavailable(mocktail) ? 'Unavailable (Manager)' : 
+                  isMocktailOutOfStock(mocktail) ? 'Unavailable (Out of Stock)' :
+                  'Available'
+                }}
+              </span>
           </div>
           <p class="mocktail-description">{{ mocktail.description }}</p>
           <div class="mocktail-details">
@@ -98,26 +104,36 @@
               <span class="ingredients-count">{{ mocktail.ingredients.length }} ingredient(s)</span>
             </div>
             <div class="actions">
-                              <button 
-                  class="btn btn-small btn-secondary" 
-                  (click)="$event.stopPropagation(); openMocktailModal(mocktail)"
-                  title="Edit">
-                  ✏️ Edit
-                </button>
-                                             <button 
-                  class="btn btn-small" 
-                  [class.btn-success]="mocktail.available"
-                  [class.btn-warning]="!mocktail.available"
+              <button 
+                class="btn btn-small btn-secondary" 
+                (click)="$event.stopPropagation(); openMocktailModal(mocktail)"
+                title="Edit">
+                ✏️ Edit
+              </button>
+                                                                                                                   <button
+                  class="btn btn-small"
+                  [class.btn-success]="isMocktailActuallyAvailable(mocktail) && !isMocktailForcedUnavailable(mocktail)"
+                  [class.btn-warning]="isMocktailForcedUnavailable(mocktail)"
+                  [class.btn-disabled]="isAvailabilityButtonDisabled(mocktail)"
+                  [disabled]="isAvailabilityButtonDisabled(mocktail)"
                   (click)="$event.stopPropagation(); toggleAvailability(mocktail)"
-                  title="{{ mocktail.available ? 'Mark as unavailable' : 'Mark as available' }}">
-                  {{ mocktail.available ? '❌' : '✅' }}
-                </button>
-                              <button 
-                  class="btn btn-small btn-danger" 
-                  (click)="$event.stopPropagation(); deleteMocktail(mocktail)"
-                  title="Delete">
-                  🗑️
-                </button>
+                  title="{{
+                    isAvailabilityButtonDisabled(mocktail) ? 'Cannot modify: out of stock' :
+                    isMocktailForcedUnavailable(mocktail) ? 'Click to make available again' :
+                    'Click to force unavailable'
+                  }}">
+                  {{
+                    isAvailabilityButtonDisabled(mocktail) ? '🚫' :
+                    isMocktailForcedUnavailable(mocktail) ? '🔓' :
+                    '🔒'
+                  }}
+                 </button>
+              <button 
+                class="btn btn-small btn-danger" 
+                (click)="$event.stopPropagation(); deleteMocktail(mocktail)"
+                title="Delete">
+                🗑️
+              </button>
             </div>
           </div>
         </div>
@@ -146,38 +162,63 @@
           Create the first mocktail
         </button>
       </div>
+
+      <!-- Pagination controls -->
+      <div class="pagination-section" *ngIf="getTotalPages() > 1">
+        <div class="pagination">
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage === 1"
+            (click)="goToPreviousPage()"
+          >
+            ← Previous
+          </button>
+
+          <div class="page-info">
+            Page {{ currentPage }} of {{ getTotalPages() }}
+          </div>
+
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="goToNextPage()"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Modal d'édition/création de mocktail -->
   <div class="order-modal-backdrop" *ngIf="showMocktailModal" (click)="closeMocktailModal()">
     <div class="order-modal" (click)="$event.stopPropagation()">
-              <button class="modal-close" (click)="closeMocktailModal()" title="Close">✕</button>
+      <button class="modal-close" (click)="closeMocktailModal()" title="Close">✕</button>
       <div class="order-modal-content">
-                  <h2>{{ editingMocktail ? 'Edit Mocktail' : 'New Mocktail' }}</h2>
+        <h2>{{ editingMocktail ? 'Edit Mocktail' : 'New Mocktail' }}</h2>
         
         <div class="form-group">
-                      <label for="mocktail-name">Mocktail name *</label>
-            <input 
-              type="text" 
-              id="mocktail-name" 
-              [(ngModel)]="mocktailForm.name" 
-              class="form-input" 
-              placeholder="Mocktail name"
-              [class.error]="showErrors && !mocktailForm.name">
-            <span class="error-message" *ngIf="showErrors && !mocktailForm.name">Name is required</span>
+          <label for="mocktail-name">Mocktail name *</label>
+          <input 
+            type="text" 
+            id="mocktail-name" 
+            [(ngModel)]="mocktailForm.name" 
+            class="form-input" 
+            placeholder="Mocktail name"
+            [class.error]="showErrors && !mocktailForm.name">
+          <span class="error-message" *ngIf="showErrors && !mocktailForm.name">Name is required</span>
         </div>
         
         <div class="form-group">
-                      <label for="mocktail-description">Description *</label>
-            <textarea 
-              id="mocktail-description" 
-              [(ngModel)]="mocktailForm.description" 
-              class="form-input" 
-              rows="3" 
-              placeholder="Mocktail description"
-              [class.error]="showErrors && !mocktailForm.description"></textarea>
-            <span class="error-message" *ngIf="showErrors && !mocktailForm.description">Description is required</span>
+          <label for="mocktail-description">Description *</label>
+          <textarea 
+            id="mocktail-description" 
+            [(ngModel)]="mocktailForm.description" 
+            class="form-input" 
+            rows="3" 
+            placeholder="Mocktail description"
+            [class.error]="showErrors && !mocktailForm.description"></textarea>
+          <span class="error-message" *ngIf="showErrors && !mocktailForm.description">Description is required</span>
         </div>
         
         <div class="form-row">
@@ -210,26 +251,27 @@
         </div>
         
         <div class="form-group">
-                      <label>Ingredients *</label>
+          <label>Ingredients *</label>
           <div class="ingredients-form">
             <div class="ingredient-form-item" *ngFor="let ingredient of mocktailForm.ingredients; let i = index">
-                              <select 
-                  [(ngModel)]="ingredient.name" 
-                  (ngModelChange)="onIngredientNameChange(i)" 
-                  class="form-input ingredient-name"
-                  [class.error]="showErrors && !ingredient.name">
-                  <option value="">Select an ingredient</option>
-                  <option *ngFor="let ing of ingredients" [value]="ing.name">{{ ing.name }}</option>
-                </select>
+              <select 
+                [(ngModel)]="ingredient.name" 
+                (ngModelChange)="onIngredientNameChange(i)" 
+                class="form-input ingredient-name"
+                [class.error]="showErrors && !ingredient.name">
+                <option value="">Select an ingredient</option>
+                <option *ngFor="let ing of ingredients" [value]="ing.name">{{ ing.name }}</option>
+              </select>
               <div class="form-row">
-                                  <input 
-                    type="number" 
-                    [(ngModel)]="ingredient.quantity" 
-                    class="form-input ingredient-quantity" 
-                    step="0.1" 
-                    min="0" 
-                    placeholder="Qty"
-                    [class.error]="showErrors && (ingredient.quantity <= 0 || !ingredient.quantity)">
+                <input 
+                  type="number" 
+                  [(ngModel)]="ingredient.quantity" 
+                  (ngModelChange)="onIngredientQuantityChange(i)"
+                  class="form-input ingredient-quantity" 
+                  step="0.1" 
+                  min="0" 
+                  placeholder="Qty"
+                  [class.error]="showErrors && (ingredient.quantity <= 0 || !ingredient.quantity)">
                 <span class="ingredient-unit">{{ ingredient.unit }}</span>
               </div>
               <button 
@@ -240,39 +282,55 @@
                 🗑️
               </button>
             </div>
-                         <button type="button" class="btn btn-small btn-secondary btn-add-ingredient" (click)="addIngredient()">
-               + Add an ingredient
-             </button>
+            <button type="button" class="btn btn-small btn-secondary btn-add-ingredient" (click)="addIngredient()">
+              + Add an ingredient
+            </button>
           </div>
-                      <span class="error-message" *ngIf="showErrors && !hasValidIngredients()">At least one valid ingredient is required</span>
+          <span class="error-message" *ngIf="showErrors && !hasValidIngredients()">At least one valid ingredient is required</span>
         </div>
         
-                 <div class="modal-actions">
-                     <button 
-            class="btn btn-primary btn-save" 
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="btn btn-outline" 
+            (click)="closeMocktailModal()"
+            [disabled]="isSaving">
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
             (click)="saveMocktail()"
             [disabled]="isSaving">
-            {{ isSaving ? 'Saving...' : (editingMocktail ? 'Edit' : 'Create') }}
+            <span *ngIf="isSaving">Saving...</span>
+            <span *ngIf="!isSaving">{{ editingMocktail ? 'Update' : 'Create' }}</span>
           </button>
-          <button class="btn btn-outline btn-cancel" (click)="closeMocktailModal()">Cancel</button>
-         </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Modal de confirmation de suppression -->
   <div class="order-modal-backdrop" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
-    <div class="order-modal" (click)="$event.stopPropagation()">
-              <button class="modal-close" (click)="closeDeleteModal()" title="Close">✕</button>
+    <div class="order-modal delete-modal" (click)="$event.stopPropagation()">
       <div class="order-modal-content">
-        <div class="delete-icon">🗑️</div>
-                  <h2>Delete mocktail</h2>
-          <p>Are you sure you want to delete <strong>{{ mocktailToDelete?.name }}</strong>?</p>
-          <p class="warning-text">This action is irreversible.</p>
+        <h2>Delete Mocktail</h2>
+        <p>Are you sure you want to delete <strong>{{ mocktailToDelete?.name }}</strong>?</p>
+        <p>This action cannot be undone.</p>
         
-        <div class="modal-actions">
-          <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
-          <button class="btn btn-outline" (click)="closeDeleteModal()">Cancel</button>
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="btn btn-outline" 
+            (click)="closeDeleteModal()">
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-danger" 
+            (click)="confirmDelete()">
+            Delete
+          </button>
         </div>
       </div>
     </div>

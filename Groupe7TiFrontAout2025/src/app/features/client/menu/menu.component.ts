@@ -14,6 +14,7 @@ interface Mocktail {
   description: string;
   price: number;
   available: boolean;
+  forceAvailable: boolean | null;
   image: string;
   ingredients: Array<{
     name: string;
@@ -158,42 +159,18 @@ export class MenuComponent implements OnInit, OnDestroy {
 
     this.mocktailService.getAll().subscribe({
       next: (mocktails) => {
+        // Utiliser directement les mocktails du backend avec leur statut de disponibilité calculé
         this.mocktails = mocktails;
         this.extractAllIngredients();
 
-        this.ingredientService.GetAll().subscribe({
-          next: (response: { ingredients: Ingredient[] }) => {
-            const ingredientsList: Ingredient[] = response.ingredients;
+        console.log('Mocktails chargés du backend:', this.mocktails.map(m => ({
+          name: m.name,
+          available: m.available,
+          forceAvailable: (m as any).forceAvailable
+        })));
 
-            console.log('Ingrédients reçus avec stockStatus:', ingredientsList);
-
-            // Créer un mapping { nom_ingredient -> stockStatus }
-            const ingredientStatusMap: { [name: string]: string } = {};
-            ingredientsList.forEach((ing: Ingredient) => {
-              ingredientStatusMap[ing.name] = ing.stockStatus;
-            });
-
-            // 🔴 FILTRER les mocktails : tous les ingrédients doivent avoir un stockStatus === 'good'
-            this.mocktails = this.mocktails.filter(mocktail => {
-              return mocktail.ingredients.every(ing => {
-                const status = ingredientStatusMap[ing.name];
-                return status === 'good';
-              });
-            });
-
-            console.log('Mocktails disponibles (tous ingrédients = good):', this.mocktails.map(m => ({
-              name: m.name,
-              ingredients: m.ingredients.map(i => i.name)
-            })));
-
-            this.filterMocktails();
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('Erreur récupération ingrédients:', error);
-            this.isLoading = false;
-          }
-        });
+        this.filterMocktails();
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Erreur chargement mocktails:', error);
@@ -202,9 +179,19 @@ export class MenuComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Méthode utilitaire pour déterminer si un mocktail est réellement disponible
+  isMocktailActuallyAvailable(mocktail: Mocktail): boolean {
+    // Si force_available est false (forcé indisponible par le gérant), toujours indisponible
+    if (mocktail.forceAvailable === false) {
+      return false;
+    }
+    // Sinon, utiliser la disponibilité basée sur le stock des ingrédients
+    return mocktail.available;
+  }
+
   // --- Cart management ---
   openOrderModal(mocktail: Mocktail) {
-    if (!mocktail.available) return;
+    if (!this.isMocktailActuallyAvailable(mocktail)) return;
 
     this.selectedMocktail = mocktail;
     this.selectedQuantity = 1;
@@ -498,35 +485,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     return 'good';
   }
 
-  // Nouvelle fonction pour mettre à jour la disponibilité des mocktails
-  updateMocktailAvailability(ingredientsStock: { [id: string]: number }, threshold: number = 5) {
-    this.mocktails.forEach(mocktail => {
-      // Pour chaque ingrédient du mocktail, on récupère la quantité en stock
-      // ingredientsStock est un objet { ingredientId: quantityInStock }
-      // On doit associer par nom d'ingrédient aux IDs stockés dans ingredientsStock
-      // Ici, on suppose que tu as un moyen de relier ingredient.name => ingredient.id dans ingredientsStock
-      // Sinon, il faudra un mapping nom => id en plus
 
-      const isAvailable = mocktail.ingredients.every(ingredient => {
-        // Trouver l'ingrédient dans le stock (par nom ou id)
-        // Ici je suppose que tu as un mapping id par nom, sinon adapter
-        const stockQty = ingredientsStock[ingredient.name]; // ou [ingredient.id] selon structure
-
-        // S'il manque info stock, on considère pas disponible
-        if (stockQty === undefined) {
-          return false;
-        }
-
-        // Vérifier si la quantité en stock est suffisante
-        return stockQty > threshold;
-      });
-
-      mocktail.available = isAvailable;
-    });
-
-    // Mettre à jour la liste filtrée
-    this.filterMocktails();
-  }
 
   goToOrderTracking() {
     this.router.navigate(['/order-tracking']);

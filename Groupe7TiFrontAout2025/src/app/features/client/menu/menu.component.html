@@ -156,13 +156,13 @@
       <div
         class="mocktail-card"
         *ngFor="let mocktail of filteredMocktails"
-        [class.unavailable]="!mocktail.available"
+        [class.unavailable]="!isMocktailActuallyAvailable(mocktail)"
         [class.adding-to-cart]="isAddingToCart && selectedMocktail?.id === mocktail.id">
 
         <div class="mocktail-image-container">
           <div class="mocktail-image">
             <span class="mocktail-emoji">{{ mocktail.image }}</span>
-            <div class="availability-badge" *ngIf="!mocktail.available">
+            <div class="availability-badge" *ngIf="!isMocktailActuallyAvailable(mocktail)">
               Unavailable
             </div>
           </div>
@@ -207,10 +207,10 @@
           <div class="mocktail-footer">
             <button
               class="btn btn-primary order-btn"
-              [disabled]="!mocktail.available"
+              [disabled]="!isMocktailActuallyAvailable(mocktail)"
               (click)="openOrderModal(mocktail)">
-              <span class="btn-icon">{{ mocktail.available ? '🛒' : '❌' }}</span>
-              {{ mocktail.available ? 'Add to Order' : 'Unavailable' }}
+              <span class="btn-icon">{{ isMocktailActuallyAvailable(mocktail) ? '🛒' : '❌' }}</span>
+              {{ isMocktailActuallyAvailable(mocktail) ? 'Add to Order' : 'Unavailable' }}
             </button>
           </div>
         </div>

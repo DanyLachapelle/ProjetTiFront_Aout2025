@@ -573,25 +573,67 @@
   gap: 1rem;
   margin-top: 2rem;
   justify-content: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
 }
 
 .modal-actions .btn {
-  min-width: 0;
+  min-width: 120px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Form actions (create/update modal) - align center */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.form-actions .btn {
+  min-width: 140px;
 }
 
 .btn-save {
-  flex: 0 0 auto;
-  min-width: 120px;
+  background: #ff7e5f;
+  color: white;
+}
+
+.btn-save:hover {
+  background: #ff6a4a;
+  transform: translateY(-1px);
 }
 
 .btn-cancel {
-  flex: 0 0 auto;
-  min-width: 100px;
+  background: rgba(255, 126, 95, 0.1);
+  color: #ff7e5f;
+  border: 2px solid #ff7e5f;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 126, 95, 0.2);
+  transform: translateY(-1px);
 }
 
 .btn-add-ingredient {
   align-self: flex-start;
   min-width: 180px;
+  background: #43cea2;
+  color: white;
+  margin-top: 1rem;
+}
+
+.btn-add-ingredient:hover {
+  background: #3bb890;
+  transform: translateY(-1px);
 }
 
 /* Modal de suppression */
@@ -610,6 +652,31 @@
 }
 
 /* Boutons supplémentaires */
+.btn {
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-success {
   background: #43cea2;
   color: white;
@@ -635,6 +702,61 @@
 
 .btn-danger:hover {
   background: #ff5a7a;
+}
+
+.btn-secondary {
+  background: #ff7e5f;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #ff6a4a;
+}
+
+/* Pagination Styles */
+.pagination-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-top: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.pagination-btn {
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #ff7e5f;
+  background: white;
+  color: #ff7e5f;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #ff7e5f;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #ccc;
+  color: #ccc;
+}
+
+.page-info {
+  font-weight: 600;
+  color: #22223b;
+  font-size: 1rem;
 }
 
 /* Responsive */

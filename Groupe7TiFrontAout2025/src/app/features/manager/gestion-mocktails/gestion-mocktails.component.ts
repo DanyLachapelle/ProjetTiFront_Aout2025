@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,14 +10,13 @@ interface MocktailForm {
   price: number;
   image: string;
   available: boolean;
+  forceAvailable: boolean | null;
   ingredients: Array<{
     name: string;
     quantity: number;
     unit: string;
   }>;
 }
-
-
 
 @Component({
   selector: 'app-gestion-mocktails',
@@ -29,7 +28,8 @@ interface MocktailForm {
 export class GestionMocktailsComponent implements OnInit {
   constructor(
     private router: Router,
-    private mocktailService: MocktailService
+    private mocktailService: MocktailService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   // Mocktails data
@@ -58,6 +58,11 @@ export class GestionMocktailsComponent implements OnInit {
   isSaving = false;
   showErrors = false;
 
+  // Pagination properties
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  paginatedMocktails: Mocktail[] = [];
+
   // Form
   mocktailForm: MocktailForm = {
     name: '',
@@ -65,13 +70,13 @@ export class GestionMocktailsComponent implements OnInit {
     price: 0,
     image: '',
     available: true,
+    forceAvailable: false,
     ingredients: [{ name: '', quantity: 0, unit: 'cl' }]
   };
 
   ngOnInit() {
     this.loadIngredients();
     this.loadMocktails();
-
   }
 
   // --- Load data from API ---
@@ -79,29 +84,31 @@ export class GestionMocktailsComponent implements OnInit {
     this.mocktailService.getAll().subscribe({
       next: (data) => {
         this.mocktails = data;
-
-        // Synchronisation avec le stock des ingrédients
-        this.mocktails.forEach(mocktail => {
-          let isAvailable = true;
-
-          for (const ing of mocktail.ingredients) {
-            const ingredientInStock = this.ingredients.find(i => i.name === ing.name);
-            if (ingredientInStock) {
-              // Utiliser directement le statut backend
-              const status = ingredientInStock.stockStatus;
-
-              if (status === 'critical' || status === 'warning') {
-                isAvailable = false;
-                break;
-              }
-            }
-          }
-          mocktail.available = isAvailable;
-        });
-
-        console.log('Mocktails après mise à jour disponibilité:', this.mocktails.map(m => ({ name: m.name, available: m.available })));
+        
+        // Utiliser directement la disponibilité calculée par le backend
+        // Pas besoin de recalculer côté frontend
+                 console.log('Mocktails chargés avec disponibilité backend:', this.mocktails.map(m => ({ 
+           name: m.name, 
+           available: m.available,
+           forceAvailable: m.forceAvailable,
+           forceAvailableType: typeof m.forceAvailable
+         })));
+         
+         // Log détaillé du premier mocktail pour debug
+         if (this.mocktails.length > 0) {
+           const firstMocktail = this.mocktails[0];
+           console.log('Détail du premier mocktail:', {
+             name: firstMocktail.name,
+             available: firstMocktail.available,
+             forceAvailable: firstMocktail.forceAvailable,
+             forceAvailableType: typeof firstMocktail.forceAvailable,
+             forceAvailableStrictNull: firstMocktail.forceAvailable === null,
+             forceAvailableStrictFalse: firstMocktail.forceAvailable === false,
+             forceAvailableStrictTrue: firstMocktail.forceAvailable === true
+           });
+         }
+        
         this.filterMocktails();
-
       },
       error: (error) => {
         console.error('Erreur lors du chargement des mocktails:', error);
@@ -109,36 +116,20 @@ export class GestionMocktailsComponent implements OnInit {
       }
     });
   }
+
   loadIngredients() {
     this.mocktailService.getAllIngredients().subscribe({
-      next: (data) => {
+      next: (data: Ingredient[]) => {
         this.ingredients = data;
-        this.allIngredients = this.ingredients.map(ing => ing.name).sort();
+        this.allIngredients = data.map((ing: Ingredient) => ing.name);
+        console.log('Ingrédients chargés:', this.ingredients.length);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Erreur lors du chargement des ingrédients:', error);
         this.ingredients = [];
         this.allIngredients = [];
       }
     });
-  }
-
-  // --- Navigation ---
-  goBack() {
-    this.router.navigate(['/dashboard']);
-  }
-
-  // --- Statistics ---
-  getTotalMocktails(): number {
-    return this.mocktails.length;
-  }
-
-  getAvailableMocktails(): number {
-    return this.mocktails.filter(m => m.available).length;
-  }
-
-  getUnavailableMocktails(): number {
-    return this.mocktails.filter(m => !m.available).length;
   }
 
   // --- Filtering and search ---
@@ -150,9 +141,12 @@ export class GestionMocktailsComponent implements OnInit {
           ingredient.name.toLowerCase().includes(this.searchTerm.toLowerCase())
         );
 
+      // Calculer la disponibilité réelle en tenant compte de forceAvailable
+      const isActuallyAvailable = this.isMocktailActuallyAvailable(mocktail);
+
       const matchesStatus = this.statusFilter === 'all' ||
-        (this.statusFilter === 'available' && mocktail.available) ||
-        (this.statusFilter === 'unavailable' && !mocktail.available);
+        (this.statusFilter === 'available' && isActuallyAvailable) ||
+        (this.statusFilter === 'unavailable' && !isActuallyAvailable);
 
       return matchesSearch && matchesStatus;
     });
@@ -167,31 +161,108 @@ export class GestionMocktailsComponent implements OnInit {
         }
       });
     }
+
+    // Apply pagination
+    this.applyPagination();
   }
 
-  // --- Autocompletion ---
+  // --- Pagination methods ---
+  private applyPagination() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedMocktails = this.filteredMocktails.slice(startIndex, endIndex);
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.filteredMocktails.length / this.itemsPerPage);
+  }
+
+  getPageNumbers(): number[] {
+    const totalPages = this.getTotalPages();
+    const pages: number[] = [];
+    
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (this.currentPage <= 3) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+      } else if (this.currentPage >= totalPages - 2) {
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = this.currentPage - 2; i <= this.currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+    
+    return pages;
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.getTotalPages()) {
+      this.currentPage = page;
+      this.applyPagination();
+    }
+  }
+
+  goToFirstPage() {
+    this.goToPage(1);
+  }
+
+  goToLastPage() {
+    this.goToPage(this.getTotalPages());
+  }
+
+  goToPreviousPage() {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  goToNextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  canGoToPreviousPage(): boolean {
+    return this.currentPage > 1;
+  }
+
+  canGoToNextPage(): boolean {
+    return this.currentPage < this.getTotalPages();
+  }
+
+  getPaginationInfo(): string {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
+    const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.filteredMocktails.length);
+    return `Showing ${startIndex}-${endIndex} of ${this.filteredMocktails.length} mocktails`;
+  }
+
+  // --- Search and filter methods ---
   onSearchInput() {
-    this.filterSuggestions();
+    this.currentPage = 1; // Reset to first page when searching
     this.filterMocktails();
+    this.updateSuggestions();
   }
 
   onSearchBlur() {
-    // Delay to allow clicking on a suggestion
     setTimeout(() => {
       this.showSuggestions = false;
     }, 200);
   }
 
-  filterSuggestions() {
-    if (!this.searchTerm.trim()) {
-      this.filteredSuggestions = this.allIngredients.slice(0, 10); // Show first 10
-    } else {
-      this.filteredSuggestions = this.allIngredients
-        .filter(ingredient =>
-          ingredient.toLowerCase().includes(this.searchTerm.toLowerCase())
-        )
-        .slice(0, 8); // Limit to 8 suggestions
+  updateSuggestions() {
+    if (!this.searchTerm) {
+      this.filteredSuggestions = [];
+      return;
     }
+
+    this.filteredSuggestions = this.allIngredients.filter(ingredient =>
+      ingredient.toLowerCase().includes(this.searchTerm.toLowerCase())
+    ).slice(0, 5);
   }
 
   selectSuggestion(suggestion: string) {
@@ -200,16 +271,104 @@ export class GestionMocktailsComponent implements OnInit {
     this.filterMocktails();
   }
 
+  // --- Statistics ---
+  getTotalMocktails(): number {
+    return this.mocktails.length;
+  }
+
+  // Méthode utilitaire pour déterminer si un mocktail est réellement disponible
+  isMocktailActuallyAvailable(mocktail: Mocktail): boolean {
+    // Si force_available est false (forcé indisponible par le gérant), toujours indisponible
+    if (mocktail.forceAvailable === false) {
+      return false;
+    }
+    // Sinon, utiliser la disponibilité basée sur le stock des ingrédients
+    // (force_available = null ou true n'override pas le manque d'ingrédients)
+    return mocktail.available;
+  }
+
+  // Méthode pour déterminer si un mocktail manque d'ingrédients
+  isMocktailOutOfStock(mocktail: Mocktail): boolean {
+    return !mocktail.available;
+  }
+
+  // Méthode pour déterminer si un mocktail est forcé indisponible par le gérant
+  isMocktailForcedUnavailable(mocktail: Mocktail): boolean {
+    return mocktail.forceAvailable === false;
+  }
+
+  // Méthode pour déterminer si le bouton de disponibilité doit être désactivé
+  isAvailabilityButtonDisabled(mocktail: Mocktail): boolean {
+    // Le bouton est désactivé seulement si le mocktail manque d'ingrédients
+    // ET n'est pas forcé indisponible par le manager
+    // (le manager peut toujours réactiver un mocktail qu'il a forcé indisponible)
+    return !mocktail.available && mocktail.forceAvailable !== false;
+  }
+
+  getAvailableMocktails(): number {
+    return this.mocktails.filter(m => this.isMocktailActuallyAvailable(m)).length;
+  }
+
+  getUnavailableMocktails(): number {
+    return this.mocktails.filter(m => !this.isMocktailActuallyAvailable(m)).length;
+  }
+
+  // --- Navigation ---
+  goBack() {
+    this.router.navigate(['/dashboard']);
+  }
+
   // --- Mocktails management ---
   toggleIngredients(mocktailId: number) {
     this.expandedMocktailId = this.expandedMocktailId === mocktailId ? null : mocktailId;
   }
 
-  toggleAvailability(mocktail: Mocktail) {
-    // Note: Le champ available est calculé côté backend,
-    // cette fonctionnalité nécessiterait un endpoint spécifique
-    // pour l'instant, on recharge les données
-    this.loadMocktails();
+    toggleAvailability(mocktail: Mocktail) {
+    
+    // Empêcher le clic si le mocktail manque d'ingrédients
+    if (this.isAvailabilityButtonDisabled(mocktail)) {
+      return;
+    }
+
+    let newForceAvailable: boolean | null;
+
+    // Logique: basculer entre disponible normal (null) et forcé indisponible (false)
+    if (mocktail.forceAvailable === false) {
+      // Actuellement forcé indisponible -> revenir à l'état normal
+      newForceAvailable = null;
+    } else {
+      // Actuellement normal (null) -> forcer comme indisponible
+      newForceAvailable = false;
+    }
+
+    // Créer une requête de mise à jour avec la nouvelle valeur
+    const updateRequest: UpdateMocktailRequest = {
+      name: mocktail.name,
+      description: mocktail.description,
+      price: mocktail.price,
+      image: mocktail.image,
+      forceAvailable: newForceAvailable,
+      ingredients: mocktail.ingredients.map(ing => ({
+        name: ing.name,
+        quantity: ing.quantity,
+        unit: ing.unit || 'cl'
+      }))
+    };
+
+         // Mettre à jour le mocktail
+     this.mocktailService.update(mocktail.id, updateRequest).subscribe({
+       next: (response) => {
+         if (response.success) {
+           // Recharger les données pour mettre à jour l'affichage
+           this.loadMocktails();
+         } else {
+           console.error('Erreur lors de la mise à jour de la disponibilité:', response.message);
+         }
+       },
+       error: (error) => {
+         console.error('Erreur lors de la mise à jour de la disponibilité:', error);
+       }
+     });
   }
 
   deleteMocktail(mocktail: Mocktail) {
@@ -242,15 +401,51 @@ export class GestionMocktailsComponent implements OnInit {
     this.showErrors = false;
 
     if (mocktail) {
-      // Edit mode - pre-fill the form
+      // Debug: afficher les données brutes du mocktail
+      console.log('=== DONNÉES BRUTES DU MOCKTAIL ===');
+      console.log('Mocktail complet:', mocktail);
+      console.log('Ingrédients bruts:', mocktail.ingredients);
+      
+      // Edit mode - pre-fill the form with correct ingredient data
       this.mocktailForm = {
         name: mocktail.name,
         description: mocktail.description,
         price: mocktail.price,
         image: mocktail.image,
         available: mocktail.available,
-        ingredients: [...mocktail.ingredients]
+        forceAvailable: mocktail.forceAvailable ?? false,
+        ingredients: mocktail.ingredients.map(ing => {
+          console.log('Mapping ingrédient:', ing);
+          console.log('Type de quantity:', typeof ing.quantity, 'Valeur:', ing.quantity);
+          
+          // S'assurer que la quantité est un nombre
+          let quantity = ing.quantity;
+          if (typeof quantity === 'string') {
+            quantity = parseFloat(quantity) || 0;
+          } else if (typeof quantity !== 'number') {
+            quantity = 0;
+          }
+          
+          // Créer un nouvel objet pour forcer la mise à jour
+          const ingredient = {
+            name: ing.name,
+            quantity: quantity,
+            unit: ing.unit || 'cl'
+          };
+          
+          console.log('Ingrédient créé:', ingredient);
+          return ingredient;
+        })
       };
+      
+      console.log('=== FORMULAIRE REMPLI ===');
+      console.log('Formulaire complet:', this.mocktailForm);
+      console.log('Ingrédients du formulaire:', this.mocktailForm.ingredients);
+      
+      // Forcer la détection des changements pour s'assurer que l'UI se met à jour
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
     } else {
       // Create mode - empty form
       this.mocktailForm = {
@@ -259,6 +454,7 @@ export class GestionMocktailsComponent implements OnInit {
         price: 0,
         image: '',
         available: true,
+        forceAvailable: false,
         ingredients: [{ name: '', quantity: 0, unit: 'cl' }]
       };
     }
@@ -290,10 +486,18 @@ export class GestionMocktailsComponent implements OnInit {
     }
   }
 
+  onIngredientQuantityChange(i: number) {
+    // S'assurer que la quantité est un nombre valide
+    const quantity = this.mocktailForm.ingredients[i].quantity;
+    if (typeof quantity === 'string') {
+      this.mocktailForm.ingredients[i].quantity = Number(quantity) || 0;
+    }
+  }
+
   // --- Validation ---
   hasValidIngredients(): boolean {
     return this.mocktailForm.ingredients.some(ing =>
-      ing.name && ing.quantity > 0
+      ing.name && ing.quantity > 0 && typeof ing.quantity === 'number'
     );
   }
 
@@ -338,14 +542,23 @@ export class GestionMocktailsComponent implements OnInit {
         description: this.mocktailForm.description,
         price: this.mocktailForm.price,
         image: this.mocktailForm.image,
-        ingredients: this.mocktailForm.ingredients
+        forceAvailable: this.mocktailForm.forceAvailable,
+        ingredients: this.mocktailForm.ingredients.map(ing => ({
+          name: ing.name,
+          quantity: Number(ing.quantity) || 0,
+          unit: ing.unit || 'cl'
+        }))
       };
 
       this.mocktailService.update(this.editingMocktail.id, updateRequest).subscribe({
         next: (response) => {
           console.log('Mocktail mis à jour avec succès:', response);
-          this.loadMocktails();
-          this.closeMocktailModal();
+          if (response.success) {
+            this.loadMocktails();
+            this.closeMocktailModal();
+          } else {
+            console.error('Erreur lors de la mise à jour:', response.message);
+          }
           this.isSaving = false;
         },
         error: (error) => {
@@ -380,7 +593,4 @@ export class GestionMocktailsComponent implements OnInit {
       });
     }
   }
-
-
-
 }
