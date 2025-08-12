@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MocktailService, Mocktail} from '../../../services/mocktail.service';
 import {Ingredient, IngredientService} from '../../../services/ingredient.service';
+import {SaleService} from '../../../services/sale.service';
 
 
 @Component({
@@ -125,8 +126,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private mocktailService: MocktailService,
-    private ingredientService: IngredientService, // Assuming ingredient service is similar to mocktail service
-
+    private ingredientService: IngredientService,
+    private saleService: SaleService
   ) {}
 
   ngOnInit(): void {
@@ -140,6 +141,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadMocktailsStats();
 
     this.loadIngredientStats();
+
+    this.loadOrdersStats();
 
   }
 
@@ -274,6 +277,74 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // En cas d'erreur, on garde les valeurs par défaut (0)
       }
     });
+  }
+
+  // Load orders statistics for dashboard
+  private loadOrdersStats(): void {
+    this.saleService.getAllSales().subscribe({
+      next: (data: any) => {
+        // Vérifier si data est un tableau ou contient un tableau
+        const sales = Array.isArray(data) ? data : (data.sales || data.data || []);
+        
+        if (!Array.isArray(sales)) {
+          console.error('Les ventes ne sont pas un tableau:', data);
+          return;
+        }
+
+        // Normaliser les statuts comme dans le composant Orders
+        const normalizedSales = sales.map((sale: any) => ({
+          ...sale,
+          status: this.normalizeStatus(sale.status)
+        }));
+
+        const total = normalizedSales.length;
+        const pending = normalizedSales.filter((s: any) => s.status === 'PENDING').length;
+        const preparing = normalizedSales.filter((s: any) => s.status === 'IN_PREPARATION').length;
+        const ready = normalizedSales.filter((s: any) => s.status === 'READY').length;
+
+        // Update the orders card stats
+        const ordersCard = this.menuItems.find(item => item.id === 'gestion-commandes');
+        if (ordersCard) {
+          ordersCard.stats = {
+            pending: pending,
+            preparing: preparing,
+            ready: ready,
+            total: total
+          };
+        }
+
+        console.log('📊 Données reçues:', data);
+        console.log('📊 Ventes normalisées:', normalizedSales);
+        console.log('📊 Statistiques commandes :', {
+          total,
+          pending,
+          preparing,
+          ready
+        });
+      },
+      error: (error: any) => {
+        console.error('Erreur lors du chargement des statistiques des commandes:', error);
+        // En cas d'erreur, on garde les valeurs par défaut (0)
+      }
+    });
+  }
+
+  // Normaliser les statuts comme dans le service OrderService
+  private normalizeStatus(status: string): string {
+    if (!status) return 'PENDING';
+    
+    const statusMap: { [key: string]: string } = {
+      'Pending': 'PENDING',
+      'In Preparation': 'IN_PREPARATION',
+      'Ready': 'READY',
+      'Delivered': 'DELIVERED',
+      'PENDING': 'PENDING',
+      'IN_PREPARATION': 'IN_PREPARATION',
+      'READY': 'READY',
+      'DELIVERED': 'DELIVERED'
+    };
+    
+    return statusMap[status] || 'PENDING';
   }
 
   // Get color class for cards
