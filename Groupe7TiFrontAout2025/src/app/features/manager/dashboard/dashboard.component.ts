@@ -285,7 +285,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: (data: any) => {
         // Vérifier si data est un tableau ou contient un tableau
         const sales = Array.isArray(data) ? data : (data.sales || data.data || []);
-        
+
         if (!Array.isArray(sales)) {
           console.error('Les ventes ne sont pas un tableau:', data);
           return;
@@ -332,7 +332,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Normaliser les statuts comme dans le service OrderService
   private normalizeStatus(status: string): string {
     if (!status) return 'PENDING';
-    
+
     const statusMap: { [key: string]: string } = {
       'Pending': 'PENDING',
       'In Preparation': 'IN_PREPARATION',
@@ -343,7 +343,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'READY': 'READY',
       'DELIVERED': 'DELIVERED'
     };
-    
+
     return statusMap[status] || 'PENDING';
   }
 
