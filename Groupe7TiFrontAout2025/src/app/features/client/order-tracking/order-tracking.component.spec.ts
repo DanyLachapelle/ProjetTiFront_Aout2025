@@ -72,7 +72,7 @@ describe('OrderTrackingComponent', () => {
     sessionService = TestBed.inject(SessionService) as jasmine.SpyObj<SessionService>;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;
 
-    // Configuration des spies
+    // Spy configuration
     sessionService.getSessionData.and.returnValue(mockSessionData);
     sessionService.getRemainingTime.and.returnValue(600);
     orderService.getOrderById.and.returnValue(of(mockOrder));
@@ -169,7 +169,7 @@ describe('OrderTrackingComponent', () => {
     
     component['checkOrderCompletion']();
     
-    // Attendre que le timeout se déclenche
+    // Wait for timeout to trigger
     setTimeout(() => {
       expect(routerSpy).toHaveBeenCalledWith(['/menu']);
     }, 5100);

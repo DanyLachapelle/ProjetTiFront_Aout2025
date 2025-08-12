@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { OrderService, Order } from '../../../services/order.service';
+import { TableService, TableDto } from '../../../services/table.service';
 
 interface OrderStatus {
   status: 'PENDING' | 'IN_PREPARATION' | 'READY' | 'DELIVERED' | 'Pending';
@@ -30,51 +31,63 @@ export class OrdersComponent implements OnInit, OnDestroy {
   // Filtres
   statusFilter: 'ALL' | 'PENDING' | 'IN_PREPARATION' | 'READY' | 'DELIVERED' = 'ALL';
   tableFilter: string = '';
-  dateFilter: string = new Date().toISOString().split('T')[0]; // Aujourd'hui par défaut
+  dateFilter: string = ''; // Pas de filtre par date par défaut pour voir toutes les commandes
   sortBy: 'date' | 'priority' = 'date';
+
+  // Tables disponibles
+  availableTables: TableDto[] = [];
 
   // Actions en cours
   processingOrderId: number | null = null;
 
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 15;
+  paginatedOrders: Order[] = [];
+
   readonly STATUS_CONFIG: { [key: string]: OrderStatus } = {
     'PENDING': {
       status: 'PENDING',
-      label: 'En attente',
+      label: 'Pending',
       icon: '⏳',
       color: '#f59e0b',
-      actionLabel: 'Commencer',
+      actionLabel: 'Start',
       nextStatus: 'IN_PREPARATION'
     },
     'IN_PREPARATION': {
       status: 'IN_PREPARATION',
-      label: 'En préparation',
+      label: 'In Preparation',
       icon: '👨‍🍳',
       color: '#3b82f6',
-      actionLabel: 'Marquer prêt',
+      actionLabel: 'Mark Ready',
       nextStatus: 'READY'
     },
     'READY': {
       status: 'READY',
-      label: 'Prêt',
+      label: 'Ready',
       icon: '✅',
       color: '#10b981',
-      actionLabel: 'Livrer',
+      actionLabel: 'Deliver',
       nextStatus: 'DELIVERED'
     },
     'DELIVERED': {
       status: 'DELIVERED',
-      label: 'Livré',
+      label: 'Delivered',
       icon: '🎉',
       color: '#8b5cf6',
-      actionLabel: 'Terminé',
+      actionLabel: 'Completed',
       nextStatus: null
     }
   };
 
-  constructor(private orderService: OrderService) {}
+  constructor(
+    private orderService: OrderService,
+    private tableService: TableService
+  ) {}
 
   ngOnInit() {
     this.loadOrders();
+    this.loadTables();
     this.startAutoRefresh();
   }
 
@@ -90,38 +103,55 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
     this.orderService.getAllOrders().subscribe({
       next: (response) => {
-        console.log('📋 Réponse reçue dans OrdersComponent:', response);
-        console.log('📋 Nombre de commandes reçues:', response.sales?.length || 0);
+        console.log('📋 Response received in OrdersComponent:', response);
+        console.log('📋 Number of orders received:', response.sales?.length || 0);
         
-        // Normaliser les données reçues
+        // Normalize received data
         this.orders = response.sales.map(order => {
           const normalizedOrder = {
             ...order,
             status: this.orderService.normalizeStatus(order.status),
             items: this.orderService.normalizeItems(order.items)
           };
-          console.log('🔄 Commande normalisée:', normalizedOrder);
+          console.log('🔄 Normalized order:', normalizedOrder);
           return normalizedOrder;
         });
         
-        console.log('📋 Commandes après normalisation:', this.orders);
+        console.log('📋 Orders after normalization:', this.orders);
         this.applyFilters();
+        
+        // Force statistics update after loading
+        this.triggerStatisticsUpdate();
+        
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des commandes:', error);
-        this.error = 'Impossible de charger les commandes';
+        console.error('Error loading orders:', error);
+        this.error = 'Unable to load orders';
         this.isLoading = false;
+      }
+    });
+  }
+
+  private loadTables() {
+    this.tableService.getAllTables().subscribe({
+      next: (response) => {
+        console.log('📋 Tables loaded:', response.tables);
+        this.availableTables = response.tables;
+      },
+      error: (error) => {
+        console.error('❌ Error loading tables:', error);
+        // En cas d'erreur, on peut continuer sans les tables
       }
     });
   }
 
   private startAutoRefresh() {
     this.refreshInterval = setInterval(() => {
-      // Rafraîchissement silencieux sans afficher le loading
+      // Silent refresh without showing loading
       this.orderService.getAllOrders().subscribe({
         next: (response) => {
-          // Normaliser les données reçues
+          // Normalize received data
           this.orders = response.sales.map(order => {
             const normalizedOrder = {
               ...order,
@@ -133,6 +163,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
           
           // Appliquer les filtres sans recharger l'interface
           this.applyFilters();
+          
+          // Force statistics update after auto refresh
+          this.triggerStatisticsUpdate();
         },
         error: (error) => {
           console.error('Erreur lors du rafraîchissement silencieux:', error);
@@ -161,7 +194,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     // Filtre par table
     if (this.tableFilter.trim()) {
       filtered = filtered.filter(order => 
-        order.tableNumber.toLowerCase().includes(this.tableFilter.toLowerCase())
+        order.tableNumber === this.tableFilter
       );
     }
 
@@ -176,21 +209,28 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
 
     this.filteredOrders = filtered;
+    
+    // Apply pagination
+    this.applyPagination();
   }
 
   onStatusFilterChange() {
+    this.currentPage = 1; // Reset to first page when filter changes
     this.applyFilters();
   }
 
   onTableFilterChange() {
+    this.currentPage = 1; // Reset to first page when filter changes
     this.applyFilters();
   }
 
   onDateFilterChange() {
+    this.currentPage = 1; // Reset to first page when filter changes
     this.applyFilters();
   }
 
   onSortChange() {
+    this.currentPage = 1; // Reset to first page when filter changes
     this.applyFilters();
   }
 
@@ -216,21 +256,34 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
     this.orderService.advanceOrderStatus(order.id).subscribe({
       next: (response) => {
-        console.log(`Statut de la commande ${order.id} mis à jour: ${response.newStatus}`);
-        this.showToast(`Commande #${order.id} : ${config.actionLabel}`, 'success');
-        this.loadOrders(); // Recharger pour avoir les données à jour
+        console.log(`Order ${order.id} status updated: ${response.newStatus}`);
+        this.showToast(`Order #${order.id}: ${config.actionLabel}`, 'success');
+        
+        // Update the order status locally for immediate UI feedback
+        const orderToUpdate = this.orders.find(o => o.id === order.id);
+        if (orderToUpdate && config.nextStatus) {
+          orderToUpdate.status = config.nextStatus;
+          console.log(`✅ Order ${order.id} status updated locally to: ${config.nextStatus}`);
+          
+          // Force statistics update
+          this.triggerStatisticsUpdate();
+          
+          // Reapply filters to update the filtered list
+          this.applyFilters();
+        }
+        
         this.processingOrderId = null;
       },
       error: (error) => {
-        console.error('Erreur lors de la mise à jour du statut:', error);
-        this.showToast('Erreur lors de la mise à jour du statut', 'error');
+        console.error('Error updating status:', error);
+        this.showToast('Error updating status', 'error');
         this.processingOrderId = null;
       }
     });
   }
 
   getFormattedDate(dateString: string): string {
-    return new Date(dateString).toLocaleString('fr-FR', {
+    return new Date(dateString).toLocaleString('en-US', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -307,10 +360,103 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   getActiveOrdersCount(): number {
-    return this.orders.filter(order => order.status !== 'DELIVERED').length;
+    const count = this.orders.filter(order => order.status !== 'DELIVERED').length;
+    console.log(`📊 Active orders count: ${count}`);
+    return count;
   }
 
   getOrdersByStatus(status: string): number {
-    return this.orders.filter(order => order.status === status).length;
+    const count = this.orders.filter(order => order.status === status).length;
+    console.log(`📊 Orders with status ${status}: ${count}`);
+    return count;
+  }
+
+  // Methods for filtered statistics (if needed)
+  getFilteredActiveOrdersCount(): number {
+    return this.filteredOrders.filter(order => order.status !== 'DELIVERED').length;
+  }
+
+  getFilteredOrdersByStatus(status: string): number {
+    return this.filteredOrders.filter(order => order.status === status).length;
+  }
+
+  // Force Angular to detect changes in statistics
+  private triggerStatisticsUpdate() {
+    // Force change detection by triggering a small change
+    setTimeout(() => {
+      // This will trigger Angular's change detection
+      this.orders = [...this.orders];
+    }, 0);
+  }
+
+  // Pagination methods
+  private applyPagination() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedOrders = this.filteredOrders.slice(startIndex, endIndex);
+    console.log(`📄 Pagination: Page ${this.currentPage}, showing ${this.paginatedOrders.length} of ${this.filteredOrders.length} orders`);
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.filteredOrders.length / this.itemsPerPage);
+  }
+
+  getPageNumbers(): number[] {
+    const totalPages = this.getTotalPages();
+    const pages: number[] = [];
+    
+    // Show max 5 page numbers around current page
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(totalPages, this.currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.getTotalPages()) {
+      this.currentPage = page;
+      this.applyPagination();
+      console.log(`📄 Navigated to page ${page}`);
+    }
+  }
+
+  goToFirstPage() {
+    this.goToPage(1);
+  }
+
+  goToLastPage() {
+    this.goToPage(this.getTotalPages());
+  }
+
+  goToPreviousPage() {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  goToNextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  canGoToPreviousPage(): boolean {
+    return this.currentPage > 1;
+  }
+
+  canGoToNextPage(): boolean {
+    return this.currentPage < this.getTotalPages();
+  }
+
+  getPaginationInfo(): string {
+    const totalPages = this.getTotalPages();
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
+    const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.filteredOrders.length);
+    
+    if (this.filteredOrders.length === 0) {
+      return 'No orders found';
+    }
+    
+    return `Showing ${startIndex}-${endIndex} of ${this.filteredOrders.length} orders`;
   }
 }

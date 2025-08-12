@@ -353,23 +353,29 @@ export class MenuComponent implements OnInit, OnDestroy {
 
     this.saleService.createSale(saleData).subscribe({
       next: (response) => {
-        console.log('✅ Vente créée avec succès:', response);
+        console.log('✅ Order created successfully:', response);
         
-        // Vider le panier
+        // Store the active order ID for tracking
+        if (response && response.id) {
+          localStorage.setItem('activeOrderId', response.id.toString());
+          console.log('💾 Active order ID stored:', response.id);
+        }
+        
+        // Clear the cart
         this.clearOrder();
         
-        // Afficher un message de succès
-        alert('Commande enregistrée avec succès ! Votre commande sera préparée rapidement.');
+        // Show success message
+        alert('Order placed successfully! Your order will be prepared quickly.');
         
-        // Fermer le modal
+        // Close the modal
         this.closeFullOrderModal();
         
-        // Rediriger vers le suivi de commande
+        // Redirect to order tracking
         this.router.navigate(['/order-tracking']);
       },
       error: (error) => {
-        console.error('❌ Erreur lors de la création de la vente:', error);
-        alert('Erreur lors de l\'enregistrement de la commande. Veuillez réessayer.');
+        console.error('❌ Error creating order:', error);
+        alert('Error placing order. Please try again.');
       }
     });
   }
@@ -527,7 +533,11 @@ export class MenuComponent implements OnInit, OnDestroy {
   }
 
   hasActiveOrder(): boolean {
-    // Logique pour vérifier s'il y a une commande active
+    // Check if there's an active order ID in localStorage
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const activeOrderId = localStorage.getItem('activeOrderId');
+      return activeOrderId !== null && activeOrderId !== '';
+    }
     return false;
   }
 }

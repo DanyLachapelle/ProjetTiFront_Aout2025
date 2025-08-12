@@ -31,47 +31,42 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   private refreshInterval: any;
   private lastUpdate = new Date();
 
-  // Propriétés pour l'historique
-  orderHistory: Order[] = [];
-  isLoadingHistory = false;
-  historyError: string | null = null;
-
   readonly STATUS_CONFIG: { [key: string]: OrderStatus } = {
     'PENDING': {
       status: 'PENDING',
-      label: 'En attente',
+      label: 'Pending',
       icon: '⏳',
       color: '#f59e0b',
       progress: 25,
       estimatedTime: 15,
-      message: 'Votre commande a été reçue et sera préparée dans quelques instants.'
+      message: 'Your order has been received and will be prepared shortly.'
     },
     'IN_PREPARATION': {
       status: 'IN_PREPARATION',
-      label: 'En préparation',
+      label: 'In Preparation',
       icon: '👨‍🍳',
       color: '#3b82f6',
       progress: 50,
       estimatedTime: 10,
-      message: 'Nos barmans préparent votre commande avec soin.'
+      message: 'Our bartenders are carefully preparing your order.'
     },
     'READY': {
       status: 'READY',
-      label: 'Prêt',
+      label: 'Ready',
       icon: '✅',
       color: '#10b981',
       progress: 75,
       estimatedTime: 2,
-      message: 'Votre commande est prête ! Elle arrive dans quelques instants.'
+      message: 'Your order is ready! It will arrive in a few moments.'
     },
     'DELIVERED': {
       status: 'DELIVERED',
-      label: 'Livré',
+      label: 'Delivered',
       icon: '🎉',
       color: '#8b5cf6',
       progress: 100,
       estimatedTime: 0,
-      message: 'Bon appétit ! Profitez de votre commande.'
+      message: 'Enjoy your order!'
     }
   };
 
@@ -84,7 +79,6 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadSessionData();
     this.loadActiveOrder();
-    this.loadOrderHistory();
     this.startAutoRefresh();
   }
 
@@ -98,14 +92,13 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     this.sessionService.getSessionData().subscribe({
       next: (data) => {
         this.sessionData = data;
-        // Ne pas rediriger automatiquement si pas de session data
-        // Laisser l'utilisateur sur la page et afficher un message d'erreur si nécessaire
+        // Let user stay on page and display error message if needed
         if (!this.sessionData) {
-          console.warn('Aucune donnée de session trouvée, mais on reste sur la page');
+          console.warn('No session data found, but staying on the page');
         }
       },
       error: (error) => {
-        console.error('Erreur lors du chargement de la session:', error);
+        console.error('Error loading session:', error);
         // Ne pas rediriger automatiquement en cas d'erreur
         // L'utilisateur peut toujours voir sa commande
       }
@@ -115,33 +108,33 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   private loadActiveOrder() {
     const activeOrderId = localStorage.getItem('activeOrderId');
     if (!activeOrderId) {
-      this.error = 'Aucune commande active trouvée. Vous pouvez retourner au menu pour passer une nouvelle commande.';
+      this.error = 'No active order found. You can return to the menu to place a new order.';
       this.isLoading = false;
       return;
     }
 
     this.orderService.getOrderById(parseInt(activeOrderId)).subscribe({
       next: (order) => {
-        console.log('📋 Commande reçue dans OrderTrackingComponent:', order);
+        console.log('📋 Order received in OrderTrackingComponent:', order);
         
-        console.log('🔍 Status reçu du backend:', order.status);
-        console.log('🔍 Status après normalisation:', this.orderService.normalizeStatus(order.status || 'PENDING'));
+        console.log('🔍 Status received from backend:', order.status);
+        console.log('🔍 Status after normalization:', this.orderService.normalizeStatus(order.status || 'PENDING'));
         
-        // Normaliser les données reçues
+        // Normalize received data
         this.order = {
           ...order,
-          status: this.orderService.normalizeStatus(order.status || 'PENDING'), // Valeur par défaut
+          status: this.orderService.normalizeStatus(order.status || 'PENDING'), // Default value
           items: this.orderService.normalizeItems(order.items)
         };
         
-        console.log('🔄 Commande normalisée:', this.order);
+        console.log('🔄 Normalized order:', this.order);
         this.isLoading = false;
         this.lastUpdate = new Date();
         this.checkOrderCompletion();
       },
       error: (error) => {
-        console.error('Erreur lors du chargement de la commande:', error);
-        this.error = 'Impossible de charger votre commande';
+        console.error('Error loading order:', error);
+        this.error = 'Unable to load your order';
         this.isLoading = false;
       }
     });
@@ -149,10 +142,8 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
 
   private startAutoRefresh() {
     this.refreshInterval = setInterval(() => {
-      // Rafraîchir la commande active et l'historique
-      // Continuer même si la commande est livrée pour voir l'historique
+      // Rafraîchir la commande active
       this.refreshOrderSilently();
-      this.refreshHistorySilently();
     }, 10000); // Rafraîchissement toutes les 10 secondes
   }
 
@@ -164,26 +155,39 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
 
     this.orderService.getOrderById(parseInt(activeOrderId)).subscribe({
       next: (order) => {
-        // Mettre à jour silencieusement sans changer l'état de loading
+        // Update silently without changing loading state
         this.order = {
           ...order,
           status: this.orderService.normalizeStatus(order.status || 'PENDING'),
           items: this.orderService.normalizeItems(order.items)
         };
         this.lastUpdate = new Date();
-        // Ne plus vérifier la completion automatiquement
+        // No longer check completion automatically
       },
       error: (error) => {
-        console.error('Erreur lors du rafraîchissement silencieux:', error);
-        // Ne pas afficher d'erreur à l'utilisateur lors du rafraîchissement automatique
+        console.error('Error during silent refresh:', error);
+        // Don't display error to user during automatic refresh
       }
     });
   }
 
   private checkOrderCompletion() {
-    // Ne plus rediriger automatiquement
-    // L'utilisateur peut rester sur la page et voir l'historique
-    // Il peut retourner au menu quand il le souhaite avec le bouton
+    if (!this.order) return;
+    
+    // If order is delivered, clear the active order ID after a delay
+    if (this.order.status === 'DELIVERED') {
+      console.log('✅ Order completed - will clear active order ID in 30 seconds');
+      setTimeout(() => {
+        this.clearActiveOrder();
+      }, 30000); // Clear after 30 seconds to let user see the completion
+    }
+  }
+
+  private clearActiveOrder() {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('activeOrderId');
+      console.log('🧹 Active order ID cleared from localStorage');
+    }
   }
 
   getCurrentStatus(): OrderStatus | null {
@@ -201,12 +205,12 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     if (!this.order || !this.order.status) return '';
     const status = this.STATUS_CONFIG[this.order.status];
     if (!status) return '';
-    if (status.estimatedTime === 0) return 'Livré !';
+    if (status.estimatedTime === 0) return 'Delivered!';
     return `${status.estimatedTime} min`;
   }
 
   getFormattedDate(dateString: string): string {
-    return new Date(dateString).toLocaleString('fr-FR', {
+    return new Date(dateString).toLocaleString('en-US', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -216,7 +220,7 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   }
 
   getLastUpdateTime(): string {
-    return this.lastUpdate.toLocaleTimeString('fr-FR', {
+    return this.lastUpdate.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
@@ -229,89 +233,15 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   }
 
   goBackToMenu() {
+    // If order is delivered, clear the active order ID when user goes back to menu
+    if (this.order && this.order.status === 'DELIVERED') {
+      this.clearActiveOrder();
+    }
     this.router.navigate(['/menu']);
   }
 
   getTableNumber(): string {
     return this.sessionData?.tableNumber || 'N/A';
-  }
-
-  getFormattedRemainingTime(): string {
-    if (!this.sessionData) return '--:--';
-    const remainingSeconds = this.sessionService.getRemainingTime();
-    const minutes = Math.floor(remainingSeconds / 60);
-    const seconds = remainingSeconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-
-  hasValidSession(): boolean {
-    return this.sessionData !== null;
-  }
-
-  // Méthodes pour l'historique
-  private loadOrderHistory() {
-    this.isLoadingHistory = true;
-    this.historyError = null;
-
-    // Récupérer toutes les commandes et filtrer par table
-    this.orderService.getAllOrders().subscribe({
-      next: (response) => {
-        console.log('📋 Historique des commandes reçu:', response);
-        
-        // Filtrer les commandes de la table actuelle
-        const tableNumber = this.sessionData?.tableNumber;
-        if (tableNumber) {
-          this.orderHistory = response.sales
-            .filter(order => order.tableNumber === tableNumber)
-            .map(order => ({
-              ...order,
-              status: this.orderService.normalizeStatus(order.status),
-              items: this.orderService.normalizeItems(order.items)
-            }))
-            .sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime()); // Plus récentes en premier
-        }
-        
-        console.log('📋 Commandes filtrées pour la table:', tableNumber, this.orderHistory);
-        this.isLoadingHistory = false;
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement de l\'historique:', error);
-        this.historyError = 'Impossible de charger l\'historique des commandes';
-        this.isLoadingHistory = false;
-      }
-    });
-  }
-
-  refreshHistory() {
-    this.loadOrderHistory();
-  }
-
-  private refreshHistorySilently() {
-    // Rafraîchir l'historique sans afficher de loading
-    const tableNumber = this.sessionData?.tableNumber;
-    if (tableNumber) {
-      this.orderService.getAllOrders().subscribe({
-        next: (response) => {
-          this.orderHistory = response.sales
-            .filter(order => order.tableNumber === tableNumber)
-            .map(order => ({
-              ...order,
-              status: this.orderService.normalizeStatus(order.status),
-              items: this.orderService.normalizeItems(order.items)
-            }))
-            .sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
-        },
-        error: (error) => {
-          console.error('Erreur lors du rafraîchissement silencieux de l\'historique:', error);
-        }
-      });
-    }
-  }
-
-  getItemsSummary(items: any[]): string {
-    if (!items || items.length === 0) return 'Aucun article';
-    if (items.length === 1) return items[0].mocktailName;
-    return `${items.length} articles`;
   }
 
   getStatusConfig(status: string): OrderStatus {
