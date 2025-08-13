@@ -237,6 +237,7 @@ export class GestionSalesComponent implements OnInit {
   salesDistributionChart: any = { ...PIE_CHART_CONFIG };
   peakHoursChart: any = { ...RADAR_CHART_CONFIG };
   periodComparisonChart: any = { ...BAR_CHART_CONFIG };
+  salesByTableChart: any = { ...PIE_CHART_CONFIG };
 
   // KPIs
   salesGrowth: { growth: number; isPositive: boolean; trend: string } = { growth: 0, isPositive: true, trend: '📈' };
@@ -287,6 +288,7 @@ export class GestionSalesComponent implements OnInit {
         this.sales = backendSales.map((sale: any) => ({
           saleDate: sale.SaleDate || sale.saleDate,
           totalAmount: sale.TotalAmount || sale.totalAmount,
+          tableNumber: sale.TableNumber || sale.tableNumber,
           items: (sale.Items || sale.items || []).map((item: any) => ({
             mocktailName: item.MocktailName || item.mocktailName,
             quantity: item.Quantity || item.quantity,
@@ -556,7 +558,8 @@ export class GestionSalesComponent implements OnInit {
 
   // Mise à jour des graphiques
   private updateCharts(): void {
-    const filteredSales = this.getFilteredSales();
+    // Utiliser toutes les données filtrées, pas seulement la page courante
+    const filteredSales = this.filteredSales;
 
     // Préparer les données avec les paramètres actuels
     const salesTrendData = this.chartDataService.prepareSalesTrendData(filteredSales, 'day', this.chartSettings);
@@ -564,6 +567,7 @@ export class GestionSalesComponent implements OnInit {
     const salesDistributionData = this.chartDataService.prepareSalesDistributionData(filteredSales, this.chartSettings);
     const peakHoursData = this.chartDataService.preparePeakHoursData(filteredSales, this.chartSettings);
     const periodComparisonData = this.chartDataService.preparePeriodComparisonData(filteredSales, this.chartSettings);
+    const salesByTableData = this.chartDataService.prepareSalesByTableData(filteredSales, this.chartSettings);
 
     // Appliquer les paramètres aux graphiques
     this.salesTrendChart = applyChartSettings(LINE_CHART_CONFIG, this.chartSettings);
@@ -580,11 +584,15 @@ export class GestionSalesComponent implements OnInit {
 
     this.periodComparisonChart = applyChartSettings(BAR_CHART_CONFIG, this.chartSettings);
     this.periodComparisonChart.data = periodComparisonData;
+
+    this.salesByTableChart = applyChartSettings(PIE_CHART_CONFIG, this.chartSettings);
+    this.salesByTableChart.data = salesByTableData;
   }
 
   // Mise à jour des KPIs
   private updateKPIs(): void {
-    const filteredSales = this.getFilteredSales();
+    // Utiliser toutes les données filtrées, pas seulement la page courante
+    const filteredSales = this.filteredSales;
 
     this.salesGrowth = this.chartDataService.calculateSalesGrowth(filteredSales);
     this.customerRetention = this.chartDataService.calculateCustomerRetention(filteredSales);

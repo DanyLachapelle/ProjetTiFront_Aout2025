@@ -29,14 +29,7 @@
     </div>
   </header>
 
-  <div style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; z-index: 1000; border: 1px solid red;">
-    <h3>Debug Info</h3>
-    <p>Total Orders: {{ totalAllOrders }}</p>
-    <p>Sales Length: {{ sales.length }}</p>
-    <p>Filtered Length: {{ filteredSales.length }}</p>
-    <button class="btn btn-primary" (click)="testCreateSale()" style="margin-top: 10px;">🧪 Test Create Sale</button>
-    <button class="btn btn-outline" (click)="refreshData()" style="margin-top: 5px;">🔄 Refresh</button>
-  </div>
+
 
   <!-- Filtres et recherche -->
   <section class="filters-section">
@@ -200,10 +193,11 @@
                 <span class="sale-date">{{ sale.saleDate  | date:'MMM dd, yyyy' }}</span>
                 <span class="sale-time">{{ sale.saleDate | date:'HH:mm' }}</span>
               </div>
-              <div class="sale-summary">
-                <span class="sale-items-count">{{ getSaleItemsCount(sale) }} items</span>
-                <span class="sale-mocktails">{{ getSaleMocktailsSummary(sale) }}</span>
-              </div>
+                             <div class="sale-summary">
+                 <span class="sale-items-count">{{ getSaleItemsCount(sale) }} items</span>
+                 <span class="sale-mocktails">{{ getSaleMocktailsSummary(sale) }}</span>
+                 <span class="sale-table" *ngIf="sale.tableNumber">🪑 {{ sale.tableNumber }}</span>
+               </div>
             </div>
 
             <div class="sale-amount">
@@ -367,46 +361,25 @@
           </div>
         </div>
 
-        <!-- Tableau de bord des KPIs -->
-        <div class="chart-container kpi-dashboard" [class.dark-theme]="chartSettings.theme === 'dark'">
-          <div class="chart-header">
-            <h3>🎯 Key Performance Indicators</h3>
-            <p>Detailed metrics and insights</p>
-          </div>
-          <div class="kpi-content">
-            <div class="kpi-grid">
-              <div class="kpi-item">
-                <div class="kpi-label">Conversion Rate</div>
-                <div class="kpi-value">{{ conversionRate.conversion }}%</div>
-                <div class="kpi-trend" [class.positive]="conversionRate.trend === '📈'"
-                     [class.negative]="conversionRate.trend === '📉'">
-                  {{ conversionRate.trend }} {{ conversionRate.conversion > 0 ? '+' : '' }}{{ conversionRate.conversion }}%
-                </div>
-              </div>
-              <div class="kpi-item">
-                <div class="kpi-label">Customer Retention</div>
-                <div class="kpi-value">{{ customerRetention.retention }}%</div>
-                <div class="kpi-trend" [class.positive]="customerRetention.trend === '📈'"
-                     [class.negative]="customerRetention.trend === '📉'">
-                  {{ customerRetention.trend }} {{ customerRetention.retention > 0 ? '+' : '' }}{{ customerRetention.retention }}%
-                </div>
-              </div>
-              <div class="kpi-item">
-                <div class="kpi-label">Average Order Value</div>
-                <div class="kpi-value">€{{ getAverageOrderValue().toFixed(2) }}</div>
-                <div class="kpi-trend positive">📈 +0%</div>
-              </div>
-              <div class="kpi-item">
-                <div class="kpi-label">Sales Growth</div>
-                <div class="kpi-value">{{ salesGrowth.isPositive ? '+' : '' }}{{ salesGrowth.growth }}%</div>
-                <div class="kpi-trend" [class.positive]="salesGrowth.isPositive"
-                     [class.negative]="!salesGrowth.isPositive">
-                  {{ salesGrowth.trend }} {{ salesGrowth.isPositive ? '+' : '' }}{{ salesGrowth.growth }}%
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                 <!-- Graphique des ventes par table -->
+         <div class="chart-container" id="sales-by-table-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+           <div class="chart-header">
+             <h3>🪑 Sales by Table</h3>
+             <p>Revenue distribution by table number</p>
+           </div>
+           <div class="chart-wrapper">
+             <canvas baseChart
+               [data]="salesByTableChart.data"
+               [options]="salesByTableChart.options"
+               [type]="salesByTableChart.type">
+             </canvas>
+           </div>
+           <div class="chart-actions">
+             <button class="btn btn-outline btn-sm" (click)="exportChart('sales-by-table-chart', 'Sales_by_Table')">
+               📄 Export
+             </button>
+           </div>
+         </div>
 
         <!-- Graphique de comparaison -->
         <div class="chart-container" id="period-comparison-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
