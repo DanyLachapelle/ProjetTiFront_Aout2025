@@ -30,7 +30,6 @@ export class QrService {
     }
 
     this.currentTokenSubject.next(qrToken)
-    localStorage.setItem('qrToken', JSON.stringify(qrToken));
     return qrToken
   }
 
@@ -58,7 +57,6 @@ export class QrService {
     const currentToken = this.currentTokenSubject.value
     if (currentToken) {
       currentToken.isValid = false
-      this.currentTokenSubject.next(currentToken)
       localStorage.removeItem('qrToken');
     }
   }
@@ -93,5 +91,12 @@ export class QrService {
         observer.complete()
       }, 500) // Simulate network delay
     })
+  }
+
+  saveTokenToLocal(): void {
+    const currentToken = this.currentTokenSubject.value;
+    if (currentToken) {
+      localStorage.setItem('qrToken', JSON.stringify(currentToken));
+    }
   }
 }

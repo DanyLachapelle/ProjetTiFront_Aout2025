@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GeolocationService, LocationResult } from '../../../services/geolocation.service';
 import { LocationMapComponent } from '../../../components/location-map/location-map.component';
+import {QrService} from '../../../services/qr.service';
 
 @Component({
   selector: 'app-geoloc-verification',
@@ -18,8 +19,29 @@ export class GeolocVerificationComponent {
 
   constructor(
     private router: Router,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private route: ActivatedRoute,
+    private qrService: QrService
   ) {}
+
+  ngOnInit(): void {
+    const token = this.route.snapshot.queryParamMap.get('token');
+    if (token) {
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 15 * 60 * 1000);
+
+      // Création d’un QRToken
+      const qrToken = {
+        token,
+        expiresAt,
+        isValid: true,
+        createdAt: now,
+      };
+
+      this.qrService['currentTokenSubject'].next(qrToken);
+      this.qrService.saveTokenToLocal();
+    }
+  }
 
   requestGeolocation() {
     this.error = null;
@@ -29,7 +51,7 @@ export class GeolocVerificationComponent {
     this.geolocationService.verifyLocation().subscribe({
       next: (result) => {
         this.locationResult = result;
-        
+
         if (result.isWithinEstablishment) {
           console.log('✅ Utilisateur dans l\'établissement - Accès accordé');
           this.loading = false;
