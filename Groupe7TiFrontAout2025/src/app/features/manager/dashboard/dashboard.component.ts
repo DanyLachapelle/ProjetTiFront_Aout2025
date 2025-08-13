@@ -191,9 +191,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Logout
   logout(): void {
-    // TODO: Implement logout logic
     console.log('Logout requested');
-    // this.router.navigate(['/login']);
+    localStorage.clear();
+    this.router.navigate(['/login']);
   }
 
   // Show notifications

@@ -61,7 +61,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       return '';
     }
 
-    const menuUrl = `${window.location.origin}/menu `;
+    const menuUrl = `${window.location.origin}/geoloc?token=${token}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(menuUrl)}`;
   }
 
@@ -83,6 +83,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onAccessMenu(): void {
+    //this.qrService.saveTokenToLocal();
     this.router.navigate(['/geoloc'], { queryParams: { token: this.qrToken } });
   }
 

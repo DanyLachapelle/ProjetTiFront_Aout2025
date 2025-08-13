@@ -7,6 +7,9 @@ export const routes: Routes = [
 
   // Routes pour la page de connexion
   { path: 'login', loadComponent: () => import('./features/manager/login-page/login-page.component').then(m => m.LoginPageComponent) },
+  // Routes pour les composants de développement/test
+  { path: 'design', loadComponent: () => import('./features/dev/general-design/general-design.component').then(m => m.GeneralDesignComponent), canActivate: [authGuard] },
+
   // Routes pour le dashboard (gérant)
   { path: 'dashboard', loadComponent: () => import('./features/manager/dashboard/dashboard.component').then(m => m.DashboardComponent), canActivate: [authGuard] },
 
