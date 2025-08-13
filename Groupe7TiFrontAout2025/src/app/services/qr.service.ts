@@ -30,6 +30,7 @@ export class QrService {
     }
 
     this.currentTokenSubject.next(qrToken)
+    localStorage.setItem('qrToken', JSON.stringify(qrToken));
     return qrToken
   }
 
@@ -58,6 +59,7 @@ export class QrService {
     if (currentToken) {
       currentToken.isValid = false
       this.currentTokenSubject.next(currentToken)
+      localStorage.removeItem('qrToken');
     }
   }
 
