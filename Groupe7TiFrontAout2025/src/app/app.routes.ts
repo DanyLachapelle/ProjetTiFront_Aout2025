@@ -7,9 +7,6 @@ export const routes: Routes = [
 
   // Routes pour la page de connexion
   { path: 'login', loadComponent: () => import('./features/manager/login-page/login-page.component').then(m => m.LoginPageComponent) },
-  // Routes pour les composants de développement/test
-  { path: 'design', loadComponent: () => import('./features/dev/general-design/general-design.component').then(m => m.GeneralDesignComponent), canActivate: [authGuard] },
-
   // Routes pour le dashboard (gérant)
   { path: 'dashboard', loadComponent: () => import('./features/manager/dashboard/dashboard.component').then(m => m.DashboardComponent), canActivate: [authGuard] },
 
@@ -40,7 +37,7 @@ export const routes: Routes = [
 
 
   // Flow d'accès client sécurisé
-  { path: 'welcome', loadComponent: () => import('./features/client/welcome/welcome.component').then(m => m.WelcomeComponent) },
+  //{ path: 'welcome', loadComponent: () => import('./features/client/welcome/welcome.component').then(m => m.WelcomeComponent) },
   { path: 'geoloc', loadComponent: () => import('./features/client/geoloc-verification/geoloc-verification.component').then(m => m.GeolocVerificationComponent) },
   { path: 'table', loadComponent: () => import('./features/client/table-number/table-number.component').then(m => m.TableNumberComponent) },
   { path: 'session', loadComponent: () => import('./features/client/session-countdown/session-countdown.component').then(m => m.SessionCountdownComponent) },

@@ -107,21 +107,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ];
 
-  // Active alerts
-  // activeAlerts = [
-  //   {
-  //     type: 'stock',
-  //     message: 'Critical stock: Fresh mint (5g remaining)',
-  //     severity: 'critical',
-  //     icon: '⚠️'
-  //   },
-  //   {
-  //     type: 'stock',
-  //     message: 'Low stock: Pineapple juice (15cl remaining)',
-  //     severity: 'warning',
-  //     icon: '⚠️'
-  //   }
-  // ];
+
   activeAlerts: { message: string; severity: string; icon: string; type: string }[] = [];
   constructor(
     private router: Router,

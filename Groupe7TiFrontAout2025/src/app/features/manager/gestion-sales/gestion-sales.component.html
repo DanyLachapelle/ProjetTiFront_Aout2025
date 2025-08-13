@@ -178,7 +178,7 @@
              <input
                type="text"
                [(ngModel)]="searchTerm"
-               placeholder="🔍 Rechercher par nom de mocktail..."
+               placeholder="🔍 Search by mocktail name..."
                class="search-input"
                (input)="onSearchChange()"
                (focus)="showSuggestions = true"
@@ -186,11 +186,11 @@
              >
              <span class="search-icon">🍹</span>
            </div>
-           
+
            <!-- Suggestions d'autocomplétion -->
            <div class="suggestions-dropdown" *ngIf="showSuggestions && filteredSuggestions.length > 0">
-             <div 
-               class="suggestion-item" 
+             <div
+               class="suggestion-item"
                *ngFor="let suggestion of filteredSuggestions"
                (click)="selectSuggestion(suggestion)"
              >
@@ -198,10 +198,10 @@
              </div>
            </div>
          </div>
-         
+
          <div class="search-info">
            <span class="search-results" *ngIf="searchTerm.trim()">
-             {{ filteredSales.length }} vente(s) trouvée(s) pour "{{ searchTerm }}"
+             {{ filteredSales.length }} sale(s) found for "{{ searchTerm }}"
            </span>
          </div>
        </div>

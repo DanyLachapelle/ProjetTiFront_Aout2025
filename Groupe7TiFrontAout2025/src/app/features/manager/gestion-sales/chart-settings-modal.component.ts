@@ -12,30 +12,30 @@ import { getColorScheme } from './chart-config';
     <div class="modal-overlay" *ngIf="isOpen" (click)="closeModal()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>⚙️ Paramètres des Graphiques</h2>
+          <h2>⚙️ Chart Settings</h2>
           <button class="close-btn" (click)="closeModal()">×</button>
         </div>
-        
+
         <div class="modal-body">
           <div class="settings-section">
-            <h3>Affichage</h3>
-            
+            <h3>Display</h3>
+
             <div class="setting-item">
               <label class="setting-label">
                 <input type="checkbox" [checked]="localSettings.showLegend" (change)="onCheckboxChange('showLegend', $event)">
                 <span class="checkmark"></span>
-                Afficher la légende
+                Show Legend
               </label>
             </div>
-            
+
             <div class="setting-item">
               <label class="setting-label">
                 <input type="checkbox" [checked]="localSettings.showGrid" (change)="onCheckboxChange('showGrid', $event)">
                 <span class="checkmark"></span>
-                Afficher la grille
+                Show Grid
               </label>
             </div>
-            
+
             <div class="setting-item">
               <label class="setting-label">
                 <input type="checkbox" [checked]="localSettings.animation" (change)="onCheckboxChange('animation', $event)">
@@ -43,7 +43,7 @@ import { getColorScheme } from './chart-config';
                 Animations
               </label>
             </div>
-            
+
             <div class="setting-item">
               <label class="setting-label">
                 <input type="checkbox" [checked]="localSettings.responsive" (change)="onCheckboxChange('responsive', $event)">
@@ -52,10 +52,10 @@ import { getColorScheme } from './chart-config';
               </label>
             </div>
           </div>
-          
+
           <div class="settings-section">
             <h3>Thème</h3>
-            
+
             <div class="setting-item">
               <label class="setting-label">Thème</label>
               <select [value]="localSettings.theme" (change)="onSelectChange('theme', $event)" class="setting-select">
@@ -63,7 +63,7 @@ import { getColorScheme } from './chart-config';
                 <option value="dark">Sombre</option>
               </select>
             </div>
-            
+
             <div class="setting-item">
               <label class="setting-label">Schéma de couleurs</label>
               <select [value]="localSettings.colorScheme" (change)="onSelectChange('colorScheme', $event)" class="setting-select">
@@ -73,9 +73,9 @@ import { getColorScheme } from './chart-config';
               </select>
             </div>
           </div>
-          
+
           <div class="settings-section">
-            <h3>Prévisualisation</h3>
+            <h3>Preview</h3>
             <div class="preview-container">
               <div class="preview-chart" [class.dark-theme]="localSettings.theme === 'dark'">
                 <div class="preview-bar" [style.background]="getPreviewColor(0)" style="height: 60%;"></div>
@@ -86,13 +86,13 @@ import { getColorScheme } from './chart-config';
             </div>
           </div>
         </div>
-        
+
         <div class="modal-footer">
           <button class="btn btn-outline" (click)="resetToDefault()">
-            🔄 Réinitialiser
+            🔄 Reset
           </button>
           <button class="btn btn-primary" (click)="saveSettings()">
-            💾 Sauvegarder
+            💾 Save
           </button>
         </div>
       </div>
@@ -112,7 +112,7 @@ import { getColorScheme } from './chart-config';
       z-index: 1000;
       backdrop-filter: blur(5px);
     }
-    
+
     .modal-content {
       background: white;
       border-radius: 20px;
@@ -123,7 +123,7 @@ import { getColorScheme } from './chart-config';
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       animation: slideIn 0.3s ease-out;
     }
-    
+
     @keyframes slideIn {
       from {
         opacity: 0;
@@ -134,7 +134,7 @@ import { getColorScheme } from './chart-config';
         transform: translateY(0);
       }
     }
-    
+
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -142,13 +142,13 @@ import { getColorScheme } from './chart-config';
       padding: 25px 30px;
       border-bottom: 1px solid #eee;
     }
-    
+
     .modal-header h2 {
       margin: 0;
       color: #333;
       font-size: 24px;
     }
-    
+
     .close-btn {
       background: none;
       border: none;
@@ -164,20 +164,20 @@ import { getColorScheme } from './chart-config';
       border-radius: 50%;
       transition: all 0.3s ease;
     }
-    
+
     .close-btn:hover {
       background: #f0f0f0;
       color: #333;
     }
-    
+
     .modal-body {
       padding: 30px;
     }
-    
+
     .settings-section {
       margin-bottom: 30px;
     }
-    
+
     .settings-section h3 {
       color: #333;
       margin: 0 0 20px 0;
@@ -185,11 +185,11 @@ import { getColorScheme } from './chart-config';
       border-bottom: 2px solid #f0f0f0;
       padding-bottom: 10px;
     }
-    
+
     .setting-item {
       margin-bottom: 15px;
     }
-    
+
     .setting-label {
       display: flex;
       align-items: center;
@@ -197,14 +197,14 @@ import { getColorScheme } from './chart-config';
       font-weight: 500;
       color: #555;
     }
-    
+
     .setting-label input[type="checkbox"] {
       margin-right: 10px;
       width: 18px;
       height: 18px;
       accent-color: #ff7e5f;
     }
-    
+
     .setting-select {
       width: 100%;
       padding: 12px;
@@ -215,19 +215,19 @@ import { getColorScheme } from './chart-config';
       background: white;
       transition: border-color 0.3s ease;
     }
-    
+
     .setting-select:focus {
       outline: none;
       border-color: #ff7e5f;
     }
-    
+
     .preview-container {
       background: #f8f9fa;
       border-radius: 10px;
       padding: 20px;
       text-align: center;
     }
-    
+
     .preview-chart {
       display: flex;
       align-items: end;
@@ -238,17 +238,17 @@ import { getColorScheme } from './chart-config';
       background: white;
       border-radius: 8px;
     }
-    
+
     .preview-chart.dark-theme {
       background: #333;
     }
-    
+
     .preview-bar {
       width: 20px;
       border-radius: 4px 4px 0 0;
       transition: all 0.3s ease;
     }
-    
+
     .modal-footer {
       display: flex;
       justify-content: space-between;
@@ -256,7 +256,7 @@ import { getColorScheme } from './chart-config';
       border-top: 1px solid #eee;
       gap: 15px;
     }
-    
+
     .btn {
       padding: 12px 25px;
       border-radius: 25px;
@@ -266,45 +266,45 @@ import { getColorScheme } from './chart-config';
       border: none;
       font-family: 'Quicksand', Arial, sans-serif;
     }
-    
+
     .btn-outline {
       background: white;
       border: 2px solid #e0e0e0;
       color: #666;
     }
-    
+
     .btn-outline:hover {
       border-color: #ff7e5f;
       color: #ff7e5f;
     }
-    
+
     .btn-primary {
       background: linear-gradient(135deg, #ff7e5f 0%, #ffb347 100%);
       color: white;
       box-shadow: 0 4px 15px rgba(255, 126, 95, 0.3);
     }
-    
+
     .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(255, 126, 95, 0.4);
     }
-    
+
     @media (max-width: 768px) {
       .modal-content {
         width: 95%;
         margin: 20px;
       }
-      
+
       .modal-header,
       .modal-body,
       .modal-footer {
         padding: 20px;
       }
-      
+
       .modal-footer {
         flex-direction: column;
       }
-      
+
       .btn {
         width: 100%;
       }
@@ -321,7 +321,7 @@ export class ChartSettingsModalComponent implements OnInit {
     theme: 'light',
     colorScheme: 'default'
   };
-  
+
   @Output() settingsChange = new EventEmitter<ChartSettings>();
   @Output() close = new EventEmitter<void>();
 
@@ -379,4 +379,4 @@ export class ChartSettingsModalComponent implements OnInit {
     const colorScheme = getColorScheme(this.localSettings);
     return colorScheme[index % colorScheme.length];
   }
-} 
+}

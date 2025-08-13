@@ -23,10 +23,7 @@ export class SaleService {
 
     constructor(private _http: HttpClient) { }
 
-  // createSale(p: { tableNumber: string }): Observable<{ id: number }> {
-  //   return this._http.post<{ id: number }>('http://localhost:5201/api/SaleCommand/CreateSale', {
-  //   });
-  // }
+
 
   createSale(data: { tableNumber: string; items?: any[] }) {
     return this._http.post<any>('http://localhost:5201/api/SaleCommand/CreateSale', data);

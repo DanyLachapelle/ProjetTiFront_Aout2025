@@ -325,7 +325,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   }
 
   onQuit() {
-    if (confirm('Êtes-vous sûr de vouloir quitter ? Votre panier sera perdu.')) {
+    if (confirm('Are you sure you want to leave? Your cart will be lost.')) {
       this.sessionService.endSession();
       this.router.navigate(['/']);
     }
@@ -333,7 +333,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   onPay() {
     if (this.orderList.length === 0) {
-      alert('Votre panier est vide !');
+      alert('Your cart is empty!');
       return;
     }
 
@@ -355,22 +355,22 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.saleService.createSale(saleData).subscribe({
       next: (response) => {
         console.log('✅ Order created successfully:', response);
-        
+
         // Store the active order ID for tracking
         if (response && response.id) {
           localStorage.setItem('activeOrderId', response.id.toString());
           console.log('💾 Active order ID stored:', response.id);
         }
-        
+
         // Clear the cart
         this.clearOrder();
-        
+
         // Show success modal
         this.showSuccessNotification = true;
-        
+
         // Close the order modal
         this.closeFullOrderModal();
-        
+
         // Don't redirect automatically - wait for user to click OK
       },
       error: (error) => {

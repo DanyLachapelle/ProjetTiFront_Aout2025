@@ -32,189 +32,7 @@ Chart.register();
 export class GestionSalesComponent implements OnInit {
 
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
-  //
-  // // Sales history data
-  // salesHistory: Sale[] = [
-  //   {
-  //     date: '2025-01-10T15:42:00',
-  //     total: 24.50,
-  //     mocktails: [
-  //       { name: 'Virgin Mojito', quantity: 2, price: 8.50 },
-  //       { name: 'Berry Fizz', quantity: 1, price: 8.00 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-02-05T14:10:00',
-  //     total: 16.00,
-  //     mocktails: [
-  //       { name: 'Virgin Colada', quantity: 1, price: 9.00 },
-  //       { name: 'Pink Lemonade', quantity: 1, price: 7.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-03-18T19:05:00',
-  //     total: 8.50,
-  //     mocktails: [
-  //       { name: 'Virgin Mojito', quantity: 1, price: 8.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-04-22T12:30:00',
-  //     total: 18.00,
-  //     mocktails: [
-  //       { name: 'Sunset Spritz', quantity: 2, price: 7.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-05-15T17:55:00',
-  //     total: 27.70,
-  //     mocktails: [
-  //       { name: 'Tropical Dream', quantity: 2, price: 9.20 },
-  //       { name: 'Green Detox', quantity: 1, price: 8.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-06-03T20:10:00',
-  //     total: 32.00,
-  //     mocktails: [
-  //       { name: 'Berry Fizz', quantity: 2, price: 8.00 },
-  //       { name: 'Sunset Spritz', quantity: 2, price: 7.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-06-25T13:20:00',
-  //     total: 12.50,
-  //     mocktails: [
-  //       { name: 'Virgin Colada', quantity: 1, price: 9.00 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-01T16:30:00',
-  //     total: 45.20,
-  //     mocktails: [
-  //       { name: 'Tropical Dream', quantity: 3, price: 9.20 },
-  //       { name: 'Green Detox', quantity: 2, price: 8.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-02T11:15:00',
-  //     total: 19.50,
-  //     mocktails: [
-  //       { name: 'Virgin Mojito', quantity: 1, price: 8.50 },
-  //       { name: 'Pink Lemonade', quantity: 1, price: 7.80 },
-  //       { name: 'Berry Fizz', quantity: 1, price: 8.00 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-03T14:45:00',
-  //     total: 33.80,
-  //     mocktails: [
-  //       { name: 'Virgin Colada', quantity: 2, price: 9.00 },
-  //       { name: 'Sunset Spritz', quantity: 2, price: 7.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-04T09:30:00',
-  //     total: 28.30,
-  //     mocktails: [
-  //       { name: 'Green Detox', quantity: 2, price: 8.80 },
-  //       { name: 'Pink Lemonade', quantity: 1, price: 7.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-05T18:20:00',
-  //     total: 41.50,
-  //     mocktails: [
-  //       { name: 'Tropical Dream', quantity: 3, price: 9.20 },
-  //       { name: 'Virgin Mojito', quantity: 1, price: 8.50 },
-  //       { name: 'Berry Fizz', quantity: 1, price: 8.00 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-06T12:45:00',
-  //     total: 15.60,
-  //     mocktails: [
-  //       { name: 'Sunset Spritz', quantity: 2, price: 7.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-07T20:15:00',
-  //     total: 52.80,
-  //     mocktails: [
-  //       { name: 'Virgin Colada', quantity: 3, price: 9.00 },
-  //       { name: 'Tropical Dream', quantity: 2, price: 9.20 },
-  //       { name: 'Green Detox', quantity: 1, price: 8.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-08T14:30:00',
-  //     total: 22.30,
-  //     mocktails: [
-  //       { name: 'Virgin Mojito', quantity: 1, price: 8.50 },
-  //       { name: 'Pink Lemonade', quantity: 1, price: 7.80 },
-  //       { name: 'Sunset Spritz', quantity: 1, price: 7.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-09T16:45:00',
-  //     total: 38.90,
-  //     mocktails: [
-  //       { name: 'Berry Fizz', quantity: 3, price: 8.00 },
-  //       { name: 'Green Detox', quantity: 2, price: 8.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-10T11:20:00',
-  //     total: 26.40,
-  //     mocktails: [
-  //       { name: 'Virgin Colada', quantity: 2, price: 9.00 },
-  //       { name: 'Pink Lemonade', quantity: 1, price: 7.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-11T19:10:00',
-  //     total: 44.70,
-  //     mocktails: [
-  //       { name: 'Tropical Dream', quantity: 2, price: 9.20 },
-  //       { name: 'Virgin Mojito', quantity: 2, price: 8.50 },
-  //       { name: 'Sunset Spritz', quantity: 1, price: 7.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-12T13:55:00',
-  //     total: 31.20,
-  //     mocktails: [
-  //       { name: 'Green Detox', quantity: 2, price: 8.80 },
-  //       { name: 'Berry Fizz', quantity: 1, price: 8.00 },
-  //       { name: 'Pink Lemonade', quantity: 1, price: 7.80 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-13T17:25:00',
-  //     total: 19.80,
-  //     mocktails: [
-  //       { name: 'Virgin Mojito', quantity: 1, price: 8.50 },
-  //       { name: 'Sunset Spritz', quantity: 1, price: 7.50 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-14T10:40:00',
-  //     total: 47.60,
-  //     mocktails: [
-  //       { name: 'Tropical Dream', quantity: 3, price: 9.20 },
-  //       { name: 'Virgin Colada', quantity: 2, price: 9.00 }
-  //     ]
-  //   },
-  //   {
-  //     date: '2025-07-15T15:15:00',
-  //     total: 29.90,
-  //     mocktails: [
-  //       { name: 'Green Detox', quantity: 2, price: 8.80 },
-  //       { name: 'Berry Fizz', quantity: 1, price: 8.00 },
-  //       { name: 'Pink Lemonade', quantity: 1, price: 7.80 }
-  //     ]
-  //   }
-  // ];
+
 
   sales: Sale[] = [];
   // Filtres et pagination
@@ -285,10 +103,10 @@ export class GestionSalesComponent implements OnInit {
         console.log('✅ Réponse getAllSales:', response);
         console.log('✅ Type de response:', typeof response);
         console.log('✅ Keys de response:', Object.keys(response));
-        
+
         // Le backend renvoie { Sales: [...] } avec S majuscule
         const backendSales = response.Sales || response.sales || [];
-        
+
         // Transformer les données du backend vers le format frontend
         this.sales = backendSales.map((sale: any) => ({
           saleDate: sale.SaleDate || sale.saleDate,
@@ -300,7 +118,7 @@ export class GestionSalesComponent implements OnInit {
             price: item.UnitPrice || item.unitPrice
           }))
         }));
-        
+
         this.totalAllOrders = this.sales.length; // Total TOUTES pages
         this.filteredSales = [...this.sales];
         this.extractMocktailNames(); // Extraire les noms de mocktails pour l'autocomplétion
@@ -571,32 +389,7 @@ export class GestionSalesComponent implements OnInit {
     this.expandedSaleIndex = null;
   }
 
-  // Méthode de test pour créer une vente fictive
-  testCreateSale(): void {
-    console.log('🧪 Test de création de vente...');
-    const testSaleData = {
-      tableNumber: 'TEST-T01',
-      items: [
-        {
-          mocktailId: 1,
-          quantity: 2,
-          unitPrice: 8.50
-        }
-      ]
-    };
 
-    this.saleService.createSale(testSaleData).subscribe({
-      next: (response) => {
-        console.log('✅ Vente test créée:', response);
-        alert('Vente test créée ! Rechargement des données...');
-        this.refreshData();
-      },
-      error: (err) => {
-        console.error('❌ Erreur création vente test:', err);
-        alert('Erreur lors de la création de la vente test. Voir console.');
-      }
-    });
-  }
 
   // Mise à jour des graphiques
   private updateCharts(): void {

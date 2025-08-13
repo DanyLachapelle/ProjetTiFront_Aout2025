@@ -306,15 +306,7 @@ export class GestionIngredientsComponent implements OnInit {
     this.restockCost = 0;
   }
 
-  // validateRestock(): void {
-  //   if (this.restockIngredient && this.restockQuantity > 0) {
-  //     this.restockIngredient.quantity += Number(this.restockQuantity);
-  //     this.restockIngredient.status = this.getStockStatus(this.restockIngredient.quantity, this.restockIngredient.restock_threshold);
-  //     this.restockIngredient.lastRestock = new Date().toISOString().split('T')[0];
-  //     this.updateStatistics();
-  //   }
-  //   this.closeRestockModal();
-  // }
+
 
   validateRestock(): void {
     if (this.restockIngredient && this.restockQuantity > 0) {
@@ -360,12 +352,12 @@ export class GestionIngredientsComponent implements OnInit {
                     ingredient: this.decreaseStockIngredient.name,
                     quantity: this.decreaseStockQuantity
                   });
-      
+
       // Pour l'instant, on simule la diminution en frontend
       this.decreaseStockIngredient.quantity -= this.decreaseStockQuantity;
       this.decreaseStockIngredient.status = this.getStockStatus(this.decreaseStockIngredient.quantity, this.decreaseStockIngredient.restockThreshold);
       this.updateStatistics();
-      
+
       alert(`Stock decreased successfully. New quantity: ${this.decreaseStockIngredient.quantity}${this.decreaseStockIngredient.unit}`);
       this.closeDecreaseStockModal();
     } else {
@@ -390,24 +382,7 @@ export class GestionIngredientsComponent implements OnInit {
     this.showAddIngredientModal = false;
   }
 
-  // validateAddIngredient(): void {
-  //   if (!this.newIngredientForm.name || this.newIngredientForm.limit <= 0) return;
-  //
-  //   const newIngredient: Ingredient = {
-  //     id: Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
-  //     name: this.newIngredientForm.name,
-  //     quantity: Number(this.newIngredientForm.stock),
-  //     restock_threshold: Number(this.newIngredientForm.limit),
-  //     unit: this.newIngredientForm.type === 'liquide' ? 'ml' : 'g',
-  //     status: this.getStockStatus(Number(this.newIngredientForm.stock), Number(this.newIngredientForm.limit)),
-  //     type: this.newIngredientForm.type,
-  //     lastRestock: new Date().toISOString().split('T')[0]
-  //   };
-  //
-  //   this.ingredients.push(newIngredient);
-  //   this.updateStatistics();
-  //   this.closeAddIngredientModal();
-  // }
+
 
   validateAddIngredient(): void {
     if (!this.newIngredientForm.name || this.newIngredientForm.limit <= 0) return;
@@ -459,14 +434,7 @@ export class GestionIngredientsComponent implements OnInit {
     this.editLimitValue = 1;
   }
 
-  // validateEditLimit(): void {
-  //   if (this.editLimitIngredient && this.editLimitValue > 0) {
-  //     this.editLimitIngredient.restock_threshold = Number(this.editLimitValue);
-  //     this.editLimitIngredient.status = this.getStockStatus(this.editLimitIngredient.quantity, this.editLimitIngredient.restock_threshold);
-  //     this.updateStatistics();
-  //   }
-  //   this.closeEditLimitModal();
-  // }
+
 
   validateEditLimit(): void {
     if (this.editLimitIngredient && this.editLimitValue > 0) {
@@ -503,13 +471,7 @@ export class GestionIngredientsComponent implements OnInit {
     this.selectedIngredient = null;
   }
 
-  // confirmDelete(): void {
-  //   if (this.selectedIngredient) {
-  //     this.ingredients = this.ingredients.filter(ingredient => ingredient.id !== this.selectedIngredient!.id);
-  //     this.updateStatistics();
-  //   }
-  //   this.closeDeleteModal();
-  // }
+
 
   confirmDelete(): void {
     if (this.selectedIngredient) {
@@ -522,7 +484,7 @@ export class GestionIngredientsComponent implements OnInit {
         },
         error: err => {
           console.error('Erreur lors de la suppression', err);
-          alert('Erreur lors de la suppression');
+          alert('Error while deleting.');
         }
       });
     }

@@ -46,11 +46,11 @@ export class ResetPasswordComponent implements OnInit {
 
     this.userService.resetPassword({token : this.token, newPassword : newPassword}).subscribe({
       next: () => {
-        this.successMessage = 'Mot de passe mis à jour avec succès.';
+        this.successMessage = 'Password updated successfully.';
         this.router.navigate(['/login']);
       },
       error: err => {
-        this.errorMessage = err.error?.message || 'Erreur lors de la réinitialisation.';
+        this.errorMessage = err.error?.message || 'Error during password reset.';
       }
     })
   }

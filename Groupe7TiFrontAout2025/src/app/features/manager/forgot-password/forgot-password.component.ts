@@ -24,7 +24,7 @@ export class ForgotPasswordComponent {
         this.error = '';
       },
       error: (err) => {
-        this.error = 'Erreur lors de l’envoi de l’email.';
+        this.error = 'Error sending email.';
         this.message = '';
       }
     });
