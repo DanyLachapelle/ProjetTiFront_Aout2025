@@ -313,6 +313,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
           };
         }
 
+        // Calculer les ventes du jour
+        this.calculateTodaySales(sales);
+
         console.log('📊 Données reçues:', data);
         console.log('📊 Ventes normalisées:', normalizedSales);
         console.log('📊 Statistiques commandes :', {
@@ -326,6 +329,70 @@ export class DashboardComponent implements OnInit, OnDestroy {
         console.error('Erreur lors du chargement des statistiques des commandes:', error);
         // En cas d'erreur, on garde les valeurs par défaut (0)
       }
+    });
+  }
+
+  // Calculer les ventes du jour
+  private calculateTodaySales(sales: any[]): void {
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+
+    // Transformer les données du backend vers le format frontend si nécessaire
+    const transformedSales = sales.map((sale: any) => ({
+      saleDate: sale.SaleDate || sale.saleDate,
+      totalAmount: sale.TotalAmount || sale.totalAmount || 0
+    }));
+
+    // Filtrer les ventes du jour
+    const todaySales = transformedSales.filter((sale: any) => {
+      const saleDate = new Date(sale.saleDate);
+      return saleDate >= startOfDay && saleDate <= endOfDay;
+    });
+
+    // Calculer le total des ventes du jour
+    const todayTotal = todaySales.reduce((sum: number, sale: any) => sum + sale.totalAmount, 0);
+
+    // Calculer les ventes de la semaine (même logique que gestion-sales)
+    const day = (today.getDay() + 6) % 7;
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - day);
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    const weekSales = transformedSales.filter((sale: any) => {
+      const saleDate = new Date(sale.saleDate);
+      return saleDate >= startOfWeek && saleDate <= endOfWeek;
+    });
+    const weekTotal = weekSales.reduce((sum: number, sale: any) => sum + sale.totalAmount, 0);
+
+    // Calculer les ventes du mois
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1, 0, 0, 0, 0);
+    const monthSales = transformedSales.filter((sale: any) => {
+      const saleDate = new Date(sale.saleDate);
+      return saleDate >= startOfMonth && saleDate <= endOfDay;
+    });
+    const monthTotal = monthSales.reduce((sum: number, sale: any) => sum + sale.totalAmount, 0);
+
+    // Mettre à jour la carte des ventes
+    const salesCard = this.menuItems.find(item => item.id === 'gestion-sales');
+    if (salesCard) {
+      salesCard.stats = {
+        today: `€${todayTotal.toFixed(2)}`,
+        week: `€${weekTotal.toFixed(2)}`,
+        month: `€${monthTotal.toFixed(2)}`
+      };
+    }
+
+    console.log('💰 Ventes calculées:', {
+      todaySales: todaySales.length,
+      todayTotal: todayTotal,
+      weekSales: weekSales.length,
+      weekTotal: weekTotal,
+      monthSales: monthSales.length,
+      monthTotal: monthTotal,
+      salesCard: salesCard?.stats
     });
   }
 
@@ -468,7 +535,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getSalesStats() {
     const salesItem = this.menuItems.find(item => item.id === 'gestion-sales');
-    return salesItem ? salesItem.stats : { today: 0, week: 0, month: 0 };
+    if (salesItem && salesItem.stats) {
+      return {
+        today: salesItem.stats.today || '€0.00',
+        week: salesItem.stats.week || '€0.00',
+        month: salesItem.stats.month || '€0.00'
+      };
+    }
+    return { today: '€0.00', week: '€0.00', month: '€0.00' };
   }
 
   getIngredientsStats() {
