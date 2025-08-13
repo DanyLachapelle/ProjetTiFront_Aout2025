@@ -264,12 +264,10 @@
               </select>
               <div class="form-row">
                 <input 
-                  type="number" 
+                  type="text" 
                   [(ngModel)]="ingredient.quantity" 
                   (ngModelChange)="onIngredientQuantityChange(i)"
                   class="form-input ingredient-quantity" 
-                  step="0.1" 
-                  min="0" 
                   placeholder="Qty"
                   [class.error]="showErrors && (ingredient.quantity <= 0 || !ingredient.quantity)">
                 <span class="ingredient-unit">{{ ingredient.unit }}</span>
@@ -282,9 +280,14 @@
                 🗑️
               </button>
             </div>
-            <button type="button" class="btn btn-small btn-secondary btn-add-ingredient" (click)="addIngredient()">
-              + Add an ingredient
-            </button>
+            <div class="ingredient-actions">
+              <button type="button" class="btn btn-small btn-secondary btn-add-ingredient" (click)="addIngredient()">
+                + Add an ingredient
+              </button>
+              <button type="button" class="btn btn-small btn-outline" (click)="openAddIngredientModal()">
+                🆕 Create new ingredient
+              </button>
+            </div>
           </div>
           <span class="error-message" *ngIf="showErrors && !hasValidIngredients()">At least one valid ingredient is required</span>
         </div>
@@ -330,6 +333,104 @@
             class="btn btn-danger" 
             (click)="confirmDelete()">
             Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de création d'ingrédient -->
+  <div class="modal-backdrop" *ngIf="showAddIngredientModal" (click)="closeAddIngredientModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeAddIngredientModal()" title="Close">✕</button>
+      <div class="modal-content">
+        <h2>Create New Ingredient</h2>
+        
+        <div class="form-group">
+          <label for="new-ingredient-name">Name *</label>
+          <input 
+            type="text" 
+            id="new-ingredient-name" 
+            [(ngModel)]="newIngredientForm.name" 
+            class="form-input" 
+            [class.error]="showErrors && !newIngredientForm.name"
+            placeholder="Ingredient name">
+          <span class="error-message" *ngIf="showErrors && !newIngredientForm.name">Name is required</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="new-ingredient-type">Type *</label>
+          <select id="new-ingredient-type" [(ngModel)]="newIngredientForm.type" class="form-input">
+            <option value="liquide">Liquid (cl)</option>
+            <option value="solide">Solid (g)</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="new-ingredient-stock">Initial stock</label>
+            <div class="form-row">
+              <input 
+                type="text" 
+                id="new-ingredient-stock" 
+                [(ngModel)]="newIngredientForm.stock" 
+                (ngModelChange)="onNewIngredientStockChange()"
+                class="form-input"
+                [class.error]="showErrors && (newIngredientForm.stock < 0 || newIngredientForm.stock === null)">
+              <span class="unit-label">{{ newIngredientForm.type === 'liquide' ? 'cl' : 'g' }}</span>
+            </div>
+            <span class="error-message" *ngIf="showErrors && (newIngredientForm.stock < 0 || newIngredientForm.stock === null)">Initial stock cannot be negative</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="new-ingredient-limit">Stock limit *</label>
+            <div class="form-row">
+              <input 
+                type="text" 
+                id="new-ingredient-limit" 
+                [(ngModel)]="newIngredientForm.limit" 
+                (ngModelChange)="onNewIngredientLimitChange()"
+                class="form-input"
+                [class.error]="showErrors && (newIngredientForm.limit <= 0 || newIngredientForm.limit === null)">
+              <span class="unit-label">{{ newIngredientForm.type === 'liquide' ? 'cl' : 'g' }}</span>
+            </div>
+            <span class="error-message" *ngIf="showErrors && (newIngredientForm.limit <= 0 || newIngredientForm.limit === null)">Stock limit must be greater than 0</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="new-ingredient-allergen">Allergen</label>
+          <select id="new-ingredient-allergen" [(ngModel)]="newIngredientForm.allergen" class="form-input">
+            <option value="none">None</option>
+            <option value="gluten">Gluten</option>
+            <option value="crustaceans">Crustaceans</option>
+            <option value="eggs">Eggs</option>
+            <option value="fish">Fish</option>
+            <option value="peanuts">Peanuts</option>
+            <option value="soybeans">Soybeans</option>
+            <option value="milk">Milk</option>
+            <option value="nuts">Nuts</option>
+            <option value="celery">Celery</option>
+            <option value="mustard">Mustard</option>
+            <option value="sesame">Sesame</option>
+            <option value="sulphites">Sulphites</option>
+            <option value="lupin">Lupin</option>
+            <option value="molluscs">Molluscs</option>
+          </select>
+        </div>
+        
+        <div class="modal-actions">
+          <button 
+            type="button" 
+            class="btn btn-outline" 
+            (click)="closeAddIngredientModal()">
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="validateAddIngredient()">
+            Create Ingredient
           </button>
         </div>
       </div>

@@ -93,6 +93,7 @@ export class GestionIngredientsComponent implements OnInit {
   showEditLimitModal = false;
   showDeleteModal = false;
   showDetailsModal = false;
+  showDecreaseStockModal = false;
 
   // Modal data
   restockIngredient: Ingredient | null = null;
@@ -111,6 +112,10 @@ export class GestionIngredientsComponent implements OnInit {
   editLimitValue: number = 1;
 
   selectedIngredient: Ingredient | null = null;
+
+  // Decrease stock modal data
+  decreaseStockIngredient: Ingredient | null = null;
+  decreaseStockQuantity: number = 0.1;
 
   // Statistics
   totalIngredients: number = 0;
@@ -332,6 +337,39 @@ export class GestionIngredientsComponent implements OnInit {
       });
     } else {
       this.closeRestockModal();
+    }
+  }
+
+  // Modal methods - Decrease stock
+  openDecreaseStockModal(ingredient: Ingredient): void {
+    this.decreaseStockIngredient = ingredient;
+    this.decreaseStockQuantity = 0.1;
+    this.showDecreaseStockModal = true;
+  }
+
+  closeDecreaseStockModal(): void {
+    this.showDecreaseStockModal = false;
+    this.decreaseStockIngredient = null;
+    this.decreaseStockQuantity = 0.1;
+  }
+
+  validateDecreaseStock(): void {
+    if (this.decreaseStockIngredient && this.decreaseStockQuantity > 0 && this.decreaseStockQuantity <= this.decreaseStockIngredient.quantity) {
+      // TODO: Implémenter l'appel au backend pour diminuer le stock
+                        console.log('Diminuer le stock:', {
+                    ingredient: this.decreaseStockIngredient.name,
+                    quantity: this.decreaseStockQuantity
+                  });
+      
+      // Pour l'instant, on simule la diminution en frontend
+      this.decreaseStockIngredient.quantity -= this.decreaseStockQuantity;
+      this.decreaseStockIngredient.status = this.getStockStatus(this.decreaseStockIngredient.quantity, this.decreaseStockIngredient.restockThreshold);
+      this.updateStatistics();
+      
+      alert(`Stock decreased successfully. New quantity: ${this.decreaseStockIngredient.quantity}${this.decreaseStockIngredient.unit}`);
+      this.closeDecreaseStockModal();
+    } else {
+      alert('Please enter a valid quantity (greater than 0 and not exceeding current stock)');
     }
   }
 

@@ -5,6 +5,7 @@ import { ChartSettings } from './chart-export.service';
 export interface Sale {
   saleDate: string;
   totalAmount: number;
+  tableNumber?: string;
   items: Array<{
     mocktailName: string;
     quantity: number;
@@ -429,6 +430,64 @@ export class ChartDataService {
       total: previousPeriodSales.reduce((sum, sale) => sum + sale.totalAmount, 0),
       count: previousPeriodSales.length
     };
+  }
+
+  // Préparer les données pour le graphique des ventes par table
+  prepareSalesByTableData(sales: Sale[], settings?: ChartSettings) {
+    const colors = this.getColors(settings);
+    const colorScheme = getColorScheme(settings || this.getDefaultSettings());
+    const tableSales = this.getTableSalesData(sales);
+
+    const labels = Object.keys(tableSales);
+    const data = Object.values(tableSales);
+
+    if (sales.length === 0) {
+      return {
+        labels: ['No Data'],
+        datasets: [{
+          label: 'Revenue (€)',
+          data: [1],
+          backgroundColor: colorScheme,
+          borderColor: '#fff',
+          borderWidth: 2
+        }]
+      };
+    }
+
+    // Utiliser le schéma de couleurs approprié selon les paramètres
+    const backgroundColor = settings?.colorScheme === 'monochrome'
+      ? colorScheme.slice(0, labels.length)
+      : colorScheme;
+
+    return {
+      labels: labels,
+      datasets: [{
+        label: 'Revenue (€)',
+        data: data,
+        backgroundColor: backgroundColor,
+        borderColor: '#fff',
+        borderWidth: 2,
+        hoverBackgroundColor: backgroundColor
+      }]
+    };
+  }
+
+  // Obtenir les données de ventes par table (utilisant les vraies données)
+  private getTableSalesData(sales: Sale[]) {
+    const tableSales: { [key: string]: number } = {};
+
+    sales.forEach(sale => {
+      // Utiliser le vrai numéro de table ou "Unknown Table" si non défini
+      const tableNumber = sale.tableNumber || 'Unknown Table';
+      tableSales[tableNumber] = (tableSales[tableNumber] || 0) + sale.totalAmount;
+    });
+
+    // Trier par montant décroissant et limiter aux 10 premières tables
+    const sortedTables = Object.entries(tableSales)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10);
+
+    return Object.fromEntries(sortedTables);
   }
 
   // Méthodes utilitaires pour obtenir les couleurs

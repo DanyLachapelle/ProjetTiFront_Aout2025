@@ -21,18 +21,8 @@
         <img src="assets/favicon.png" alt="Helha Fresh Logo" class="client-logo-img" />
         <h1>Helha Fresh</h1>
       </div>
-      <p>Savor every sip, summer is too short to be bored.</p>
-
-      <!-- Order tracking button -->
-      <div class="tracking-button-container" *ngIf="hasActiveOrder()">
-        <button
-          class="btn btn-tracking"
-          (click)="goToOrderTracking()"
-          title="Track my order">
-          📍 Track my order
-        </button>
-      </div>
-    </div>
+                          <p>Savor every sip, summer is too short to be bored.</p>
+                  </div>
 
     <!-- Panier en haut à droite -->
     <div class="order-cart" [class.cart-animation]="cartAnimation">
@@ -293,6 +283,37 @@
           </div>
         </div>
       </div>
-    </div>
-  </main>
-</div>
+         </div>
+   </main>
+
+                     <!-- Modal de succès -->
+                  <div class="success-modal-overlay" *ngIf="showSuccessNotification">
+                    <div class="success-modal">
+                      <div class="modal-content">
+                        <div class="modal-icon">✅</div>
+                        <div class="modal-text">
+                          <h3>Order placed successfully!</h3>
+                          <p>Your order will be prepared quickly.</p>
+                        </div>
+                        <button class="modal-ok-button" (click)="closeSuccessNotification()">OK</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Modal de confirmation de sortie -->
+                  <div class="exit-confirmation-overlay" *ngIf="showExitConfirmationModal">
+                    <div class="exit-confirmation-modal">
+                      <div class="modal-content">
+                        <div class="modal-icon">⚠️</div>
+                        <div class="modal-text">
+                          <h3>Do you really want to quit?</h3>
+                          <p>You will be disconnected.</p>
+                        </div>
+                        <div class="modal-actions">
+                          <button class="modal-btn modal-btn-no" (click)="cancelExit()">No</button>
+                          <button class="modal-btn modal-btn-yes" (click)="confirmExit()">Yes</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+ </div>
