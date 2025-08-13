@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgIterable } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgIterable, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -59,6 +59,10 @@ export class MenuComponent implements OnInit, OnDestroy {
   isAddingToCart = false;
   cartAnimation = false;
   availableIngredients: Ingredient[] = [];
+  showSuccessNotification = false;
+
+  // Browser back button confirmation
+  showExitConfirmationModal = false;
 
   // Quantity limits
   readonly MAX_QUANTITY = 10;
@@ -69,6 +73,13 @@ export class MenuComponent implements OnInit, OnDestroy {
   remainingTime = '15:00';
   private timerInterval: any;
   private sessionTimeSeconds = 15 * 60; // 15 minutes en secondes
+
+  // Browser back button detection
+  @HostListener('window:popstate', ['$event'])
+  onPopState(event: any) {
+    event.preventDefault();
+    this.showExitConfirmationModal = true;
+  }
 
   // Timer formatting
   private formatTime(seconds: number): string {
@@ -84,7 +95,10 @@ export class MenuComponent implements OnInit, OnDestroy {
     private saleService: SaleService,
     private ingredientService: IngredientService,
     private allergenService: AllergenService
-  ) {}
+  ) {
+    // Push a state to enable back button detection
+    history.pushState(null, '', location.href);
+  }
 
   ngOnInit() {
     this.loadSessionData();
@@ -351,14 +365,13 @@ export class MenuComponent implements OnInit, OnDestroy {
         // Clear the cart
         this.clearOrder();
         
-        // Show success message
-        alert('Order placed successfully! Your order will be prepared quickly.');
+        // Show success modal
+        this.showSuccessNotification = true;
         
-        // Close the modal
+        // Close the order modal
         this.closeFullOrderModal();
         
-        // Redirect to order tracking
-        this.router.navigate(['/order-tracking']);
+        // Don't redirect automatically - wait for user to click OK
       },
       error: (error) => {
         console.error('❌ Error creating order:', error);
@@ -498,5 +511,24 @@ export class MenuComponent implements OnInit, OnDestroy {
       return activeOrderId !== null && activeOrderId !== '';
     }
     return false;
+  }
+
+  closeSuccessNotification(): void {
+    this.showSuccessNotification = false;
+    // Redirect to order tracking after user clicks OK
+    this.router.navigate(['/order-tracking']);
+  }
+
+  // Exit confirmation methods
+  confirmExit() {
+    this.showExitConfirmationModal = false;
+    // Clear session and redirect to homepage
+    this.sessionService.endSession();
+  }
+
+  cancelExit() {
+    this.showExitConfirmationModal = false;
+    // Push state again to prevent immediate back navigation
+    history.pushState(null, '', location.href);
   }
 }
