@@ -25,7 +25,9 @@
       </form>
       <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
       <div class="login-footer">
-        <p>Forgot password?</p>
+        <p>
+          <a routerLink="/forgot-password" class="forgot-password-link">Forgot password?</a>
+        </p>
       </div>
     </div>
   </div>

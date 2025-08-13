@@ -135,4 +135,21 @@
       Order status: {{ getCurrentStatus()?.label }}
     </span>
   </div>
+
+  <!-- Modal de confirmation de sortie -->
+  <div class="exit-confirmation-overlay" *ngIf="showExitConfirmationModal">
+    <div class="exit-confirmation-modal">
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-text">
+          <h3>Do you really want to quit?</h3>
+          <p>You will be disconnected.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-no" (click)="cancelExit()">No</button>
+          <button class="modal-btn modal-btn-yes" (click)="confirmExit()">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

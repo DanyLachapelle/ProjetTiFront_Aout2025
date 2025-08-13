@@ -619,6 +619,22 @@
   margin: 1rem 0;
 }
 
+.form-help {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.btn-warning {
+  background: #f7b267;
+  color: white;
+}
+
+.btn-warning:hover {
+  background: #f0a050;
+}
+
 /* Details Modal */
 .details-grid {
   display: grid;

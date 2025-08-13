@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgIterable } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgIterable, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -30,6 +30,9 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   sessionData: SessionData | null = null;
   private refreshInterval: any;
   private lastUpdate = new Date();
+
+  // Browser back button confirmation
+  showExitConfirmationModal = false;
 
   readonly STATUS_CONFIG: { [key: string]: OrderStatus } = {
     'PENDING': {
@@ -74,7 +77,17 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     private router: Router,
     private sessionService: SessionService,
     private orderService: OrderService
-  ) {}
+  ) {
+    // Push a state to enable back button detection
+    history.pushState(null, '', location.href);
+  }
+
+  // Browser back button detection
+  @HostListener('window:popstate', ['$event'])
+  onPopState(event: any) {
+    event.preventDefault();
+    this.showExitConfirmationModal = true;
+  }
 
   ngOnInit() {
     this.loadSessionData();
@@ -86,6 +99,19 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
+  }
+
+  // Exit confirmation methods
+  confirmExit() {
+    this.showExitConfirmationModal = false;
+    // Clear session and redirect to homepage
+    this.sessionService.endSession();
+  }
+
+  cancelExit() {
+    this.showExitConfirmationModal = false;
+    // Push state again to prevent immediate back navigation
+    history.pushState(null, '', location.href);
   }
 
   private loadSessionData() {

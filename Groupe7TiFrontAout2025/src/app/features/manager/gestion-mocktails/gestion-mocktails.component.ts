@@ -2,7 +2,8 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MocktailService, Mocktail, CreateMocktailRequest, UpdateMocktailRequest, Ingredient } from '../../../services/mocktail.service';
+import { MocktailService, Mocktail, CreateMocktailRequest, UpdateMocktailRequest } from '../../../services/mocktail.service';
+import { IngredientService, Ingredient } from '../../../services/ingredient.service';
 
 interface MocktailForm {
   name: string;
@@ -18,6 +19,14 @@ interface MocktailForm {
   }>;
 }
 
+interface NewIngredientForm {
+  name: string;
+  type: string;
+  stock: number;
+  limit: number;
+  allergen: string;
+}
+
 @Component({
   selector: 'app-gestion-mocktails',
   standalone: true,
@@ -29,6 +38,7 @@ export class GestionMocktailsComponent implements OnInit {
   constructor(
     private router: Router,
     private mocktailService: MocktailService,
+    private ingredientService: IngredientService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -52,6 +62,7 @@ export class GestionMocktailsComponent implements OnInit {
   // Modal management
   showMocktailModal = false;
   showDeleteModal = false;
+  showAddIngredientModal = false;
   editingMocktail: Mocktail | null = null;
   mocktailToDelete: Mocktail | null = null;
   expandedMocktailId: number | null = null;
@@ -72,6 +83,15 @@ export class GestionMocktailsComponent implements OnInit {
     available: true,
     forceAvailable: false,
     ingredients: [{ name: '', quantity: 0, unit: 'cl' }]
+  };
+
+  // New ingredient form
+  newIngredientForm: NewIngredientForm = {
+    name: '',
+    type: 'liquide',
+    stock: 0,
+    limit: 1,
+    allergen: 'none'
   };
 
   ngOnInit() {
@@ -492,6 +512,89 @@ export class GestionMocktailsComponent implements OnInit {
     if (typeof quantity === 'string') {
       this.mocktailForm.ingredients[i].quantity = Number(quantity) || 0;
     }
+  }
+
+  // --- New ingredient modal methods ---
+  openAddIngredientModal(): void {
+    this.newIngredientForm = {
+      name: '',
+      type: 'liquide',
+      stock: 0,
+      limit: 1,
+      allergen: 'none'
+    };
+    this.showErrors = false;
+    this.showAddIngredientModal = true;
+  }
+
+  closeAddIngredientModal(): void {
+    this.showAddIngredientModal = false;
+  }
+
+  onNewIngredientStockChange(): void {
+    // Convertir la valeur en nombre si possible
+    const numericValue = parseFloat(this.newIngredientForm.stock as any);
+    if (!isNaN(numericValue)) {
+      this.newIngredientForm.stock = numericValue;
+    }
+  }
+
+  onNewIngredientLimitChange(): void {
+    // Convertir la valeur en nombre si possible
+    const numericValue = parseFloat(this.newIngredientForm.limit as any);
+    if (!isNaN(numericValue)) {
+      this.newIngredientForm.limit = numericValue;
+    }
+  }
+
+  validateAddIngredient(): void {
+    this.showErrors = true;
+    if (!this.newIngredientForm.name || 
+        this.newIngredientForm.limit <= 0 || 
+        this.newIngredientForm.stock < 0 || 
+        this.newIngredientForm.stock === null || 
+        this.newIngredientForm.limit === null) return;
+
+    const newIngredientPayload = {
+      name: this.newIngredientForm.name,
+      quantity: Number(this.newIngredientForm.stock),
+      restockThreshold: Number(this.newIngredientForm.limit),
+      unit: this.newIngredientForm.type === 'liquide' ? 'cl' : 'g',
+      allergen: this.newIngredientForm.allergen || 'none'
+    };
+
+    this.ingredientService.CreateIngredient(newIngredientPayload).subscribe({
+      next: (createdIngredient) => {
+        // Ajouter l'ingrédient créé dans la liste locale
+        const ingredient: Ingredient = {
+          id: createdIngredient.id || Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
+          name: createdIngredient.name,
+          quantity: createdIngredient.quantity,
+          restockThreshold: createdIngredient.restock_threshold,
+          unit: createdIngredient.unit,
+          allergen: createdIngredient.allergen
+        };
+
+        this.ingredients.push(ingredient);
+        this.closeAddIngredientModal();
+        
+        // Ajouter automatiquement l'ingrédient créé au mocktail en cours d'édition
+        if (this.showMocktailModal) {
+          this.mocktailForm.ingredients.push({
+            name: ingredient.name,
+            quantity: 0,
+            unit: ingredient.unit
+          });
+        }
+        
+        // Recharger la liste des ingrédients pour s'assurer de la cohérence
+        this.loadIngredients();
+      },
+      error: (err) => {
+        console.error('Erreur lors de la création de l\'ingrédient', err);
+        // Optionnel : afficher un message d'erreur à l'utilisateur
+      }
+    });
   }
 
   // --- Validation ---
