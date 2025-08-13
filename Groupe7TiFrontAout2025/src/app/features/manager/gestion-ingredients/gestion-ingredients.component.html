@@ -167,14 +167,14 @@
           <div class="stock-info">
             <div class="stock-bar">
               <div class="stock-fill"
-                   [style.width.%]="getStockPercentage(ingredient.quantity, ingredient.restock_threshold)"
-                   [style.background]="getStockColor(ingredient.quantity, ingredient.restock_threshold)">
+                   [style.width.%]="getStockPercentage(ingredient.quantity, ingredient.restockThreshold)"
+                   [style.background]="getStockColor(ingredient.quantity, ingredient.restockThreshold)">
               </div>
               <div class="limit-marker" style="left: 25%"></div>
             </div>
             <div class="stock-details">
               <span class="current-stock">{{ ingredient.quantity }}{{ ingredient.unit }}</span>
-              <span class="stock-limit">/ {{ ingredient.restock_threshold }}{{ ingredient.unit }}</span>
+              <span class="stock-limit">/ {{ ingredient.restockThreshold }}{{ ingredient.unit }}</span>
             </div>
           </div>
 
@@ -186,7 +186,7 @@
 
             <div class="detail-row">
               <span class="detail-label">Last Restock:</span>
-              <span class="detail-value">{{ formatDate(ingredient.last_modified_at) }}</span>
+              <span class="detail-value">{{ formatDate(ingredient.lastModifiedAt) }}</span>
             </div>
           </div>
 
@@ -391,7 +391,7 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">Stock Limit:</span>
-              <span class="detail-value">{{ selectedIngredient?.restock_threshold }}{{ selectedIngredient?.unit }}</span>
+              <span class="detail-value">{{ selectedIngredient?.restockThreshold }}{{ selectedIngredient?.unit }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Status:</span>
@@ -401,7 +401,7 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">Stock Percentage:</span>
-              <span class="detail-value">{{ getStockPercentage(selectedIngredient?.quantity || 0, selectedIngredient?.restock_threshold || 1).toFixed(1) }}%</span>
+              <span class="detail-value">{{ getStockPercentage(selectedIngredient?.quantity || 0, selectedIngredient?.restockThreshold || 1).toFixed(1) }}%</span>
             </div>
           </div>
 
@@ -422,7 +422,7 @@
             <h3>History</h3>
             <div class="detail-item">
               <span class="detail-label">Last Restock:</span>
-              <span class="detail-value">{{ formatDate(selectedIngredient?.last_modified_at) }}</span>
+              <span class="detail-value">{{ formatDate(selectedIngredient?.lastModifiedAt) }}</span>
             </div>
 
           </div>

@@ -17,7 +17,7 @@ export interface Ingredient {
   id: number;
   name: string;
   quantity: number;             // <-- c’est ce que renvoie ton backend
-  restock_threshold: number;    // <-- idem
+  restockThreshold: number;    // <-- idem
   unit: string;
   allergen?: string;            // optionnel si pas toujours présent
 }
@@ -35,13 +35,13 @@ export class IngredientService {
         return this._http.get<any>(IngredientService.URL);
     }
 
-  CreateIngredient(ingredient: { name: string; quantity: number; restock_threshold: number; unit: string,allergen:string}): Observable<any> {
+  CreateIngredient(ingredient: { name: string; quantity: number; restockThreshold: number; unit: string,allergen:string}): Observable<any> {
     return this._http.post<any>(
       'http://localhost:5201/api/ingredients/createIngredient',
       {
         name: ingredient.name,
         quantity: ingredient.quantity,
-        restock_threshold: ingredient.restock_threshold,
+        restockThreshold: ingredient.restockThreshold,
         unit: ingredient.unit,
         allergen: ingredient.allergen
       }

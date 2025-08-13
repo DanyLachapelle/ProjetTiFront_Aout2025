@@ -24,7 +24,7 @@ export interface Ingredient {
   id: number
   name: string
   quantity: number
-  restock_threshold: number
+  restockThreshold: number
   unit: string
 }
 
