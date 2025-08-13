@@ -231,6 +231,11 @@ export class GestionSalesComponent implements OnInit {
   filteredSales: Sale[] = [];
   displayMode: 'list' | 'statistics' = 'list'; //   Nouveau: mode d'affichage
 
+  // Autocomplétion de recherche
+  showSuggestions: boolean = false;
+  filteredSuggestions: string[] = [];
+  allMocktailNames: string[] = [];
+
   // Graphiques avec configuration de base
   salesTrendChart: any = { ...LINE_CHART_CONFIG };
   topMocktailsChart: any = { ...BAR_CHART_CONFIG };
@@ -298,6 +303,7 @@ export class GestionSalesComponent implements OnInit {
         
         this.totalAllOrders = this.sales.length; // Total TOUTES pages
         this.filteredSales = [...this.sales];
+        this.extractMocktailNames(); // Extraire les noms de mocktails pour l'autocomplétion
         this.applyFilters();
 
         console.log('📊 Total commandes:', this.totalAllOrders);
@@ -348,10 +354,46 @@ export class GestionSalesComponent implements OnInit {
   onSearchChange(): void {
     this.currentPage = 1;
     this.applyFilters();
+    this.updateSuggestions();
     if (this.displayMode === 'statistics') {
       this.updateCharts();
       this.updateKPIs();
     }
+  }
+
+  onSearchBlur(): void {
+    // Délai pour permettre le clic sur les suggestions
+    setTimeout(() => {
+      this.showSuggestions = false;
+    }, 200);
+  }
+
+  selectSuggestion(suggestion: string): void {
+    this.searchTerm = suggestion;
+    this.showSuggestions = false;
+    this.onSearchChange();
+  }
+
+  private updateSuggestions(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredSuggestions = [];
+      return;
+    }
+
+    const searchLower = this.searchTerm.toLowerCase();
+    this.filteredSuggestions = this.allMocktailNames
+      .filter(name => name.toLowerCase().includes(searchLower))
+      .slice(0, 5); // Limiter à 5 suggestions
+  }
+
+  private extractMocktailNames(): void {
+    const mocktailSet = new Set<string>();
+    this.sales.forEach(sale => {
+      sale.items.forEach(item => {
+        mocktailSet.add(item.mocktailName);
+      });
+    });
+    this.allMocktailNames = Array.from(mocktailSet).sort();
   }
 
   private applyFilters(): void {

@@ -31,20 +31,9 @@
 
 
 
-  <!-- Filtres et recherche -->
+  <!-- Filtres de date -->
   <section class="filters-section">
     <div class="filters-container">
-      <div class="search-box">
-        <input
-          type="text"
-          [(ngModel)]="searchTerm"
-          placeholder="Search by mocktail name..."
-          class="search-input"
-          (input)="onSearchChange()"
-        >
-        <span class="search-icon">🔍</span>
-      </div>
-
       <div class="date-filters">
         <button
           class="filter-btn"
@@ -166,21 +155,56 @@
 
   <!-- Zone de contenu dynamique -->
   <section class="content-section">
-    <!-- Mode Liste des ventes -->
-    <div class="sales-content" *ngIf="displayMode === 'list'">
-      <div class="sales-header-row">
-        <h2>Sales History</h2>
-        <div class="sales-actions">
-          <button class="btn btn-outline" (click)="exportSales()">
-            <span class="action-icon">📄</span>
-            Export
-          </button>
-          <button class="btn btn-outline" (click)="refreshData()">
-            <span class="action-icon">🔄</span>
-            Refresh
-          </button>
-        </div>
-      </div>
+         <!-- Mode Liste des ventes -->
+     <div class="sales-content" *ngIf="displayMode === 'list'">
+       <div class="sales-header-row">
+         <h2>Sales History</h2>
+         <div class="sales-actions">
+           <button class="btn btn-outline" (click)="exportSales()">
+             <span class="action-icon">📄</span>
+             Export
+           </button>
+           <button class="btn btn-outline" (click)="refreshData()">
+             <span class="action-icon">🔄</span>
+             Refresh
+           </button>
+         </div>
+       </div>
+
+       <!-- Barre de recherche pour les mocktails -->
+       <div class="search-section">
+         <div class="search-container">
+           <div class="search-box">
+             <input
+               type="text"
+               [(ngModel)]="searchTerm"
+               placeholder="🔍 Rechercher par nom de mocktail..."
+               class="search-input"
+               (input)="onSearchChange()"
+               (focus)="showSuggestions = true"
+               (blur)="onSearchBlur()"
+             >
+             <span class="search-icon">🍹</span>
+           </div>
+           
+           <!-- Suggestions d'autocomplétion -->
+           <div class="suggestions-dropdown" *ngIf="showSuggestions && filteredSuggestions.length > 0">
+             <div 
+               class="suggestion-item" 
+               *ngFor="let suggestion of filteredSuggestions"
+               (click)="selectSuggestion(suggestion)"
+             >
+               {{ suggestion }}
+             </div>
+           </div>
+         </div>
+         
+         <div class="search-info">
+           <span class="search-results" *ngIf="searchTerm.trim()">
+             {{ filteredSales.length }} vente(s) trouvée(s) pour "{{ searchTerm }}"
+           </span>
+         </div>
+       </div>
 
       <div class="sales-list" *ngIf="getFilteredSales().length > 0; else noSales">
         <div class="sale-item" *ngFor="let sale of getFilteredSales(); let i = index"
@@ -245,7 +269,7 @@
       </ng-template>
 
       <!-- Pagination -->
-      <section class="pagination-section" *ngIf="filteredSales.length > itemsPerPage">
+      <section class="pagination-section" *ngIf="displayMode === 'list' && filteredSales.length > itemsPerPage">
         <div class="pagination">
           <button
             class="pagination-btn"
