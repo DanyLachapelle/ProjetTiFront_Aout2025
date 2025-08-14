@@ -21,7 +21,7 @@ export const routes: Routes = [
   { path: 'gestion-sales', loadComponent: () => import('./features/manager/gestion-sales/gestion-sales.component').then(m => m.GestionSalesComponent), canActivate: [authGuard] },
 
   // Routes pour la gestion des commandes
-  { path: 'orders', loadComponent: () => import('./features/manager/orders/orders.component').then(m => m.OrdersComponent), canActivate: [clientAccessGuard]},
+  { path: 'orders', loadComponent: () => import('./features/manager/orders/orders.component').then(m => m.OrdersComponent), canActivate: [authGuard]},
 
   // Routes pour le menu client
   { path: 'menu', loadComponent: () => import('./features/client/menu/menu.component').then(m => m.MenuComponent), canActivate: [clientAccessGuard] },
@@ -33,7 +33,7 @@ export const routes: Routes = [
   { path: 'reset-password', loadComponent: () => import('./features/manager/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
 
   // Routes pour le suivi de commande client
-  { path: 'order-tracking', loadComponent: () => import('./features/client/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent), canActivate: [authGuard] },
+  { path: 'order-tracking', loadComponent: () => import('./features/client/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent), canActivate: [clientAccessGuard] },
 
 
 

@@ -32,7 +32,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   /** Initialisation uniquement côté navigateur */
   ngOnInit(): void {
-    localStorage.clear();
+    localStorage.removeItem('qrToken');
+    localStorage.removeItem('helha-fresh-cart');
+    localStorage.removeItem('table_number');
+    localStorage.removeItem('clientStep');
     if (isPlatformBrowser(this.platformId)) {
       this.generateNewQRCode();
       this.startTimer();

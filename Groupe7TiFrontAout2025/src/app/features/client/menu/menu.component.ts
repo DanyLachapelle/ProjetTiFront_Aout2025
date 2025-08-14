@@ -128,7 +128,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
-    localStorage.clear();
+    //localStorage.clear();
   }
 
   loadAvailableIngredients() {
@@ -545,6 +545,10 @@ export class MenuComponent implements OnInit, OnDestroy {
   // Exit confirmation methods
   confirmExit() {
     this.showExitConfirmationModal = false;
+    localStorage.removeItem('qrToken');
+    localStorage.removeItem('helha-fresh-cart');
+    localStorage.removeItem('table_number');
+    localStorage.removeItem('clientStep');
     // Clear session and redirect to homepage
     this.sessionService.endSession();
   }
