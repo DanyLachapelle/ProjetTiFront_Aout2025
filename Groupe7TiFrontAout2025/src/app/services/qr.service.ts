@@ -8,12 +8,20 @@ export interface QRToken {
   createdAt: Date
 }
 
+export enum ClientStep {
+  START = 0,        // bouton cliqué
+  GEOLOC = 1,       // géoloc validée
+  TABLE = 2,        // table choisie
+  MENU = 3          // accès au menu
+}
+
 @Injectable({
   providedIn: "root",
 })
 export class QrService {
   private currentTokenSubject = new BehaviorSubject<QRToken | null>(null)
   public currentToken$ = this.currentTokenSubject.asObservable()
+  private currentStep = ClientStep.START;
 
   constructor() {}
 
@@ -99,4 +107,14 @@ export class QrService {
       localStorage.setItem('qrToken', JSON.stringify(currentToken));
     }
   }
+
+  setStep(step: ClientStep) {
+    this.currentStep = step;
+    localStorage.setItem('clientStep', step.toString());
+  }
+
+  getStep(): ClientStep {
+    return parseInt(localStorage.getItem('clientStep') || '0', 10);
+  }
+
 }
