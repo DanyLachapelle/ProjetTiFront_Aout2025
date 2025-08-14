@@ -105,7 +105,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
       next: (response) => {
         console.log('📋 Response received in OrdersComponent:', response);
         console.log('📋 Number of orders received:', response.sales?.length || 0);
-        
+
         // Normalize received data
         this.orders = response.sales.map(order => {
           const normalizedOrder = {
@@ -116,13 +116,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
           console.log('🔄 Normalized order:', normalizedOrder);
           return normalizedOrder;
         });
-        
+
         console.log('📋 Orders after normalization:', this.orders);
         this.applyFilters();
-        
+
         // Force statistics update after loading
         this.triggerStatisticsUpdate();
-        
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -160,10 +160,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
             };
             return normalizedOrder;
           });
-          
+
           // Appliquer les filtres sans recharger l'interface
           this.applyFilters();
-          
+
           // Force statistics update after auto refresh
           this.triggerStatisticsUpdate();
         },
@@ -193,7 +193,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
     // Filtre par table
     if (this.tableFilter.trim()) {
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         order.tableNumber === this.tableFilter
       );
     }
@@ -209,7 +209,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
 
     this.filteredOrders = filtered;
-    
+
     // Apply pagination
     this.applyPagination();
   }
@@ -258,20 +258,20 @@ export class OrdersComponent implements OnInit, OnDestroy {
       next: (response) => {
         console.log(`Order ${order.id} status updated: ${response.newStatus}`);
         this.showToast(`Order #${order.id}: ${config.actionLabel}`, 'success');
-        
+
         // Update the order status locally for immediate UI feedback
         const orderToUpdate = this.orders.find(o => o.id === order.id);
         if (orderToUpdate && config.nextStatus) {
           orderToUpdate.status = config.nextStatus;
           console.log(`✅ Order ${order.id} status updated locally to: ${config.nextStatus}`);
-          
+
           // Force statistics update
           this.triggerStatisticsUpdate();
-          
+
           // Reapply filters to update the filtered list
           this.applyFilters();
         }
-        
+
         this.processingOrderId = null;
       },
       error: (error) => {
@@ -297,7 +297,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const now = new Date();
     const diffMs = now.getTime() - orderDate.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    
+
     if (diffMins < 60) {
       return `${diffMins} min`;
     } else {
@@ -311,7 +311,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const now = new Date();
     const diffMs = now.getTime() - orderDate.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    
+
     if (diffMins > 30) return 'high';
     if (diffMins > 15) return 'medium';
     return 'low';
@@ -348,9 +348,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
       z-index: 1000;
       animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
       toast.style.animation = 'slideOut 0.3s ease';
       setTimeout(() => {
@@ -404,15 +404,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
   getPageNumbers(): number[] {
     const totalPages = this.getTotalPages();
     const pages: number[] = [];
-    
+
     // Show max 5 page numbers around current page
     const startPage = Math.max(1, this.currentPage - 2);
     const endPage = Math.min(totalPages, this.currentPage + 2);
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   }
 
@@ -452,11 +452,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const totalPages = this.getTotalPages();
     const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
     const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.filteredOrders.length);
-    
+
     if (this.filteredOrders.length === 0) {
       return 'No orders found';
     }
-    
+
     return `Showing ${startIndex}-${endIndex} of ${this.filteredOrders.length} orders`;
   }
 }

@@ -100,9 +100,9 @@ describe('OrderTrackingComponent', () => {
 
   it('should handle error when no active order found', () => {
     localStorage.getItem = jasmine.createSpy().and.returnValue(null);
-    
+
     component.ngOnInit();
-    
+
     expect(component.error).toBe('Aucune commande active trouvée');
     expect(component.isLoading).toBeFalse();
   });
@@ -110,7 +110,7 @@ describe('OrderTrackingComponent', () => {
   it('should get current status correctly', () => {
     component.order = mockOrder;
     const status = component.getCurrentStatus();
-    
+
     expect(status).toBeTruthy();
     expect(status?.status).toBe('IN_PREPARATION');
     expect(status?.label).toBe('En préparation');
@@ -120,7 +120,7 @@ describe('OrderTrackingComponent', () => {
   it('should calculate progress percentage correctly', () => {
     component.order = mockOrder;
     const progress = component.getProgressPercentage();
-    
+
     expect(progress).toBe(50); // IN_PREPARATION = 50%
   });
 
@@ -132,14 +132,14 @@ describe('OrderTrackingComponent', () => {
   it('should get estimated time remaining', () => {
     component.order = mockOrder;
     const estimatedTime = component.getEstimatedTimeRemaining();
-    
+
     expect(estimatedTime).toBe('10 min');
   });
 
   it('should get table number from session data', () => {
     component.sessionData = mockSessionData;
     const tableNumber = component.getTableNumber();
-    
+
     expect(tableNumber).toBe('5');
   });
 
@@ -150,7 +150,7 @@ describe('OrderTrackingComponent', () => {
 
   it('should refresh order when refreshOrder is called', () => {
     component.refreshOrder();
-    
+
     expect(component.isLoading).toBeTrue();
     expect(orderService.getOrderById).toHaveBeenCalled();
   });
@@ -159,16 +159,16 @@ describe('OrderTrackingComponent', () => {
     spyOn(window, 'clearInterval');
     component.ngOnInit();
     component.ngOnDestroy();
-    
+
     expect(window.clearInterval).toHaveBeenCalled();
   });
 
   it('should redirect to menu when order is delivered', () => {
     const routerSpy = spyOn(component['router'], 'navigate');
-    component.order = { ...mockOrder, status: 'DELIVERED' };
-    
+    component.order = { ...mockOrder, stockStatus: 'DELIVERED' };
+
     component['checkOrderCompletion']();
-    
+
     // Wait for timeout to trigger
     setTimeout(() => {
       expect(routerSpy).toHaveBeenCalledWith(['/menu']);
@@ -181,9 +181,9 @@ describe('OrderTrackingComponent', () => {
         throw new Error('API Error');
       })
     );
-    
+
     component['loadActiveOrder']();
-    
+
     expect(component.error).toBe('Impossible de charger votre commande');
     expect(component.isLoading).toBeFalse();
   });

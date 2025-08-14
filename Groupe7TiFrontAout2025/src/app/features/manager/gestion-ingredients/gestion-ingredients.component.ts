@@ -11,7 +11,7 @@ interface Ingredient {
   quantity: number;
   restockThreshold: number;
   unit: string;
-  status: 'good' | 'warning' | 'critical';
+  stockStatus: 'good' | 'warning' | 'critical';
   type: 'liquide' | 'solide';
   lastModifiedAt?: string;
 }
@@ -47,7 +47,7 @@ export class GestionIngredientsComponent implements OnInit {
           quantity: item.quantity,
           restockThreshold: item.restockThreshold,
           unit: item.unit,
-          status: this.getStockStatus(item.quantity, item.restock_threshold),
+          stockStatus: this.getStockStatus(item.quantity, item.restockThreshold),
           type: item.unit === 'g' ? 'solide' : 'liquide',
           lastModifiedAt: item.lastModifiedAt
         }));
@@ -70,11 +70,11 @@ export class GestionIngredientsComponent implements OnInit {
     const alerts = [];
 
     for (const ingredient of this.ingredients) {
-      if (ingredient.status === 'critical' || ingredient.status === 'warning') {
+      if (ingredient.stockStatus === 'critical' || ingredient.stockStatus === 'warning') {
         alerts.push({
           type: 'stock',
-          message: `${ingredient.status === 'critical' ? 'Critical' : 'Low'} stock: ${ingredient.name} (${ingredient.quantity}${ingredient.unit} remaining)`,
-          severity: ingredient.status,
+          message: `${ingredient.stockStatus === 'critical' ? 'Critical' : 'Low'} stock: ${ingredient.name} (${ingredient.quantity}${ingredient.unit} remaining)`,
+          severity: ingredient.stockStatus,
           icon: '⚠️'
         });
       }
@@ -157,7 +157,7 @@ export class GestionIngredientsComponent implements OnInit {
 
     // Apply status filter
     if (this.selectedFilter !== 'all') {
-      filtered = filtered.filter(ingredient => ingredient.status === this.selectedFilter);
+      filtered = filtered.filter(ingredient => ingredient.stockStatus === this.selectedFilter);
     }
 
     // Apply type filter
@@ -215,7 +215,7 @@ export class GestionIngredientsComponent implements OnInit {
 
     // Apply status filter
     if (this.selectedFilter !== 'all') {
-      filtered = filtered.filter(ingredient => ingredient.status === this.selectedFilter);
+      filtered = filtered.filter(ingredient => ingredient.stockStatus === this.selectedFilter);
     }
 
     // Apply type filter
@@ -284,11 +284,11 @@ export class GestionIngredientsComponent implements OnInit {
   updateStatistics(): void {
     this.totalIngredients = this.ingredients.length;
     this.lowStockCount = this.ingredients.filter(ingredient =>
-      ingredient.status === 'warning' || ingredient.status === 'critical').length;
+      ingredient.stockStatus === 'warning' || ingredient.stockStatus === 'critical').length;
   }
 
   getStatusCount(status: 'good' | 'warning' | 'critical'): number {
-    return this.ingredients.filter(ingredient => ingredient.status === status).length;
+    return this.ingredients.filter(ingredient => ingredient.stockStatus === status).length;
   }
 
   // Modal methods - Restock
@@ -355,7 +355,7 @@ export class GestionIngredientsComponent implements OnInit {
 
       // Pour l'instant, on simule la diminution en frontend
       this.decreaseStockIngredient.quantity -= this.decreaseStockQuantity;
-      this.decreaseStockIngredient.status = this.getStockStatus(this.decreaseStockIngredient.quantity, this.decreaseStockIngredient.restockThreshold);
+      this.decreaseStockIngredient.stockStatus = this.getStockStatus(this.decreaseStockIngredient.quantity, this.decreaseStockIngredient.restockThreshold);
       this.updateStatistics();
 
       alert(`Stock decreased successfully. New quantity: ${this.decreaseStockIngredient.quantity}${this.decreaseStockIngredient.unit}`);
@@ -405,7 +405,7 @@ export class GestionIngredientsComponent implements OnInit {
           quantity: createdIngredient.quantity,
           restockThreshold: createdIngredient.restock_threshold,
           unit: createdIngredient.unit,
-          status: this.getStockStatus(createdIngredient.quantity, createdIngredient.restock_threshold),
+          stockStatus: this.getStockStatus(createdIngredient.quantity, createdIngredient.restock_threshold),
           type: this.newIngredientForm.type,
           lastModifiedAt: new Date().toISOString().split('T')[0]
         };
@@ -443,7 +443,7 @@ export class GestionIngredientsComponent implements OnInit {
           if (response.success) {
             // Met à jour localement la valeur et le status
             this.editLimitIngredient!.restockThreshold = Number(this.editLimitValue);
-            this.editLimitIngredient!.status = this.getStockStatus(this.editLimitIngredient!.quantity, this.editLimitIngredient!.restockThreshold);
+            this.editLimitIngredient!.stockStatus = this.getStockStatus(this.editLimitIngredient!.quantity, this.editLimitIngredient!.restockThreshold);
             this.updateStatistics();
             alert('Restock threshold updated successfully');
           } else {

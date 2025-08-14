@@ -142,17 +142,17 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     this.orderService.getOrderById(parseInt(activeOrderId)).subscribe({
       next: (order) => {
         console.log('📋 Order received in OrderTrackingComponent:', order);
-        
+
         console.log('🔍 Status received from backend:', order.status);
         console.log('🔍 Status after normalization:', this.orderService.normalizeStatus(order.status || 'PENDING'));
-        
+
         // Normalize received data
         this.order = {
           ...order,
           status: this.orderService.normalizeStatus(order.status || 'PENDING'), // Default value
           items: this.orderService.normalizeItems(order.items)
         };
-        
+
         console.log('🔄 Normalized order:', this.order);
         this.isLoading = false;
         this.lastUpdate = new Date();
@@ -199,7 +199,7 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
 
   private checkOrderCompletion() {
     if (!this.order) return;
-    
+
     // If order is delivered, clear the active order ID after a delay
     if (this.order.status === 'DELIVERED') {
       console.log('✅ Order completed - will clear active order ID in 30 seconds');

@@ -155,11 +155,11 @@
     </div>
 
     <div class="ingredients-grid" *ngIf="getFilteredIngredients().length > 0; else noIngredients">
-      <div class="ingredient-card" *ngFor="let ingredient of getFilteredIngredients()" [class]="'status-' + ingredient.status">
+      <div class="ingredient-card" *ngFor="let ingredient of getFilteredIngredients()" [class]="'status-' + ingredient.stockStatus">
         <div class="ingredient-header">
           <h3 class="ingredient-name">{{ ingredient.name }}</h3>
-          <span class="status-badge" [class]="ingredient.status">
-            {{ getStatusText(ingredient.status) }}
+          <span class="status-badge" [class]="ingredient.stockStatus">
+            {{ getStatusText(ingredient.stockStatus) }}
           </span>
         </div>
 
@@ -398,8 +398,8 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">Status:</span>
-              <span class="detail-value status-badge" [class]="selectedIngredient?.status">
-                {{ getStatusText(selectedIngredient?.status || '') }}
+              <span class="detail-value status-badge" [class]="selectedIngredient?.stockStatus">
+                {{ getStatusText(selectedIngredient?.stockStatus || '') }}
               </span>
             </div>
             <div class="detail-item">
