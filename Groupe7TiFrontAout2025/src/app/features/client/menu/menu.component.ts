@@ -128,6 +128,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
+    localStorage.clear();
   }
 
   loadAvailableIngredients() {

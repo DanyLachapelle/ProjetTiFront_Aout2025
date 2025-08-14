@@ -44,5 +44,5 @@ export const routes: Routes = [
   { path: 'session', loadComponent: () => import('./features/client/session-countdown/session-countdown.component').then(m => m.SessionCountdownComponent) },
 
   // Route par défaut - redirection vers dashboard
-  { path: '**', redirectTo: '/dashboard' }
+  { path: '**', redirectTo: '/' }
 ];

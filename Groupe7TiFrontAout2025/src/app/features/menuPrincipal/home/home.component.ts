@@ -32,6 +32,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   /** Initialisation uniquement côté navigateur */
   ngOnInit(): void {
+    localStorage.clear();
     if (isPlatformBrowser(this.platformId)) {
       this.generateNewQRCode();
       this.startTimer();
