@@ -104,16 +104,16 @@ export class GestionMocktailsComponent implements OnInit {
     this.mocktailService.getAll().subscribe({
       next: (data) => {
         this.mocktails = data;
-        
+
         // Utiliser directement la disponibilité calculée par le backend
         // Pas besoin de recalculer côté frontend
-                 console.log('Mocktails chargés avec disponibilité backend:', this.mocktails.map(m => ({ 
-           name: m.name, 
+                 console.log('Mocktails chargés avec disponibilité backend:', this.mocktails.map(m => ({
+           name: m.name,
            available: m.available,
            forceAvailable: m.forceAvailable,
            forceAvailableType: typeof m.forceAvailable
          })));
-         
+
          // Log détaillé du premier mocktail pour debug
          if (this.mocktails.length > 0) {
            const firstMocktail = this.mocktails[0];
@@ -127,7 +127,7 @@ export class GestionMocktailsComponent implements OnInit {
              forceAvailableStrictTrue: firstMocktail.forceAvailable === true
            });
          }
-        
+
         this.filterMocktails();
       },
       error: (error) => {
@@ -200,7 +200,7 @@ export class GestionMocktailsComponent implements OnInit {
   getPageNumbers(): number[] {
     const totalPages = this.getTotalPages();
     const pages: number[] = [];
-    
+
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -220,7 +220,7 @@ export class GestionMocktailsComponent implements OnInit {
         }
       }
     }
-    
+
     return pages;
   }
 
@@ -302,6 +302,9 @@ export class GestionMocktailsComponent implements OnInit {
     if (mocktail.forceAvailable === false) {
       return false;
     }
+
+
+
     // Sinon, utiliser la disponibilité basée sur le stock des ingrédients
     // (force_available = null ou true n'override pas le manque d'ingrédients)
     return mocktail.available;
@@ -344,7 +347,7 @@ export class GestionMocktailsComponent implements OnInit {
   }
 
     toggleAvailability(mocktail: Mocktail) {
-    
+
     // Empêcher le clic si le mocktail manque d'ingrédients
     if (this.isAvailabilityButtonDisabled(mocktail)) {
       return;
@@ -425,7 +428,7 @@ export class GestionMocktailsComponent implements OnInit {
       console.log('=== DONNÉES BRUTES DU MOCKTAIL ===');
       console.log('Mocktail complet:', mocktail);
       console.log('Ingrédients bruts:', mocktail.ingredients);
-      
+
       // Edit mode - pre-fill the form with correct ingredient data
       this.mocktailForm = {
         name: mocktail.name,
@@ -437,7 +440,7 @@ export class GestionMocktailsComponent implements OnInit {
         ingredients: mocktail.ingredients.map(ing => {
           console.log('Mapping ingrédient:', ing);
           console.log('Type de quantity:', typeof ing.quantity, 'Valeur:', ing.quantity);
-          
+
           // S'assurer que la quantité est un nombre
           let quantity = ing.quantity;
           if (typeof quantity === 'string') {
@@ -445,23 +448,23 @@ export class GestionMocktailsComponent implements OnInit {
           } else if (typeof quantity !== 'number') {
             quantity = 0;
           }
-          
+
           // Créer un nouvel objet pour forcer la mise à jour
           const ingredient = {
             name: ing.name,
             quantity: quantity,
             unit: ing.unit || 'cl'
           };
-          
+
           console.log('Ingrédient créé:', ingredient);
           return ingredient;
         })
       };
-      
+
       console.log('=== FORMULAIRE REMPLI ===');
       console.log('Formulaire complet:', this.mocktailForm);
       console.log('Ingrédients du formulaire:', this.mocktailForm.ingredients);
-      
+
       // Forcer la détection des changements pour s'assurer que l'UI se met à jour
       setTimeout(() => {
         this.cdr.detectChanges();
@@ -549,10 +552,10 @@ export class GestionMocktailsComponent implements OnInit {
 
   validateAddIngredient(): void {
     this.showErrors = true;
-    if (!this.newIngredientForm.name || 
-        this.newIngredientForm.limit <= 0 || 
-        this.newIngredientForm.stock < 0 || 
-        this.newIngredientForm.stock === null || 
+    if (!this.newIngredientForm.name ||
+        this.newIngredientForm.limit <= 0 ||
+        this.newIngredientForm.stock < 0 ||
+        this.newIngredientForm.stock === null ||
         this.newIngredientForm.limit === null) return;
 
     const newIngredientPayload = {
@@ -577,7 +580,7 @@ export class GestionMocktailsComponent implements OnInit {
 
         this.ingredients.push(ingredient);
         this.closeAddIngredientModal();
-        
+
         // Ajouter automatiquement l'ingrédient créé au mocktail en cours d'édition
         if (this.showMocktailModal) {
           this.mocktailForm.ingredients.push({
@@ -586,7 +589,7 @@ export class GestionMocktailsComponent implements OnInit {
             unit: ingredient.unit
           });
         }
-        
+
         // Recharger la liste des ingrédients pour s'assurer de la cohérence
         this.loadIngredients();
       },

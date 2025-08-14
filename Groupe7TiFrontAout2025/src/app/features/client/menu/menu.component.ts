@@ -17,6 +17,7 @@ interface Mocktail {
   forceAvailable: boolean | null;
   image: string;
   ingredients: Array<{
+    id: number;
     name: string;
     quantity: number;
     unit: string;
@@ -26,7 +27,7 @@ interface Mocktail {
 
 interface Ingredient {
   stockStatus: string;
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   allergen?: string; // Ajout du champ allergène
@@ -362,6 +363,27 @@ export class MenuComponent implements OnInit, OnDestroy {
           console.log('💾 Active order ID stored:', response.id);
         }
 
+
+        // --- Décrémenter les quantités d'ingrédients ---
+        for (const orderItem of this.orderList) {
+          const mocktail = orderItem.mocktail;
+          console.log(`\n🍹 Processing mocktail: ${mocktail.name} x${orderItem.quantity}`);
+          for (const ingredient of mocktail.ingredients) {
+            const quantityToDecrease = ingredient.quantity * orderItem.quantity;
+
+            console.log(`\n🍹 Processing mocktail: ${mocktail.name} x${orderItem.quantity}`);
+            console.log(`🔧 Decreasing ingredient: ${ingredient.id} }`);
+            this.ingredientService.DecreaseQuantity(ingredient.id, quantityToDecrease)
+              .subscribe({
+                next: () => {
+                  console.log(`Ingredient ${ingredient.name} decreased by ${quantityToDecrease}`);
+                },
+                error: (error) => {
+                  console.error(`Erreur lors de la décrémentation de ${ingredient.name}:`, error);
+                }
+              });
+          }
+        }
         // Clear the cart
         this.clearOrder();
 

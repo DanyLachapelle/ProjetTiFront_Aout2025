@@ -12,6 +12,8 @@ export interface Mocktail {
   forceAvailable: boolean | null
   image: string
   ingredients: Array<{
+    stockStatus: string;
+    id: number
     name: string
     quantity: number
     unit: string
