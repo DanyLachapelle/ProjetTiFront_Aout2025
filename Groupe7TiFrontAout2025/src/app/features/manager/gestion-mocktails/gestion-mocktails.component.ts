@@ -358,7 +358,7 @@ export class GestionMocktailsComponent implements OnInit {
     // Logique: basculer entre disponible normal (null) et forcé indisponible (false)
     if (mocktail.forceAvailable === false) {
       // Actuellement forcé indisponible -> revenir à l'état normal
-      newForceAvailable = null;
+      newForceAvailable = true;
     } else {
       // Actuellement normal (null) -> forcer comme indisponible
       newForceAvailable = false;
