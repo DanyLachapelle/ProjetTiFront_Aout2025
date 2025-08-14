@@ -25,10 +25,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Quick statistics
   quickStats = {
-    totalSales: 1247.50,
-    todaySales: 89.30,
-    activeMocktails: 7,
-    lowStockItems: 2
+    totalSales: 0,
+    todaySales: 0,
+    activeMocktails: 0,
+    lowStockItems: 0
   };
 
   // Real-time time variables
@@ -301,15 +301,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         // Calculer les ventes du jour
         this.calculateTodaySales(sales);
-
-        console.log('📊 Données reçues:', data);
-        console.log('📊 Ventes normalisées:', normalizedSales);
-        console.log('📊 Statistiques commandes :', {
-          total,
-          pending,
-          preparing,
-          ready
-        });
       },
       error: (error: any) => {
         console.error('Erreur lors du chargement des statistiques des commandes:', error);
@@ -371,15 +362,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       };
     }
 
-    console.log('💰 Ventes calculées:', {
-      todaySales: todaySales.length,
-      todayTotal: todayTotal,
-      weekSales: weekSales.length,
-      weekTotal: weekTotal,
-      monthSales: monthSales.length,
-      monthTotal: monthTotal,
-      salesCard: salesCard?.stats
-    });
   }
 
   // Normaliser les statuts comme dans le service OrderService
@@ -482,25 +464,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             };
           });
 
-        // ✅ Logs utiles
-        console.log('📦 Ingrédients reçus :', ingredients.map(i => ({
-          name: i.name,
-          quantity: i.quantity,
-          threshold: i.restock_threshold,
-          status: this.getStockStatus(i.quantity, i.restock_threshold)
-        })));
-
-        console.log('📊 Statistiques ingrédients :', {
-          total: ingredients.length,
-          good,
-          warning,
-          critical
-        });
-
-        console.log('🧾 Carte mise à jour (gestion-ingredients) :', ingredientCard);
-
-        // Log des alertes pour vérification
-        console.log('🔔 Alertes actives:', this.activeAlerts);
       },
       error: (err) => {
         console.error('Erreur chargement ingrédients :', err);
