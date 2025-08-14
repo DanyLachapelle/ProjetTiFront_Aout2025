@@ -2,7 +2,7 @@ import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
-import { QrService } from '../../../services/qr.service';
+import {ClientStep, QrService} from '../../../services/qr.service';
 
 @Component({
   selector: 'app-home',
@@ -32,6 +32,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   /** Initialisation uniquement côté navigateur */
   ngOnInit(): void {
+    localStorage.clear();
     if (isPlatformBrowser(this.platformId)) {
       this.generateNewQRCode();
       this.startTimer();
@@ -84,6 +85,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   onAccessMenu(): void {
     //this.qrService.saveTokenToLocal();
+    this.qrService.setStep(ClientStep.START);
     this.router.navigate(['/geoloc'], { queryParams: { token: this.qrToken } });
   }
 

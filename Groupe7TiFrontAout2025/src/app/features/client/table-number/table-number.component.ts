@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SessionService } from '../../../services/session.service';
 import { TableService, TableDto } from '../../../services/table.service';
+import {ClientStep} from '../../../services/qr.service';
+import {QrService} from '../../../services/qr.service';
 
 @Component({
   selector: 'app-table-number',
@@ -20,9 +22,10 @@ export class TableNumberComponent implements OnInit {
   isLoadingTables = true;
 
   constructor(
-    private router: Router, 
+    private router: Router,
     private sessionService: SessionService,
-    private tableService: TableService
+    private tableService: TableService,
+    private qrService: QrService
   ) {}
 
   ngOnInit() {
@@ -41,9 +44,9 @@ export class TableNumberComponent implements OnInit {
           const bNumber = this.extractTableNumber(b.tableNumber);
           return aNumber - bNumber;
         });
-        
+
         this.isLoadingTables = false;
-        
+
         // Sélectionner la première table par défaut
         if (this.availableTables.length > 0) {
           this.selectedTableNumber = this.availableTables[0].tableNumber;
@@ -53,7 +56,7 @@ export class TableNumberComponent implements OnInit {
         console.error('Erreur lors du chargement des tables:', error);
         this.error = 'Impossible de charger les tables disponibles.';
         this.isLoadingTables = false;
-        
+
         // Fallback : créer des tables par défaut
         this.availableTables = this.generateDefaultTables();
         if (this.availableTables.length > 0) {
@@ -88,7 +91,7 @@ export class TableNumberComponent implements OnInit {
 
   validateAndContinue() {
     this.error = null;
-    
+
     if (!this.selectedTableNumber) {
       this.error = "Please select a table number.";
       return;
@@ -98,20 +101,21 @@ export class TableNumberComponent implements OnInit {
 
     if (typeof window !== 'undefined' && window.localStorage) {
       const newTableNumber = this.selectedTableNumber.trim();
-      
+
       // Nettoyer les données globales non organisées
       localStorage.removeItem('current-order');
       localStorage.removeItem('current_order');
       localStorage.removeItem('helha-fresh-cart');
       localStorage.removeItem('mocktail_orders');
-      
+
       // Sauvegarder le nouveau numéro de table
       localStorage.setItem('table_number', newTableNumber);
-      
+
       console.log('Numéro de table sauvegardé:', newTableNumber);
-      
+
       // Démarrer la session avec le numéro de table
       this.sessionService.startSession(newTableNumber);
+      this.qrService.setStep(ClientStep.TABLE);
       this.router.navigate(['/menu']);
     }
   }

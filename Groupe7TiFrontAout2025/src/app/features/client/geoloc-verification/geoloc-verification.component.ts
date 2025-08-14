@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GeolocationService, LocationResult } from '../../../services/geolocation.service';
 import { LocationMapComponent } from '../../../components/location-map/location-map.component';
-import {QrService} from '../../../services/qr.service';
+import {ClientStep, QrService} from '../../../services/qr.service';
 
 @Component({
   selector: 'app-geoloc-verification',
@@ -71,6 +71,7 @@ export class GeolocVerificationComponent {
 
   proceedToMenu() {
     console.log('🍹 Redirection vers le menu');
+    this.qrService.setStep(ClientStep.GEOLOC);
     this.router.navigate(['/table']);
   }
 
