@@ -346,24 +346,41 @@ export class GestionIngredientsComponent implements OnInit {
   }
 
   validateDecreaseStock(): void {
-    if (this.decreaseStockIngredient && this.decreaseStockQuantity > 0 && this.decreaseStockQuantity <= this.decreaseStockIngredient.quantity) {
-      // TODO: Implémenter l'appel au backend pour diminuer le stock
-                        console.log('Diminuer le stock:', {
-                    ingredient: this.decreaseStockIngredient.name,
-                    quantity: this.decreaseStockQuantity
-                  });
-
-      // Pour l'instant, on simule la diminution en frontend
-      this.decreaseStockIngredient.quantity -= this.decreaseStockQuantity;
-      this.decreaseStockIngredient.stockStatus = this.getStockStatus(this.decreaseStockIngredient.quantity, this.decreaseStockIngredient.restockThreshold);
-      this.updateStatistics();
-
-      alert(`Stock decreased successfully. New quantity: ${this.decreaseStockIngredient.quantity}${this.decreaseStockIngredient.unit}`);
-      this.closeDecreaseStockModal();
+    if (
+      this.decreaseStockIngredient &&
+      this.decreaseStockQuantity > 0 &&
+      this.decreaseStockQuantity <= this.decreaseStockIngredient.quantity
+    ) {
+      this.ingredientService.DecreaseQuantity(
+        this.decreaseStockIngredient.id,
+        this.decreaseStockQuantity
+      ).subscribe({
+        next: (response: any) => {
+          if (response.success) {
+            // Met à jour localement la quantité et le statut
+            this.decreaseStockIngredient!.quantity -= this.decreaseStockQuantity;
+            this.decreaseStockIngredient!.stockStatus = this.getStockStatus(
+              this.decreaseStockIngredient!.quantity,
+              this.decreaseStockIngredient!.restockThreshold
+            );
+            this.updateStatistics();
+            alert(`Stock decreased successfully. New quantity: ${this.decreaseStockIngredient!.quantity}${this.decreaseStockIngredient!.unit}`);
+          } else {
+            alert('Update failed: ' + response.message);
+          }
+          this.closeDecreaseStockModal();
+        },
+        error: (err) => {
+          console.error('Error decreasing quantity', err);
+          alert('Error decreasing quantity');
+          this.closeDecreaseStockModal();
+        }
+      });
     } else {
       alert('Please enter a valid quantity (greater than 0 and not exceeding current stock)');
     }
   }
+
 
 
   // Modal methods - Add ingredient
