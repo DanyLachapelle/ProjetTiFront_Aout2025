@@ -416,9 +416,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getCurrentDate(): string {
     return this.currentDate || 'Date not available';
   }
-  getStockStatus(stock: number, limit: number): 'good' | 'warning' | 'critical' {
-    if (stock < limit * 0.8) return 'critical';
-    if (stock > limit * 1.5) return 'good';
+  getStockStatus(stockStatus: number, limit: number): 'good' | 'warning' | 'critical' {
+    if (stockStatus < limit * 0.8) return 'critical';
+    if (stockStatus > limit * 1.5) return 'good';
     return 'warning';
   }
 
@@ -433,9 +433,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
 
         // Calcul des statuts
-        const good = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'good').length;
-        const warning = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'warning').length;
-        const critical = ingredients.filter(i => this.getStockStatus(i.quantity, i.restock_threshold) === 'critical').length;
+        const good = ingredients.filter(i => this.getStockStatus(i.quantity, i.restockThreshold) === 'good').length;
+        const warning = ingredients.filter(i => this.getStockStatus(i.quantity, i.restockThreshold) === 'warning').length;
+        const critical = ingredients.filter(i => this.getStockStatus(i.quantity, i.restockThreshold) === 'critical').length;
 
         // Mise à jour de la carte des stats
         const ingredientCard = this.menuItems.find(item => item.id === 'gestion-ingredients');
@@ -451,11 +451,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // 💡 Génération dynamique des alertes
         this.activeAlerts = ingredients
           .filter(i => {
-            const status = this.getStockStatus(i.quantity, i.restock_threshold);
+            const status = this.getStockStatus(i.quantity, i.restockThreshold);
             return status === 'critical' || status === 'warning';
           })
           .map(i => {
-            const status = this.getStockStatus(i.quantity, i.restock_threshold);
+            const status = this.getStockStatus(i.quantity, i.restockThreshold);
             return {
               type: 'stock',
               message: `${status === 'critical' ? 'Critical' : 'Low'} stock: ${i.name} (${i.quantity}${i.unit} remaining)`,
