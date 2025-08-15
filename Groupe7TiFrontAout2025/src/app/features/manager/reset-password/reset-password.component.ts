@@ -22,6 +22,7 @@ export class ResetPasswordComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
+  // Tracks which password rules are satisfied
   passwordCriteria = {
     minLength: false,
     uppercase: false,
@@ -41,8 +42,10 @@ export class ResetPasswordComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Get token from URL query parameters
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
 
+    // Create password form with validation rules
     this.resetForm = this.fb.group({
       newPassword: [
         '',
@@ -53,6 +56,7 @@ export class ResetPasswordComponent implements OnInit {
       ]
     });
 
+    // Listen to password input changes and update criteria flags
     this.resetForm.get('newPassword')?.valueChanges.subscribe(value => {
       this.passwordCriteria.minLength = value?.length >= 8;
       this.passwordCriteria.uppercase = /[A-Z]/.test(value);
@@ -69,6 +73,7 @@ export class ResetPasswordComponent implements OnInit {
 
     const newPassword = this.resetForm.value.newPassword;
 
+    // Send new password and token to backend
     this.userService.resetPassword({token : this.token, newPassword : newPassword}).subscribe({
       next: () => {
         this.successMessage = 'Password updated successfully.';

@@ -1,7 +1,7 @@
 <!-- ===== DASHBOARD MANAGER ESTIVAL ===== -->
 <div class="container">
   <div class="dashboard-bg-center">
-    <!-- Header du dashboard -->
+    <!-- Dashboard header -->
     <header class="header">
       <div class="header-left">
         <div class="logo-section">
@@ -36,7 +36,7 @@
       </div>
     </header>
 
-    <!-- Section de statistiques rapides -->
+    <!-- Quick statistics section -->
     <section class="stats-section">
       <div class="stats-grid">
         <div class="stat-card stat-primary">
@@ -73,7 +73,7 @@
       </div>
     </section>
 
-    <!-- Section des modules principaux -->
+    <!-- Main modules section -->
     <section class="menu-section">
       <div class="menu-grid">
                  <!-- Module Gestion Mocktails -->
@@ -107,7 +107,7 @@
            </div>
          </div>
 
-                          <!-- Module Historique des Ventes -->
+                          <!-- Sales History Module -->
          <div class="menu-card card-warning"
               *ngFor="let item of menuItems.slice(1,2)"
               (click)="navigateTo(item.route)">
@@ -138,7 +138,7 @@
            </div>
          </div>
 
-         <!-- Module Gestion Ingrédients -->
+         <!-- Order Ingredient Module -->
          <div class="menu-card card-secondary"
               *ngFor="let item of menuItems.slice(2,3)"
               (click)="navigateTo(item.route)">
@@ -169,7 +169,7 @@
            </div>
          </div>
 
-                 <!-- Module Gestion Commandes -->
+                 <!-- Order Management Module -->
          <div class="menu-card card-success"
               *ngFor="let item of menuItems.slice(3,4)"
               (click)="navigateTo(item.route)">
@@ -232,7 +232,7 @@
     </div>
   </div>
 
-  <!-- Modal Paramètres -->
+  <!-- Modal Parameter -->
   <div class="modal-backdrop" *ngIf="showSettingsModal" (click)="closeSettings()">
     <div class="modal settings-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
