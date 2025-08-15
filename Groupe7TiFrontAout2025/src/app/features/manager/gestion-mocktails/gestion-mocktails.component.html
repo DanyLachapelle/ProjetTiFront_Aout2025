@@ -47,19 +47,19 @@
         <h2>Mocktails List</h2>
         <div class="list-actions">
           <div class="search-container">
-            <input 
-              type="text" 
-              placeholder="Search by ingredient..." 
+            <input
+              type="text"
+              placeholder="Search by ingredient..."
               class="search-input"
               [(ngModel)]="searchTerm"
               (input)="onSearchInput()"
               (focus)="showSuggestions = true"
               (blur)="onSearchBlur()">
-            
+
             <!-- Suggestions d'autocomplétion -->
             <div class="suggestions-dropdown" *ngIf="showSuggestions && filteredSuggestions.length > 0">
-              <div 
-                class="suggestion-item" 
+              <div
+                class="suggestion-item"
                 *ngFor="let suggestion of filteredSuggestions"
                 (click)="selectSuggestion(suggestion)">
                 <span class="suggestion-icon">🥤</span>
@@ -67,7 +67,7 @@
               </div>
             </div>
           </div>
-          
+
           <select class="filter-select" [(ngModel)]="statusFilter" (change)="filterMocktails()">
             <option value="all">All statuses</option>
             <option value="available">Available</option>
@@ -86,12 +86,12 @@
           <div class="mocktail-header">
             <span class="mocktail-emoji">{{ mocktail.image }}</span>
             <h3>{{ mocktail.name }}</h3>
-                                                   <span class="status-badge" 
+                                                   <span class="status-badge"
                 [class.available]="isMocktailActuallyAvailable(mocktail)"
                 [class.forced-unavailable]="isMocktailForcedUnavailable(mocktail)"
                 [class.out-of-stock]="isMocktailOutOfStock(mocktail) && !isMocktailForcedUnavailable(mocktail)">
-                {{ 
-                  isMocktailForcedUnavailable(mocktail) ? 'Unavailable (Manager)' : 
+                {{
+                  isMocktailForcedUnavailable(mocktail) ? 'Unavailable (Manager)' :
                   isMocktailOutOfStock(mocktail) ? 'Unavailable (Out of Stock)' :
                   'Available'
                 }}
@@ -104,8 +104,8 @@
               <span class="ingredients-count">{{ mocktail.ingredients.length }} ingredient(s)</span>
             </div>
             <div class="actions">
-              <button 
-                class="btn btn-small btn-secondary" 
+              <button
+                class="btn btn-small btn-secondary"
                 (click)="$event.stopPropagation(); openMocktailModal(mocktail)"
                 title="Edit">
                 ✏️ Edit
@@ -128,8 +128,8 @@
                     '🔒'
                   }}
                  </button>
-              <button 
-                class="btn btn-small btn-danger" 
+              <button
+                class="btn btn-small btn-danger"
                 (click)="$event.stopPropagation(); deleteMocktail(mocktail)"
                 title="Delete">
                 🗑️
@@ -137,7 +137,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Section ingrédients dépliable -->
         <div class="ingredients-section" *ngIf="expandedMocktailId === mocktail.id">
           <div class="ingredients-header">
@@ -196,85 +196,96 @@
       <button class="modal-close" (click)="closeMocktailModal()" title="Close">✕</button>
       <div class="order-modal-content">
         <h2>{{ editingMocktail ? 'Edit Mocktail' : 'New Mocktail' }}</h2>
-        
+
         <div class="form-group">
           <label for="mocktail-name">Mocktail name *</label>
-          <input 
-            type="text" 
-            id="mocktail-name" 
-            [(ngModel)]="mocktailForm.name" 
-            class="form-input" 
+          <input
+            type="text"
+            id="mocktail-name"
+            [(ngModel)]="mocktailForm.name"
+            class="form-input"
             placeholder="Mocktail name"
             [class.error]="showErrors && !mocktailForm.name">
           <span class="error-message" *ngIf="showErrors && !mocktailForm.name">Name is required</span>
         </div>
-        
+
         <div class="form-group">
           <label for="mocktail-description">Description *</label>
-          <textarea 
-            id="mocktail-description" 
-            [(ngModel)]="mocktailForm.description" 
-            class="form-input" 
-            rows="3" 
+          <textarea
+            id="mocktail-description"
+            [(ngModel)]="mocktailForm.description"
+            class="form-input"
+            rows="3"
             placeholder="Mocktail description"
             [class.error]="showErrors && !mocktailForm.description"></textarea>
           <span class="error-message" *ngIf="showErrors && !mocktailForm.description">Description is required</span>
         </div>
-        
+
         <div class="form-row">
           <div class="form-group">
             <label for="mocktail-price">Price (€) *</label>
-            <input 
-              type="number" 
-              id="mocktail-price" 
-              [(ngModel)]="mocktailForm.price" 
-              class="form-input" 
-              step="0.01" 
-              min="0" 
+            <input
+              type="number"
+              id="mocktail-price"
+              [(ngModel)]="mocktailForm.price"
+              class="form-input"
+              step="0.01"
+              min="0"
               placeholder="0.00"
               [class.error]="showErrors && (mocktailForm.price <= 0 || !mocktailForm.price)">
             <span class="error-message" *ngIf="showErrors && (mocktailForm.price <= 0 || !mocktailForm.price)">Price must be greater than 0</span>
           </div>
-          
+
           <div class="form-group">
             <label for="mocktail-emoji">Emoji *</label>
-            <input 
-              type="text" 
-              id="mocktail-emoji" 
-              [(ngModel)]="mocktailForm.image" 
-              class="form-input" 
-              maxlength="2" 
-              placeholder="Ex: 🍹"
+
+            <select
+              id="mocktail-emoji"
+              [(ngModel)]="mocktailForm.image"
+              class="form-input"
               [class.error]="showErrors && !mocktailForm.image">
+              <option value="" disabled selected>Select an emoji</option>
+              <option value="🍹">🍹</option>
+              <option value="🍸">🍸</option>
+              <option value="🥤">🥤</option>
+              <option value="🍷">🍷</option>
+              <option value="🍺">🍺</option>
+              <option value="🍊">🍊</option>
+              <option value="🍋">🍋</option>
+              <option value="🥛">🥛</option>
+              <option value="🍏">🍏</option>
+              <option value="🍓">🍓</option>
+            </select>
+
             <span class="error-message" *ngIf="showErrors && !mocktailForm.image">Emoji is required</span>
           </div>
         </div>
-        
+
         <div class="form-group">
           <label>Ingredients *</label>
           <div class="ingredients-form">
             <div class="ingredient-form-item" *ngFor="let ingredient of mocktailForm.ingredients; let i = index">
-              <select 
-                [(ngModel)]="ingredient.name" 
-                (ngModelChange)="onIngredientNameChange(i)" 
+              <select
+                [(ngModel)]="ingredient.name"
+                (ngModelChange)="onIngredientNameChange(i)"
                 class="form-input ingredient-name"
                 [class.error]="showErrors && !ingredient.name">
                 <option value="">Select an ingredient</option>
                 <option *ngFor="let ing of ingredients" [value]="ing.name">{{ ing.name }}</option>
               </select>
               <div class="form-row">
-                <input 
-                  type="text" 
-                  [(ngModel)]="ingredient.quantity" 
+                <input
+                  type="text"
+                  [(ngModel)]="ingredient.quantity"
                   (ngModelChange)="onIngredientQuantityChange(i)"
-                  class="form-input ingredient-quantity" 
+                  class="form-input ingredient-quantity"
                   placeholder="Qty"
                   [class.error]="showErrors && (ingredient.quantity <= 0 || !ingredient.quantity)">
                 <span class="ingredient-unit">{{ ingredient.unit }}</span>
               </div>
-              <button 
-                type="button" 
-                class="btn btn-small btn-outline" 
+              <button
+                type="button"
+                class="btn btn-small btn-outline"
                 (click)="removeIngredient(i)"
                 [disabled]="mocktailForm.ingredients.length <= 1">
                 🗑️
@@ -291,18 +302,18 @@
           </div>
           <span class="error-message" *ngIf="showErrors && !hasValidIngredients()">At least one valid ingredient is required</span>
         </div>
-        
+
         <div class="form-actions">
-          <button 
-            type="button" 
-            class="btn btn-outline" 
+          <button
+            type="button"
+            class="btn btn-outline"
             (click)="closeMocktailModal()"
             [disabled]="isSaving">
             Cancel
           </button>
-          <button 
-            type="button" 
-            class="btn btn-primary" 
+          <button
+            type="button"
+            class="btn btn-primary"
             (click)="saveMocktail()"
             [disabled]="isSaving">
             <span *ngIf="isSaving">Saving...</span>
@@ -320,17 +331,17 @@
         <h2>Delete Mocktail</h2>
         <p>Are you sure you want to delete <strong>{{ mocktailToDelete?.name }}</strong>?</p>
         <p>This action cannot be undone.</p>
-        
+
         <div class="form-actions">
-          <button 
-            type="button" 
-            class="btn btn-outline" 
+          <button
+            type="button"
+            class="btn btn-outline"
             (click)="closeDeleteModal()">
             Cancel
           </button>
-          <button 
-            type="button" 
-            class="btn btn-danger" 
+          <button
+            type="button"
+            class="btn btn-danger"
             (click)="confirmDelete()">
             Delete
           </button>
@@ -345,19 +356,19 @@
       <button class="modal-close" (click)="closeAddIngredientModal()" title="Close">✕</button>
       <div class="modal-content">
         <h2>Create New Ingredient</h2>
-        
+
         <div class="form-group">
           <label for="new-ingredient-name">Name *</label>
-          <input 
-            type="text" 
-            id="new-ingredient-name" 
-            [(ngModel)]="newIngredientForm.name" 
-            class="form-input" 
+          <input
+            type="text"
+            id="new-ingredient-name"
+            [(ngModel)]="newIngredientForm.name"
+            class="form-input"
             [class.error]="showErrors && !newIngredientForm.name"
             placeholder="Ingredient name">
           <span class="error-message" *ngIf="showErrors && !newIngredientForm.name">Name is required</span>
         </div>
-        
+
         <div class="form-group">
           <label for="new-ingredient-type">Type *</label>
           <select id="new-ingredient-type" [(ngModel)]="newIngredientForm.type" class="form-input">
@@ -365,15 +376,15 @@
             <option value="solide">Solid (g)</option>
           </select>
         </div>
-        
+
         <div class="form-row">
           <div class="form-group">
             <label for="new-ingredient-stock">Initial stock</label>
             <div class="form-row">
-              <input 
-                type="text" 
-                id="new-ingredient-stock" 
-                [(ngModel)]="newIngredientForm.stock" 
+              <input
+                type="text"
+                id="new-ingredient-stock"
+                [(ngModel)]="newIngredientForm.stock"
                 (ngModelChange)="onNewIngredientStockChange()"
                 class="form-input"
                 [class.error]="showErrors && (newIngredientForm.stock < 0 || newIngredientForm.stock === null)">
@@ -381,14 +392,14 @@
             </div>
             <span class="error-message" *ngIf="showErrors && (newIngredientForm.stock < 0 || newIngredientForm.stock === null)">Initial stock cannot be negative</span>
           </div>
-          
+
           <div class="form-group">
             <label for="new-ingredient-limit">Stock limit *</label>
             <div class="form-row">
-              <input 
-                type="text" 
-                id="new-ingredient-limit" 
-                [(ngModel)]="newIngredientForm.limit" 
+              <input
+                type="text"
+                id="new-ingredient-limit"
+                [(ngModel)]="newIngredientForm.limit"
                 (ngModelChange)="onNewIngredientLimitChange()"
                 class="form-input"
                 [class.error]="showErrors && (newIngredientForm.limit <= 0 || newIngredientForm.limit === null)">
@@ -397,7 +408,7 @@
             <span class="error-message" *ngIf="showErrors && (newIngredientForm.limit <= 0 || newIngredientForm.limit === null)">Stock limit must be greater than 0</span>
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="new-ingredient-allergen">Allergen</label>
           <select id="new-ingredient-allergen" [(ngModel)]="newIngredientForm.allergen" class="form-input">
@@ -418,17 +429,17 @@
             <option value="molluscs">Molluscs</option>
           </select>
         </div>
-        
+
         <div class="modal-actions">
-          <button 
-            type="button" 
-            class="btn btn-outline" 
+          <button
+            type="button"
+            class="btn btn-outline"
             (click)="closeAddIngredientModal()">
             Cancel
           </button>
-          <button 
-            type="button" 
-            class="btn btn-primary" 
+          <button
+            type="button"
+            class="btn btn-primary"
             (click)="validateAddIngredient()">
             Create Ingredient
           </button>

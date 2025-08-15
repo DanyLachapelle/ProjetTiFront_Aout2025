@@ -458,7 +458,7 @@ export class GestionIngredientsComponent implements OnInit {
           name: createdIngredient.name,
           quantity: createdIngredient.quantity,
           // Map API's restock_threshold field to restockThreshold
-          restockThreshold: createdIngredient.restock_threshold,
+          restockThreshold: createdIngredient.restockThreshold,
           unit: createdIngredient.unit,
           // Determine the stock status based on quantity and restock threshold
           stockStatus: this.getStockStatus(
