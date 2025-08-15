@@ -20,31 +20,46 @@ export const clientAccessGuard: CanActivateFn = (route: ActivatedRouteSnapshot) 
     }
   }
 
-  // Token valide ?
   if (!tokenData || qrService.isTokenExpired(tokenData) || !tokenData.isValid) {
     router.navigate(['/']);
     return false;
   }
 
-  // Récupération étape
   const currentStep = qrService.getStep();
 
-  // Vérification en fonction de la page demandée
+
   const routePath = route.routeConfig?.path;
 
-  if (routePath === 'geoloc' && currentStep < ClientStep.START) {
-    router.navigate(['/']);
-    return false;
+  // GELOCL : interdit si trop tôt ou déjà passé à TABLE ou MENU
+  if (routePath === 'geoloc') {
+    if (currentStep < ClientStep.START) {
+      router.navigate(['/']);
+      return false;
+    }
+    if (currentStep >= ClientStep.GEOLOC) { // table ou menu
+      router.navigate([currentStep >= ClientStep.MENU ? '/menu' : '/table']);
+      return false;
+    }
   }
 
-  if (routePath === 'table' && currentStep < ClientStep.GEOLOC) {
-    router.navigate(['/geoloc']);
-    return false;
+  // TABLE : interdit si étape précédente pas faite, ou déjà au MENU
+  if (routePath === 'table') {
+    if (currentStep < ClientStep.GEOLOC) {
+      router.navigate(['/geoloc']);
+      return false;
+    }
+    if (currentStep >= ClientStep.MENU) {
+      router.navigate(['/menu']);
+      return false;
+    }
   }
 
-  if (routePath === 'menu' && currentStep < ClientStep.TABLE) {
-    router.navigate(['/table']);
-    return false;
+  // MENU : interdit si étape précédente pas faite
+  if (routePath === 'menu') {
+    if (currentStep < ClientStep.TABLE) {
+      router.navigate(['/table']);
+      return false;
+    }
   }
 
   return true;
