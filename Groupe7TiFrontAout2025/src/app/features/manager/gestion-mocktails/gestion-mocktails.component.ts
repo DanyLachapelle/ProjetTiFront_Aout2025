@@ -74,7 +74,7 @@ export class GestionMocktailsComponent implements OnInit {
   itemsPerPage: number = 10;
   paginatedMocktails: Mocktail[] = [];
 
-  // Form
+  //  Mocktail form data
   mocktailForm: MocktailForm = {
     name: '',
     description: '',
@@ -99,50 +99,27 @@ export class GestionMocktailsComponent implements OnInit {
     this.loadMocktails();
   }
 
-  // --- Load data from API ---
+  // ---  Load all mocktails from the API  ---
   loadMocktails() {
     this.mocktailService.getAll().subscribe({
       next: (data) => {
         this.mocktails = data;
-
-        // Utiliser directement la disponibilité calculée par le backend
-        // Pas besoin de recalculer côté frontend
-                 console.log('Mocktails chargés avec disponibilité backend:', this.mocktails.map(m => ({
-           name: m.name,
-           available: m.available,
-           forceAvailable: m.forceAvailable,
-           forceAvailableType: typeof m.forceAvailable
-         })));
-
-         // Log détaillé du premier mocktail pour debug
-         if (this.mocktails.length > 0) {
-           const firstMocktail = this.mocktails[0];
-           console.log('Détail du premier mocktail:', {
-             name: firstMocktail.name,
-             available: firstMocktail.available,
-             forceAvailable: firstMocktail.forceAvailable,
-             forceAvailableType: typeof firstMocktail.forceAvailable,
-             forceAvailableStrictNull: firstMocktail.forceAvailable === null,
-             forceAvailableStrictFalse: firstMocktail.forceAvailable === false,
-             forceAvailableStrictTrue: firstMocktail.forceAvailable === true
-           });
-         }
-
+        // Use backend-calculated availability directly
         this.filterMocktails();
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des mocktails:', error);
+        console.error('Error loading mocktails:', error);
         this.mocktails = [];
       }
     });
   }
+  // --- Load all ingredients from the API ---
 
   loadIngredients() {
     this.mocktailService.getAllIngredients().subscribe({
       next: (data: Ingredient[]) => {
         this.ingredients = data;
         this.allIngredients = data.map((ing: Ingredient) => ing.name);
-        console.log('Ingrédients chargés:', this.ingredients.length);
       },
       error: (error: any) => {
         console.error('Erreur lors du chargement des ingrédients:', error);
@@ -152,7 +129,7 @@ export class GestionMocktailsComponent implements OnInit {
     });
   }
 
-  // --- Filtering and search ---
+  // --- Filter mocktails based on search term, status filter, and price sort ---
   filterMocktails() {
     this.filteredMocktails = this.mocktails.filter(mocktail => {
       // Search by ingredient
@@ -161,7 +138,7 @@ export class GestionMocktailsComponent implements OnInit {
           ingredient.name.toLowerCase().includes(this.searchTerm.toLowerCase())
         );
 
-      // Calculer la disponibilité réelle en tenant compte de forceAvailable
+      // Calculate real availability taking forceAvailable into account
       const isActuallyAvailable = this.isMocktailActuallyAvailable(mocktail);
 
       const matchesStatus = this.statusFilter === 'all' ||
@@ -171,7 +148,7 @@ export class GestionMocktailsComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort by price
+    // Apply price sorting
     if (this.priceSort !== 'none') {
       this.filteredMocktails.sort((a, b) => {
         if (this.priceSort === 'asc') {
@@ -182,7 +159,7 @@ export class GestionMocktailsComponent implements OnInit {
       });
     }
 
-    // Apply pagination
+    // Apply pagination after filtering and sorting
     this.applyPagination();
   }
 
@@ -296,35 +273,31 @@ export class GestionMocktailsComponent implements OnInit {
     return this.mocktails.length;
   }
 
-  // Méthode utilitaire pour déterminer si un mocktail est réellement disponible
+  // Utility method to determine if a mocktail is actually available
   isMocktailActuallyAvailable(mocktail: Mocktail): boolean {
-    // Si force_available est false (forcé indisponible par le gérant), toujours indisponible
+    // If forceAvailable is false (manually set unavailable by the manager), always unavailable
     if (mocktail.forceAvailable === false) {
       return false;
     }
-
-
-
-    // Sinon, utiliser la disponibilité basée sur le stock des ingrédients
-    // (force_available = null ou true n'override pas le manque d'ingrédients)
+    // Otherwise, check the available property
     return mocktail.available;
   }
 
-  // Méthode pour déterminer si un mocktail manque d'ingrédients
+  // Method to determine if a mocktail is out of stock
   isMocktailOutOfStock(mocktail: Mocktail): boolean {
     return !mocktail.available;
   }
 
-  // Méthode pour déterminer si un mocktail est forcé indisponible par le gérant
+  // Method to determine if a mocktail is forcibly unavailable by the manager
   isMocktailForcedUnavailable(mocktail: Mocktail): boolean {
     return mocktail.forceAvailable === false;
   }
 
-  // Méthode pour déterminer si le bouton de disponibilité doit être désactivé
+  // Method to determine if the availability button should be disabled
   isAvailabilityButtonDisabled(mocktail: Mocktail): boolean {
-    // Le bouton est désactivé seulement si le mocktail manque d'ingrédients
-    // ET n'est pas forcé indisponible par le manager
-    // (le manager peut toujours réactiver un mocktail qu'il a forcé indisponible)
+    // The button is disabled only if the mocktail is out of ingredients
+    // AND is not forcibly unavailable by the manager
+    // (the manager can always reactivate a mocktail they have forcibly made unavailable)
     return !mocktail.available && mocktail.forceAvailable !== false;
   }
 
@@ -346,25 +319,25 @@ export class GestionMocktailsComponent implements OnInit {
     this.expandedMocktailId = this.expandedMocktailId === mocktailId ? null : mocktailId;
   }
 
-    toggleAvailability(mocktail: Mocktail) {
+  toggleAvailability(mocktail: Mocktail) {
 
-    // Empêcher le clic si le mocktail manque d'ingrédients
+    // Prevent click if the mocktail is out of ingredients
     if (this.isAvailabilityButtonDisabled(mocktail)) {
       return;
     }
 
     let newForceAvailable: boolean | null;
 
-    // Logique: basculer entre disponible normal (null) et forcé indisponible (false)
+    // Logic: toggle between normal availability (null) and forced unavailable (false)
     if (mocktail.forceAvailable === false) {
-      // Actuellement forcé indisponible -> revenir à l'état normal
+      // Currently forced unavailable -> revert to normal state
       newForceAvailable = true;
     } else {
-      // Actuellement normal (null) -> forcer comme indisponible
+      // Currently normal (null) -> force as unavailable
       newForceAvailable = false;
     }
 
-    // Créer une requête de mise à jour avec la nouvelle valeur
+    // Create an update request with the new value
     const updateRequest: UpdateMocktailRequest = {
       name: mocktail.name,
       description: mocktail.description,
@@ -378,27 +351,29 @@ export class GestionMocktailsComponent implements OnInit {
       }))
     };
 
-         // Mettre à jour le mocktail
-     this.mocktailService.update(mocktail.id, updateRequest).subscribe({
-       next: (response) => {
-         if (response.success) {
-           // Recharger les données pour mettre à jour l'affichage
-           this.loadMocktails();
-         } else {
-           console.error('Erreur lors de la mise à jour de la disponibilité:', response.message);
-         }
-       },
-       error: (error) => {
-         console.error('Erreur lors de la mise à jour de la disponibilité:', error);
-       }
-     });
+    // Update the mocktail
+    this.mocktailService.update(mocktail.id, updateRequest).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Reload data to update the display
+          this.loadMocktails();
+        } else {
+          console.error('Error updating availability:', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error updating availability:', error);
+      }
+    });
   }
 
+  // --- Delete mocktail ---
   deleteMocktail(mocktail: Mocktail) {
     this.mocktailToDelete = mocktail;
     this.showDeleteModal = true;
   }
 
+  // Confirm deletion of the mocktail
   confirmDelete() {
     if (this.mocktailToDelete) {
       this.mocktailService.delete(this.mocktailToDelete.id).subscribe({
@@ -413,6 +388,7 @@ export class GestionMocktailsComponent implements OnInit {
     }
   }
 
+  // Close the delete confirmation modal
   closeDeleteModal() {
     this.showDeleteModal = false;
     this.mocktailToDelete = null;
@@ -424,12 +400,9 @@ export class GestionMocktailsComponent implements OnInit {
     this.showErrors = false;
 
     if (mocktail) {
-      // Debug: afficher les données brutes du mocktail
-      console.log('=== DONNÉES BRUTES DU MOCKTAIL ===');
-      console.log('Mocktail complet:', mocktail);
-      console.log('Ingrédients bruts:', mocktail.ingredients);
 
-      // Edit mode - pre-fill the form with correct ingredient data
+
+      // Edit mode - pre-fill the form with the correct ingredient data
       this.mocktailForm = {
         name: mocktail.name,
         description: mocktail.description,
@@ -438,10 +411,7 @@ export class GestionMocktailsComponent implements OnInit {
         available: mocktail.available,
         forceAvailable: mocktail.forceAvailable ?? false,
         ingredients: mocktail.ingredients.map(ing => {
-          console.log('Mapping ingrédient:', ing);
-          console.log('Type de quantity:', typeof ing.quantity, 'Valeur:', ing.quantity);
-
-          // S'assurer que la quantité est un nombre
+          // Ensure quantity is a number
           let quantity = ing.quantity;
           if (typeof quantity === 'string') {
             quantity = parseFloat(quantity) || 0;
@@ -449,23 +419,19 @@ export class GestionMocktailsComponent implements OnInit {
             quantity = 0;
           }
 
-          // Créer un nouvel objet pour forcer la mise à jour
+          // Create a new object to force form update
           const ingredient = {
             name: ing.name,
             quantity: quantity,
             unit: ing.unit || 'cl'
           };
 
-          console.log('Ingrédient créé:', ingredient);
           return ingredient;
         })
       };
 
-      console.log('=== FORMULAIRE REMPLI ===');
-      console.log('Formulaire complet:', this.mocktailForm);
-      console.log('Ingrédients du formulaire:', this.mocktailForm.ingredients);
 
-      // Forcer la détection des changements pour s'assurer que l'UI se met à jour
+      // Force change detection to ensure the UI updates
       setTimeout(() => {
         this.cdr.detectChanges();
       }, 0);
@@ -483,6 +449,7 @@ export class GestionMocktailsComponent implements OnInit {
     }
     this.showMocktailModal = true;
   }
+
 
   closeMocktailModal() {
     this.showMocktailModal = false;
@@ -510,7 +477,7 @@ export class GestionMocktailsComponent implements OnInit {
   }
 
   onIngredientQuantityChange(i: number) {
-    // S'assurer que la quantité est un nombre valide
+    // Ensure the quantity is a valid number
     const quantity = this.mocktailForm.ingredients[i].quantity;
     if (typeof quantity === 'string') {
       this.mocktailForm.ingredients[i].quantity = Number(quantity) || 0;
@@ -535,7 +502,7 @@ export class GestionMocktailsComponent implements OnInit {
   }
 
   onNewIngredientStockChange(): void {
-    // Convertir la valeur en nombre si possible
+    // Convert the quantity to a number if possible
     const numericValue = parseFloat(this.newIngredientForm.stock as any);
     if (!isNaN(numericValue)) {
       this.newIngredientForm.stock = numericValue;
@@ -543,7 +510,7 @@ export class GestionMocktailsComponent implements OnInit {
   }
 
   onNewIngredientLimitChange(): void {
-    // Convertir la valeur en nombre si possible
+    // Convert the value to a number if possible
     const numericValue = parseFloat(this.newIngredientForm.limit as any);
     if (!isNaN(numericValue)) {
       this.newIngredientForm.limit = numericValue;
@@ -568,7 +535,7 @@ export class GestionMocktailsComponent implements OnInit {
 
     this.ingredientService.CreateIngredient(newIngredientPayload).subscribe({
       next: (createdIngredient) => {
-        // Ajouter l'ingrédient créé dans la liste locale
+        // Add the new ingredient to the local form list
         const ingredient: Ingredient = {
           id: createdIngredient.id || Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
           name: createdIngredient.name,
@@ -581,7 +548,7 @@ export class GestionMocktailsComponent implements OnInit {
         this.ingredients.push(ingredient);
         this.closeAddIngredientModal();
 
-        // Ajouter automatiquement l'ingrédient créé au mocktail en cours d'édition
+        // Automatically add the created ingredient to the currently edited mocktail
         if (this.showMocktailModal) {
           this.mocktailForm.ingredients.push({
             name: ingredient.name,
@@ -590,12 +557,11 @@ export class GestionMocktailsComponent implements OnInit {
           });
         }
 
-        // Recharger la liste des ingrédients pour s'assurer de la cohérence
+        // Reload the ingredient list to ensure consistency
         this.loadIngredients();
       },
       error: (err) => {
         console.error('Erreur lors de la création de l\'ingrédient', err);
-        // Optionnel : afficher un message d'erreur à l'utilisateur
       }
     });
   }
@@ -658,23 +624,22 @@ export class GestionMocktailsComponent implements OnInit {
 
       this.mocktailService.update(this.editingMocktail.id, updateRequest).subscribe({
         next: (response) => {
-          console.log('Mocktail mis à jour avec succès:', response);
+
           if (response.success) {
             this.loadMocktails();
             this.closeMocktailModal();
           } else {
-            console.error('Erreur lors de la mise à jour:', response.message);
+            console.error('Error while updating:', response.message);
           }
           this.isSaving = false;
         },
         error: (error) => {
-          console.error('Erreur lors de la mise à jour:', error);
+          console.error('Error during update:', error);
           this.isSaving = false;
         }
       });
     } else {
       // Create mode - add new mocktail
-      console.log('Mode création pour:', this.mocktailForm.name);
       const createRequest: CreateMocktailRequest = {
         name: this.mocktailForm.name,
         description: this.mocktailForm.description,
@@ -683,17 +648,14 @@ export class GestionMocktailsComponent implements OnInit {
         ingredients: this.mocktailForm.ingredients
       };
 
-      console.log('Données envoyées:', createRequest);
-      console.log('Prix avant create (type et valeur):', typeof this.mocktailForm.price, this.mocktailForm.price);
       this.mocktailService.create(createRequest).subscribe({
         next: (response) => {
-          console.log('Mocktail créé avec succès:', response);
           this.loadMocktails();
           this.closeMocktailModal();
           this.isSaving = false;
         },
         error: (error) => {
-          console.error('Erreur lors de la création:', error);
+          console.error('Error during creation:', error);
           this.isSaving = false;
         }
       });

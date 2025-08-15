@@ -36,6 +36,7 @@ export class GestionIngredientsComponent implements OnInit {
     const alerts = this.getStockAlerts();
   }
 
+  // Load ingredients from the service
   loadIngredients(): void {
     this.ingredientService.GetAll().subscribe({
       next: (data) => {
@@ -51,14 +52,12 @@ export class GestionIngredientsComponent implements OnInit {
           type: item.unit === 'g' ? 'solide' : 'liquide',
           lastModifiedAt: item.lastModifiedAt
         }));
-        // Met à jour le statut de chaque ingrédient
+        // 🔔Update the statistics after loading the ingredients
 
         this.updateStatistics();
 
-        console.log('📦 Ingrédients chargés:', this.ingredients);
-        // 🔔 Maintenant que les ingrédients sont chargés, appelle getStockAlerts()
+        // 🔔 Now that the ingredients are loaded, call getStockAlerts()
         const alerts = this.getStockAlerts();
-        console.log('📢 Alerts après chargement:', alerts);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des ingrédients:', err);
@@ -66,10 +65,12 @@ export class GestionIngredientsComponent implements OnInit {
     });
   }
 
+  //Returns an array of stock alert objects based on the current ingredients' stock status
   getStockAlerts(): { message: string; severity: string; icon: string; type: string }[] {
     const alerts = [];
-
+// Loop through each ingredient in the current list
     for (const ingredient of this.ingredients) {
+      // Check if the ingredient has a critical or warning stock status
       if (ingredient.stockStatus === 'critical' || ingredient.stockStatus === 'warning') {
         alerts.push({
           type: 'stock',
@@ -283,11 +284,15 @@ export class GestionIngredientsComponent implements OnInit {
   // Statistics
   updateStatistics(): void {
     this.totalIngredients = this.ingredients.length;
+    // Counts the number of ingredients with 'critical' or 'warning' stock status
     this.lowStockCount = this.ingredients.filter(ingredient =>
       ingredient.stockStatus === 'warning' || ingredient.stockStatus === 'critical').length;
   }
 
+  //Returns the number of ingredients matching the given stock status
   getStatusCount(status: 'good' | 'warning' | 'critical'): number {
+    // Filter the ingredients to only those with the specified status
+    // and return the number of matching items
     return this.ingredients.filter(ingredient => ingredient.stockStatus === status).length;
   }
 
@@ -307,27 +312,38 @@ export class GestionIngredientsComponent implements OnInit {
   }
 
 
-
+// Validates and processes the restocking of an ingredient
   validateRestock(): void {
+    // Check that an ingredient is selected and the restock quantity is greater than zero
     if (this.restockIngredient && this.restockQuantity > 0) {
+      // Call the service to update the ingredient quantity
       this.ingredientService.updateQuantity(this.restockIngredient.id, this.restockQuantity).subscribe({
+        // Handle successful HTTP response
         next: (response) => {
           if (response.success) {
-            this.loadIngredients();  // <-- recharge la liste complète
+            // Reload the full ingredient list to get the updated data
+            this.loadIngredients();
+            // Update any statistics based on the new data
             this.updateStatistics();
+            // Inform the user that the update succeeded
             alert('Quantity updated successfully');
           } else {
+            // Inform the user that the update failed (business logic failure)
             alert('Update failed: ' + response.message);
           }
+          // Close the restock modal regardless of success or failure
           this.closeRestockModal();
         },
+        // Handle HTTP or network error
         error: (err) => {
           console.error('Error updating quantity', err);
           alert('Error updating quantity');
+          // Close the modal in case of error
           this.closeRestockModal();
         }
       });
     } else {
+      // If no ingredient selected or quantity invalid, just close the modal
       this.closeRestockModal();
     }
   }
@@ -345,41 +361,59 @@ export class GestionIngredientsComponent implements OnInit {
     this.decreaseStockQuantity = 0.1;
   }
 
+  // Validates and processes the decrease of an ingredient's stock quantity
   validateDecreaseStock(): void {
+    // Ensure an ingredient is selected, quantity > 0, and quantity does not exceed current stock
     if (
       this.decreaseStockIngredient &&
       this.decreaseStockQuantity > 0 &&
       this.decreaseStockQuantity <= this.decreaseStockIngredient.quantity
     ) {
+      // Call the service to decrease the stock quantity
       this.ingredientService.DecreaseQuantity(
         this.decreaseStockIngredient.id,
         this.decreaseStockQuantity
       ).subscribe({
+        // Handle a successful API response
         next: (response: any) => {
           if (response.success) {
-            // Met à jour localement la quantité et le statut
+            // Update the quantity locally to reflect the change
             this.decreaseStockIngredient!.quantity -= this.decreaseStockQuantity;
+
+            // Update the stock status based on the new quantity and the restock threshold
             this.decreaseStockIngredient!.stockStatus = this.getStockStatus(
               this.decreaseStockIngredient!.quantity,
               this.decreaseStockIngredient!.restockThreshold
             );
+
+            // Refresh any related statistics
             this.updateStatistics();
-            alert(`Stock decreased successfully. New quantity: ${this.decreaseStockIngredient!.quantity}${this.decreaseStockIngredient!.unit}`);
+
+            // Inform the user of success and show the new quantity
+            alert(
+              `Stock decreased successfully. New quantity: ${this.decreaseStockIngredient!.quantity}${this.decreaseStockIngredient!.unit}`
+            );
           } else {
+            // Inform the user that the API call was unsuccessful
             alert('Update failed: ' + response.message);
           }
+          // Close the decrease stock modal regardless of the outcome
           this.closeDecreaseStockModal();
         },
+        // Handle any HTTP or network errors
         error: (err) => {
           console.error('Error decreasing quantity', err);
           alert('Error decreasing quantity');
+          // Close the modal in case of error
           this.closeDecreaseStockModal();
         }
       });
     } else {
+      // If quantity is invalid, show an error message without calling the API
       alert('Please enter a valid quantity (greater than 0 and not exceeding current stock)');
     }
   }
+
 
 
 
@@ -413,32 +447,48 @@ export class GestionIngredientsComponent implements OnInit {
     };
 
 
+    // Call the service to create a new ingredient
     this.ingredientService.CreateIngredient(newIngredientPayload).subscribe({
+      // Handle successful API response
       next: (createdIngredient) => {
-        // Ajouter l'ingrédient créé dans la liste locale avec les infos reçues
+        // Build the Ingredient object for local state using data from the API
         const ingredient: Ingredient = {
-          id: createdIngredient.id || Math.max(0, ...this.ingredients.map(i => i.id)) + 1, // fallback si pas d'id retourné
+          // Use returned ID if available; otherwise generate a fallback ID based on the max existing ID
+          id: createdIngredient.id || Math.max(0, ...this.ingredients.map(i => i.id)) + 1,
           name: createdIngredient.name,
           quantity: createdIngredient.quantity,
+          // Map API's restock_threshold field to restockThreshold
           restockThreshold: createdIngredient.restock_threshold,
           unit: createdIngredient.unit,
-          stockStatus: this.getStockStatus(createdIngredient.quantity, createdIngredient.restock_threshold),
+          // Determine the stock status based on quantity and restock threshold
+          stockStatus: this.getStockStatus(
+            createdIngredient.quantity,
+            createdIngredient.restock_threshold
+          ),
+          // Take the type from the form input
           type: this.newIngredientForm.type,
+          // Store the current date in YYYY-MM-DD format
           lastModifiedAt: new Date().toISOString().split('T')[0]
         };
 
+        // Add the newly created ingredient to the local list
         this.ingredients.push(ingredient);
+
+        // Update statistics to reflect the new data
         this.updateStatistics();
+
+        // Close the "Add Ingredient" modal
         this.closeAddIngredientModal();
       },
+      // Handle HTTP or network errors
       error: (err) => {
-        console.error('Erreur lors de la création de l’ingrédient', err);
-        // Optionnel : afficher un message d’erreur à l’utilisateur
+        console.error('Error creating ingredient', err);
+        // Optionally: show an error message to the user
       }
     });
   }
 
-  // Modal methods - Edit limit
+    // Modal methods - Edit limit
   openEditLimitModal(ingredient: Ingredient): void {
     this.editLimitIngredient = ingredient;
     this.editLimitValue = ingredient.restockThreshold;

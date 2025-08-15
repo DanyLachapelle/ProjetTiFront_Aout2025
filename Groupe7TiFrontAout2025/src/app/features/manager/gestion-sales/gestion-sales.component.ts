@@ -19,7 +19,7 @@ import {
 } from './chart-config';
 import {SaleService} from '../../../services/sale.service';
 
-// Enregistrer Chart.js avec tous les éléments automatiquement
+// Save Chart.js with all elements automatically
 Chart.register();
 
 @Component({
@@ -35,7 +35,7 @@ export class GestionSalesComponent implements OnInit {
 
 
   sales: Sale[] = [];
-  // Filtres et pagination
+  // Filters and pagination
   selectedFilter: 'all' | 'today' | 'week' | 'month' | 'custom' = 'all';
   searchTerm: string = '';
   customDateRange = { start: '', end: '' };
@@ -49,12 +49,12 @@ export class GestionSalesComponent implements OnInit {
   filteredSales: Sale[] = [];
   displayMode: 'list' | 'statistics' = 'list'; //   Nouveau: mode d'affichage
 
-  // Autocomplétion de recherche
+  // Search autocomplete
   showSuggestions: boolean = false;
   filteredSuggestions: string[] = [];
   allMocktailNames: string[] = [];
 
-  // Graphiques avec configuration de base
+  // Charts with basic configuration
   salesTrendChart: any = { ...LINE_CHART_CONFIG };
   topMocktailsChart: any = { ...BAR_CHART_CONFIG };
   salesDistributionChart: any = { ...PIE_CHART_CONFIG };
@@ -67,7 +67,7 @@ export class GestionSalesComponent implements OnInit {
   customerRetention: { retention: number; trend: string } = { retention: 0, trend: '📈' };
   conversionRate: { conversion: number; trend: string } = { conversion: 0, trend: '📈' };
 
-  // Paramètres des graphiques
+  // Chart settings
   chartSettings: ChartSettings;
   showSettingsModal: boolean = false;
 
@@ -180,7 +180,7 @@ export class GestionSalesComponent implements OnInit {
   }
 
   onSearchBlur(): void {
-    // Délai pour permettre le clic sur les suggestions
+    // Delay before allowing click on suggestions
     setTimeout(() => {
       this.showSuggestions = false;
     }, 200);

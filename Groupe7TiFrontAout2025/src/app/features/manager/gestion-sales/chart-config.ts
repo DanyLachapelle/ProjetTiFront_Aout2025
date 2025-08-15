@@ -1,4 +1,4 @@
-// Couleurs personnalisées pour les graphiques
+// Custom colors for charts
 export const CHART_COLORS = {
   primary: '#ff7e5f',
   secondary: '#ffb347',
@@ -12,7 +12,7 @@ export const CHART_COLORS = {
   gradient: ['#ff7e5f', '#ffb347', '#ffe066', '#28a745', '#17a2b8']
 };
 
-// Couleurs pour le thème sombre
+// Colors for dark theme
 export const DARK_CHART_COLORS = {
   primary: '#ffb347',
   secondary: '#ff7e5f',
@@ -26,7 +26,7 @@ export const DARK_CHART_COLORS = {
   gradient: ['#ffb347', '#ff7e5f', '#ffe066', '#28a745', '#17a2b8']
 };
 
-// Configuration globale pour tous les graphiques
+// Global configuration for all charts
 export const CHART_GLOBAL_CONFIG = {
   responsive: true,
   maintainAspectRatio: false,
@@ -62,7 +62,7 @@ export const CHART_GLOBAL_CONFIG = {
   }
 };
 
-// Configuration pour les graphiques en ligne (Sales Trend)
+// Configuration for line charts (Sales Trend)
 export const LINE_CHART_CONFIG = {
   type: 'line' as const,
   data: {
@@ -87,7 +87,7 @@ export const LINE_CHART_CONFIG = {
   }
 };
 
-// Configuration pour les graphiques en barres (Top Selling Mocktails)
+//Configuration for bar charts (Top Selling Mocktails)
 export const BAR_CHART_CONFIG = {
   type: 'bar' as const,
   data: {
@@ -105,7 +105,7 @@ export const BAR_CHART_CONFIG = {
   }
 };
 
-// Configuration pour les graphiques circulaires (Sales Distribution)
+// Configuration for pie charts (Sales Distribution)
 export const PIE_CHART_CONFIG = {
   type: 'pie' as const,
   data: {
@@ -128,7 +128,8 @@ export const PIE_CHART_CONFIG = {
   }
 };
 
-// Configuration pour les graphiques en radar (Peak Hours)
+
+// Configuration for radar charts (Peak Hours)
 export const RADAR_CHART_CONFIG = {
   type: 'radar' as const,
   data: {
@@ -149,7 +150,7 @@ export const RADAR_CHART_CONFIG = {
   }
 };
 
-// Interface pour les paramètres des graphiques
+// Interface for chart settings
 export interface ChartSettings {
   showLegend: boolean;
   showGrid: boolean;
@@ -159,23 +160,23 @@ export interface ChartSettings {
   colorScheme: 'default' | 'colorblind' | 'monochrome';
 }
 
-// Fonction pour appliquer les paramètres aux graphiques
+// Function to apply settings to charts
 export function applyChartSettings(chartConfig: any, settings: ChartSettings): any {
   const colors = settings.theme === 'dark' ? DARK_CHART_COLORS : CHART_COLORS;
-  
-  // Créer une copie profonde de la configuration
+
+  // Create a deep copy of the configuration
   const updatedConfig = JSON.parse(JSON.stringify(chartConfig));
-  
+
   // Appliquer les paramètres de base
   updatedConfig.options.responsive = settings.responsive;
   updatedConfig.options.animation = settings.animation;
-  
+
   // Appliquer la légende
   if (updatedConfig.options.plugins?.legend) {
     updatedConfig.options.plugins.legend.display = settings.showLegend;
     updatedConfig.options.plugins.legend.labels.color = settings.theme === 'dark' ? '#fff' : '#666';
   }
-  
+
   // Appliquer la grille (scales)
   if (updatedConfig.options.scales) {
     Object.keys(updatedConfig.options.scales).forEach(scaleKey => {
@@ -189,7 +190,7 @@ export function applyChartSettings(chartConfig: any, settings: ChartSettings): a
       }
     });
   }
-  
+
   // Appliquer le thème aux couleurs
   if (updatedConfig.data?.datasets) {
     updatedConfig.data.datasets.forEach((dataset: any, index: number) => {
@@ -222,22 +223,22 @@ export function applyChartSettings(chartConfig: any, settings: ChartSettings): a
       }
     });
   }
-  
+
   // Appliquer le thème au tooltip
   if (updatedConfig.options.plugins?.tooltip) {
-    updatedConfig.options.plugins.tooltip.backgroundColor = settings.theme === 'dark' 
-      ? 'rgba(0, 0, 0, 0.9)' 
+    updatedConfig.options.plugins.tooltip.backgroundColor = settings.theme === 'dark'
+      ? 'rgba(0, 0, 0, 0.9)'
       : 'rgba(0, 0, 0, 0.8)';
     updatedConfig.options.plugins.tooltip.borderColor = colors.primary;
   }
-  
+
   return updatedConfig;
 }
 
 // Fonction pour obtenir les couleurs selon le schéma
 export function getColorScheme(settings: ChartSettings): string[] {
   const colors = settings.theme === 'dark' ? DARK_CHART_COLORS : CHART_COLORS;
-  
+
   switch (settings.colorScheme) {
     case 'monochrome':
       // Créer des variations de la couleur principale pour distinguer les sections
@@ -266,15 +267,15 @@ function adjustBrightness(color: string, factor: number): string {
   const r = parseInt(hex.substr(0, 2), 16);
   const g = parseInt(hex.substr(2, 2), 16);
   const b = parseInt(hex.substr(4, 2), 16);
-  
+
   // Ajuster la luminosité
   const newR = Math.min(255, Math.max(0, Math.round(r * factor)));
   const newG = Math.min(255, Math.max(0, Math.round(g * factor)));
   const newB = Math.min(255, Math.max(0, Math.round(b * factor)));
-  
+
   // Convertir en hex
-  return '#' + 
-    newR.toString(16).padStart(2, '0') + 
-    newG.toString(16).padStart(2, '0') + 
+  return '#' +
+    newR.toString(16).padStart(2, '0') +
+    newG.toString(16).padStart(2, '0') +
     newB.toString(16).padStart(2, '0');
-} 
+}
