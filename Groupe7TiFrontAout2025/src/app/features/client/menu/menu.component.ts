@@ -7,6 +7,7 @@ import { SaleService } from '../../../services/sale.service';
 import { SessionService, SessionData } from '../../../services/session.service';
 import { IngredientService } from '../../../services/ingredient.service';
 import { AllergenService, AllergenInfo, IngredientWithAllergen } from '../../../services/allergen.service';
+import {ClientStep, QrService} from '../../../services/qr.service';
 
 interface Mocktail {
   id: number;
@@ -95,7 +96,8 @@ export class MenuComponent implements OnInit, OnDestroy {
     private sessionService: SessionService,
     private saleService: SaleService,
     private ingredientService: IngredientService,
-    private allergenService: AllergenService
+    private allergenService: AllergenService,
+    private qrService: QrService,
   ) {
     // Push a state to enable back button detection
     history.pushState(null, '', location.href);
@@ -106,6 +108,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.loadMocktails();
     this.loadAvailableIngredients();
     this.startSimpleTimer();
+    this.qrService.setStep(ClientStep.MENU);
   }
 
   loadSessionData() {
