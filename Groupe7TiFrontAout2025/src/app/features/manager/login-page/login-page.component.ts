@@ -30,15 +30,15 @@ export class LoginPageComponent {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        console.error('Erreur de connexion', err);
+        console.error('Connection error', err);
 
         // Retrieve message sent by backend (if any)
         const backendMessage = err.error?.message || '';
 
-        if (backendMessage === 'Invalid pseudo') {
-          this.errorMessage = 'The username is incorrect.';
+        if (backendMessage === 'Invalid username') {
+          this.errorMessage = 'The username or password is incorrect.';
         } else if (backendMessage === 'Invalid password') {
-          this.errorMessage = 'The password is incorrect.';
+          this.errorMessage = 'The password or password is incorrect.';
         } else {
           this.errorMessage = 'Login failed. Please try again.';
         }
