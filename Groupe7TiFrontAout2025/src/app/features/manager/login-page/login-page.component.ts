@@ -23,24 +23,22 @@ export class LoginPageComponent {
   constructor(private userService: UserService,private router: Router) {}
 
   onLogin() {
-    console.log('Tentative de connexion avec:', { username: this.username, password: this.password });
-
+    // Call the login method from the user service and subscribe to the result
     this.userService.login({ username: this.username, password: this.password }).subscribe({
       next: (response) => {
-        console.log('Connexion réussie', response);
         localStorage.setItem('token', response.token);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        console.error('Erreur de connexion', err);
+        console.error('Connection error', err);
 
-        // Récupère le message envoyé par le backend
+        // Retrieve message sent by backend (if any)
         const backendMessage = err.error?.message || '';
 
-        if (backendMessage === 'Invalid pseudo') {
-          this.errorMessage = 'The username is incorrect.';
+        if (backendMessage === 'Invalid username') {
+          this.errorMessage = 'The username or password is incorrect.';
         } else if (backendMessage === 'Invalid password') {
-          this.errorMessage = 'The password is incorrect.';
+          this.errorMessage = 'The password or password is incorrect.';
         } else {
           this.errorMessage = 'Login failed. Please try again.';
         }

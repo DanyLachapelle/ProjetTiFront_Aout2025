@@ -122,7 +122,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ];
 
-
+  // Alerts to be displayed on dashboard
   activeAlerts: { message: string; severity: string; icon: string; type: string }[] = [];
   constructor(
     private router: Router,
@@ -200,14 +200,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Navigate to a page
+  // Navigate to another dashboard section
   navigateTo(route: string): void {
     this.router.navigate([route]);
   }
 
   // Logout
   logout(): void {
-    console.log('Logout requested');
     localStorage.clear();
     this.router.navigate(['/login']);
   }
@@ -238,6 +237,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   }
 
+  // Update password validation status when typing
   onNewPasswordChange(value: string): void {
     this.passwordForm.newPassword = value;
     this.passwordCriteria.minLength = value.length >= 8;
@@ -249,7 +249,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.allCriteriaValid = Object.values(this.passwordCriteria).every(Boolean);
   }
 
-  // Change password
+  // Attempt password change via service
   changePassword(): void {
     if (!this.allCriteriaValid) {
       alert('New password does not meet security criteria.');
@@ -260,8 +260,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       alert('Passwords do not match');
       return;
     }
-
-    console.log('Password change requested');
 
     this.userService.changePassword({
       oldPassword: this.passwordForm.currentPassword,
@@ -299,7 +297,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       },
       error: (error: any) => {
-        console.error('Erreur lors du chargement des statistiques des mocktails:', error);
+        console.error('Error loading mocktail statistics:', error);
         // En cas d'erreur, on garde les valeurs par défaut (0)
       }
     });
@@ -309,15 +307,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadOrdersStats(): void {
     this.saleService.getAllSales().subscribe({
       next: (data: any) => {
-        // Vérifier si data est un tableau ou contient un tableau
+        // Check if data is an array or contains an array
         const sales = Array.isArray(data) ? data : (data.sales || data.data || []);
 
         if (!Array.isArray(sales)) {
-          console.error('Les ventes ne sont pas un tableau:', data);
+          console.error('Sales are not a array:', data);
           return;
         }
 
-        // Normaliser les statuts comme dans le composant Orders
+        // Normalize statuses as in the Orders component
         const normalizedSales = sales.map((sale: any) => ({
           ...sale,
           status: this.normalizeStatus(sale.status)
@@ -339,38 +337,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
           };
         }
 
-        // Calculer les ventes du jour
+        // Calculate today's sales
         this.calculateTodaySales(sales);
       },
       error: (error: any) => {
-        console.error('Erreur lors du chargement des statistiques des commandes:', error);
+        console.error('Error loading order statistics:', error);
         // En cas d'erreur, on garde les valeurs par défaut (0)
       }
     });
   }
 
-  // Calculer les ventes du jour
+  // Calculate today's sales
   private calculateTodaySales(sales: any[]): void {
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
     const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
 
-    // Transformer les données du backend vers le format frontend si nécessaire
+    // Transform backend data to frontend format if necessary
     const transformedSales = sales.map((sale: any) => ({
       saleDate: sale.SaleDate || sale.saleDate,
       totalAmount: sale.TotalAmount || sale.totalAmount || 0
     }));
 
-    // Filtrer les ventes du jour
+    // Filter today's sales
     const todaySales = transformedSales.filter((sale: any) => {
       const saleDate = new Date(sale.saleDate);
       return saleDate >= startOfDay && saleDate <= endOfDay;
     });
 
-    // Calculer le total des ventes du jour
+    // Calculate total today's sales
     const todayTotal = todaySales.reduce((sum: number, sale: any) => sum + sale.totalAmount, 0);
 
-    // Calculer les ventes de la semaine (même logique que gestion-sales)
+    // Calculate weekly sales (same logic as sales management)
     const day = (today.getDay() + 6) % 7;
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - day);
@@ -384,7 +382,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
     const weekTotal = weekSales.reduce((sum: number, sale: any) => sum + sale.totalAmount, 0);
 
-    // Calculer les ventes du mois
+    // Calculate month's sales
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1, 0, 0, 0, 0);
     const monthSales = transformedSales.filter((sale: any) => {
       const saleDate = new Date(sale.saleDate);
@@ -392,7 +390,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
     const monthTotal = monthSales.reduce((sum: number, sale: any) => sum + sale.totalAmount, 0);
 
-    // Mettre à jour la carte des ventes
+    // Update the sales card
     const salesCard = this.menuItems.find(item => item.id === 'gestion-sales');
     if (salesCard) {
       salesCard.stats = {
@@ -404,7 +402,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   }
 
-  // Normaliser les statuts comme dans le service OrderService
+  //  Normalize statuses as in the OrderService service
   private normalizeStatus(status: string): string {
     if (!status) return 'PENDING';
 
@@ -448,7 +446,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return amount.toFixed(2) + '€';
   }
 
-  // Public methods for time and date
   getCurrentTime(): string {
     return this.currentTime || '--:--';
   }
@@ -462,22 +459,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'warning';
   }
 
+  // Load ingredient stats and create alerts
   private loadIngredientStats(): void {
     this.ingredientService.GetAll().subscribe({
       next: (data: any) => {
         const ingredients = Array.isArray(data) ? data : data.ingredients;
 
         if (!Array.isArray(ingredients)) {
-          console.error('Les ingrédients ne sont pas un tableau:', ingredients);
+          console.error('The ingredients are not a array:', ingredients);
           return;
         }
 
-        // Calcul des statuts
+        // Calculation of statuses
         const good = ingredients.filter(i => this.getStockStatus(i.quantity, i.restockThreshold) === 'good').length;
         const warning = ingredients.filter(i => this.getStockStatus(i.quantity, i.restockThreshold) === 'warning').length;
         const critical = ingredients.filter(i => this.getStockStatus(i.quantity, i.restockThreshold) === 'critical').length;
 
-        // Mise à jour de la carte des stats
+        // Stat card update
         const ingredientCard = this.menuItems.find(item => item.id === 'gestion-ingredients');
         if (ingredientCard) {
           ingredientCard.stats = {
@@ -488,7 +486,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           };
         }
 
-        // 💡 Génération dynamique des alertes
+        // Generate alerts for low/critical stock
         this.activeAlerts = ingredients
           .filter(i => {
             const status = this.getStockStatus(i.quantity, i.restockThreshold);
@@ -506,12 +504,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
       },
       error: (err) => {
-        console.error('Erreur chargement ingrédients :', err);
+        console.error('Error loading ingredients :', err);
       }
     });
   }
 
-  // Méthodes pour les statistiques rapides
+  // Quick stats getters for UI
   getMocktailsStats() {
     const mocktailsItem = this.menuItems.find(item => item.id === 'gestion-mocktails');
     return mocktailsItem ? mocktailsItem.stats : { total: 0, available: 0, unavailable: 0 };
