@@ -28,16 +28,16 @@ export class OrdersComponent implements OnInit, OnDestroy {
   error: string | null = null;
   private refreshInterval: any;
 
-  // Filtres
+  // Filter
   statusFilter: 'ALL' | 'PENDING' | 'IN_PREPARATION' | 'READY' | 'DELIVERED' = 'ALL';
   tableFilter: string = '';
   dateFilter: string = ''; // Pas de filtre par date par défaut pour voir toutes les commandes
   sortBy: 'date' | 'priority' = 'date';
 
-  // Tables disponibles
+  // Available tables
   availableTables: TableDto[] = [];
 
-  // Actions en cours
+  // Current actions
   processingOrderId: number | null = null;
 
   // Pagination
@@ -103,8 +103,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
     this.orderService.getAllOrders().subscribe({
       next: (response) => {
-        console.log('📋 Response received in OrdersComponent:', response);
-        console.log('📋 Number of orders received:', response.sales?.length || 0);
 
         // Normalize received data
         this.orders = response.sales.map(order => {
@@ -113,11 +111,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
             status: this.orderService.normalizeStatus(order.status),
             items: this.orderService.normalizeItems(order.items)
           };
-          console.log('🔄 Normalized order:', normalizedOrder);
           return normalizedOrder;
         });
 
-        console.log('📋 Orders after normalization:', this.orders);
         this.applyFilters();
 
         // Force statistics update after loading
@@ -136,12 +132,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
   private loadTables() {
     this.tableService.getAllTables().subscribe({
       next: (response) => {
-        console.log('📋 Tables loaded:', response.tables);
         this.availableTables = response.tables;
       },
       error: (error) => {
         console.error('❌ Error loading tables:', error);
-        // En cas d'erreur, on peut continuer sans les tables
+        // In case of error, we can continue without the tables
       }
     });
   }
@@ -161,23 +156,23 @@ export class OrdersComponent implements OnInit, OnDestroy {
             return normalizedOrder;
           });
 
-          // Appliquer les filtres sans recharger l'interface
+          // Apply filters without reloading the interface
           this.applyFilters();
 
           // Force statistics update after auto refresh
           this.triggerStatisticsUpdate();
         },
         error: (error) => {
-          console.error('Erreur lors du rafraîchissement silencieux:', error);
+          console.error('Error during silent refresh:', error);
         }
       });
-    }, 30000); // Rafraîchissement toutes les 30 secondes (plus discret)
+    }, 30000); // Refresh every 30 seconds
   }
 
   private applyFilters() {
     let filtered = [...this.orders];
 
-    // Filtre par date (commandes de la journée par défaut)
+    // Filter by date
     if (this.dateFilter) {
       const filterDate = new Date(this.dateFilter);
       filtered = filtered.filter(order => {
@@ -186,24 +181,24 @@ export class OrdersComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Filtre par statut
+    // Filter by status
     if (this.statusFilter !== 'ALL') {
       filtered = filtered.filter(order => order.status === this.statusFilter);
     }
 
-    // Filtre par table
+    // Filter by table
     if (this.tableFilter.trim()) {
       filtered = filtered.filter(order =>
         order.tableNumber === this.tableFilter
       );
     }
 
-    // Tri
+    // Sort
     filtered.sort((a, b) => {
       if (this.sortBy === 'date') {
         return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime();
       } else {
-        // Tri par priorité (plus anciennes en premier)
+        // Sort by priority (oldest first)
         return new Date(a.saleDate).getTime() - new Date(b.saleDate).getTime();
       }
     });
@@ -256,14 +251,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
     this.orderService.advanceOrderStatus(order.id).subscribe({
       next: (response) => {
-        console.log(`Order ${order.id} status updated: ${response.newStatus}`);
         this.showToast(`Order #${order.id}: ${config.actionLabel}`, 'success');
 
         // Update the order status locally for immediate UI feedback
         const orderToUpdate = this.orders.find(o => o.id === order.id);
         if (orderToUpdate && config.nextStatus) {
           orderToUpdate.status = config.nextStatus;
-          console.log(`✅ Order ${order.id} status updated locally to: ${config.nextStatus}`);
 
           // Force statistics update
           this.triggerStatisticsUpdate();
@@ -318,9 +311,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   getItemsSummary(items: any[]): string {
-    if (items.length === 0) return 'Aucun article';
+    if (items.length === 0) return 'No articles';
     if (items.length === 1) return items[0].mocktailName;
-    return `${items[0].mocktailName} +${items.length - 1} autre(s)`;
+    return `${items[0].mocktailName} +${items.length - 1} other(s)`;
   }
 
   getTotalItems(items: any[]): number {
@@ -332,7 +325,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   private showToast(message: string, type: 'success' | 'error') {
-    // Implémentation simple de toast - peut être améliorée avec un service dédié
+    // Simple toast implementation - can be improved with a dedicated service
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
@@ -361,13 +354,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   getActiveOrdersCount(): number {
     const count = this.orders.filter(order => order.status !== 'DELIVERED').length;
-    console.log(`📊 Active orders count: ${count}`);
     return count;
   }
 
   getOrdersByStatus(status: string): number {
     const count = this.orders.filter(order => order.status === status).length;
-    console.log(`📊 Orders with status ${status}: ${count}`);
     return count;
   }
 
@@ -394,7 +385,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     this.paginatedOrders = this.filteredOrders.slice(startIndex, endIndex);
-    console.log(`📄 Pagination: Page ${this.currentPage}, showing ${this.paginatedOrders.length} of ${this.filteredOrders.length} orders`);
   }
 
   getTotalPages(): number {
@@ -405,7 +395,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const totalPages = this.getTotalPages();
     const pages: number[] = [];
 
-    // Show max 5 page numbers around current page
+    // Show max 5 pages numbers around current page
     const startPage = Math.max(1, this.currentPage - 2);
     const endPage = Math.min(totalPages, this.currentPage + 2);
 
@@ -420,7 +410,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
     if (page >= 1 && page <= this.getTotalPages()) {
       this.currentPage = page;
       this.applyPagination();
-      console.log(`📄 Navigated to page ${page}`);
     }
   }
 
