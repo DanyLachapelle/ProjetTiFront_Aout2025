@@ -111,7 +111,6 @@ export class TableNumberComponent implements OnInit {
       // Sauvegarder le nouveau numéro de table
       localStorage.setItem('table_number', newTableNumber);
 
-      console.log('Numéro de table sauvegardé:', newTableNumber);
 
       // Démarrer la session avec le numéro de table
       this.sessionService.startSession(newTableNumber);

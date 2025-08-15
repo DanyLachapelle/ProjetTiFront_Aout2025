@@ -141,10 +141,6 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
 
     this.orderService.getOrderById(parseInt(activeOrderId)).subscribe({
       next: (order) => {
-        console.log('📋 Order received in OrderTrackingComponent:', order);
-
-        console.log('🔍 Status received from backend:', order.status);
-        console.log('🔍 Status after normalization:', this.orderService.normalizeStatus(order.status || 'PENDING'));
 
         // Normalize received data
         this.order = {
@@ -153,7 +149,7 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
           items: this.orderService.normalizeItems(order.items)
         };
 
-        console.log('🔄 Normalized order:', this.order);
+
         this.isLoading = false;
         this.lastUpdate = new Date();
         this.checkOrderCompletion();
@@ -202,7 +198,6 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
 
     // If order is delivered, clear the active order ID after a delay
     if (this.order.status === 'DELIVERED') {
-      console.log('✅ Order completed - will clear active order ID in 30 seconds');
       setTimeout(() => {
         this.clearActiveOrder();
       }, 30000); // Clear after 30 seconds to let user see the completion
@@ -212,7 +207,6 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
   private clearActiveOrder() {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.removeItem('activeOrderId');
-      console.log('🧹 Active order ID cleared from localStorage');
     }
   }
 
