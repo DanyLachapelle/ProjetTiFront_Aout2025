@@ -1,0 +1,294 @@
+<!-- ===== MANAGER ORDERS PAGE ===== -->
+<div class="orders-container">
+  <!-- Header -->
+  <header class="orders-header">
+    <div class="header-content">
+      <h1>Order Management</h1>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-label">Active orders</span>
+          <span class="stat-value">{{ getActiveOrdersCount() }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Pending</span>
+          <span class="stat-value pending">{{ getOrdersByStatus('PENDING') }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">In preparation</span>
+          <span class="stat-value preparing">{{ getOrdersByStatus('IN_PREPARATION') }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Ready</span>
+          <span class="stat-value ready">{{ getOrdersByStatus('READY') }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshOrders()" title="Refresh">
+        🔄 Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters and controls -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label for="statusFilter">Status</label>
+        <select 
+          id="statusFilter" 
+          [(ngModel)]="statusFilter" 
+          (change)="onStatusFilterChange()"
+          class="filter-select">
+          <option value="ALL">All statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="IN_PREPARATION">In preparation</option>
+          <option value="READY">Ready</option>
+          <option value="DELIVERED">Delivered</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="dateFilter">Date</label>
+        <input 
+          type="date" 
+          id="dateFilter" 
+          [(ngModel)]="dateFilter" 
+          (change)="onDateFilterChange()"
+          class="filter-input">
+      </div>
+
+      <div class="filter-group">
+        <label for="tableFilter">Table</label>
+        <select 
+          id="tableFilter" 
+          [(ngModel)]="tableFilter" 
+          (change)="onTableFilterChange()"
+          class="filter-select">
+          <option value="">All tables</option>
+          <option *ngFor="let table of availableTables" [value]="table.tableNumber">
+            {{ table.displayName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sortBy">Sort</label>
+        <select 
+          id="sortBy" 
+          [(ngModel)]="sortBy" 
+          (change)="onSortChange()"
+          class="filter-select">
+          <option value="date">Most recent</option>
+          <option value="priority">Priority (oldest first)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <main class="orders-main">
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading orders...</p>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error && !isLoading" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h2>Error</h2>
+      <p>{{ error }}</p>
+      <button class="btn-primary" (click)="refreshOrders()">
+        Try again
+      </button>
+    </div>
+
+    <!-- Orders list -->
+    <div *ngIf="!isLoading && !error" class="orders-content">
+      <!-- Empty state -->
+      <div *ngIf="filteredOrders.length === 0" class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h2>No orders found</h2>
+        <p>No orders match the selected criteria.</p>
+        <div class="empty-help">
+          <p><strong>Tips:</strong></p>
+          <ul>
+            <li>Check if the date filter is set (clear it to see all orders)</li>
+            <li>Verify the status filter is set to "All statuses"</li>
+            <li>Clear the table filter if it's set</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Orders list -->
+      <div *ngIf="filteredOrders.length > 0" class="orders-list">
+        
+        <div 
+          *ngFor="let order of paginatedOrders" 
+          class="order-card"
+          [class.priority-high]="getOrderPriority(order.saleDate) === 'high'"
+          [class.priority-medium]="getOrderPriority(order.saleDate) === 'medium'">
+          
+          <!-- Order header -->
+          <div class="order-header">
+            <div class="order-info">
+              <h3 class="order-id">Order #{{ order.id }}</h3>
+              <div class="order-meta">
+                <span class="table-number">Table {{ order.tableNumber }}</span>
+                <span class="order-time">{{ getFormattedDate(order.saleDate) }}</span>
+                <span class="order-age" [class.urgent]="getOrderPriority(order.saleDate) === 'high'">
+                  {{ getOrderAge(order.saleDate) }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="order-status">
+              <div class="status-badge" [style.background-color]="getStatusConfig(order.status).color">
+                <span class="status-icon">{{ getStatusConfig(order.status).icon }}</span>
+                <span class="status-label">{{ getStatusConfig(order.status).label }}</span>
+              </div>
+            </div>
+          </div>
+
+                    <!-- Order details -->
+          <div class="order-details">
+            <div class="order-items">
+              <div class="items-summary">
+                <span class="items-count">{{ getTotalItems(order.items) }} item(s)</span>
+                <span class="items-text">{{ getItemsSummary(order.items) }}</span>
+              </div>
+              
+              <div class="items-list">
+                 <div *ngIf="order.items.length === 0" class="item-row empty">
+                   <span class="item-name">No details available</span>
+                 </div>
+                 <div *ngFor="let item of order.items" class="item-row">
+                   <span class="item-name">{{ item.mocktailName }}</span>
+                   <span class="item-quantity">x{{ item.quantity }}</span>
+                   <span class="item-price">{{ item.itemTotal.toFixed(2) }}€</span>
+                 </div>
+               </div>
+            </div>
+
+            <div class="order-total">
+              <span class="total-label">Total</span>
+              <span class="total-amount">{{ order.totalAmount.toFixed(2) }}€</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="order-actions">
+            <button 
+              *ngIf="canAdvanceStatus(order)"
+              class="btn-action"
+              [style.background-color]="getStatusConfig(order.status).color"
+              (click)="advanceOrderStatus(order)"
+              [disabled]="processingOrderId === order.id">
+              <span *ngIf="processingOrderId === order.id" class="loading-dots">...</span>
+              <span *ngIf="processingOrderId !== order.id">
+                {{ getStatusConfig(order.status).actionLabel }}
+              </span>
+            </button>
+            
+            <span *ngIf="!canAdvanceStatus(order)" class="status-complete">
+              Order completed
+            </span>
+          </div>
+        </div>
+        
+        <!-- Pagination controls -->
+        <div *ngIf="getTotalPages() > 1" class="pagination-controls">
+          <div class="pagination-info">
+            <span>{{ getPaginationInfo() }}</span>
+          </div>
+          
+          <div class="pagination-buttons">
+            <!-- First page -->
+            <button 
+              class="btn-pagination" 
+              (click)="goToFirstPage()"
+              [disabled]="!canGoToPreviousPage()"
+              title="First page">
+              ⏮️
+            </button>
+            
+            <!-- Previous page -->
+            <button 
+              class="btn-pagination" 
+              (click)="goToPreviousPage()"
+              [disabled]="!canGoToPreviousPage()"
+              title="Previous page">
+              ◀️
+            </button>
+            
+            <!-- Page numbers -->
+            <div class="page-numbers">
+              <button 
+                *ngFor="let page of getPageNumbers()" 
+                class="btn-page-number"
+                [class.active]="page === currentPage"
+                (click)="goToPage(page)"
+                [title]="'Page ' + page">
+                {{ page }}
+              </button>
+            </div>
+            
+            <!-- Next page -->
+            <button 
+              class="btn-pagination" 
+              (click)="goToNextPage()"
+              [disabled]="!canGoToNextPage()"
+              title="Next page">
+              ▶️
+            </button>
+            
+            <!-- Last page -->
+            <button 
+              class="btn-pagination" 
+              (click)="goToLastPage()"
+              [disabled]="!canGoToNextPage()"
+              title="Last page">
+              ⏭️
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Styles pour les animations de toast -->
+<style>
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .loading-dots {
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+</style>

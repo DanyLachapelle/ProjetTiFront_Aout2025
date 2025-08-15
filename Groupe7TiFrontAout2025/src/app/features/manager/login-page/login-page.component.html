@@ -1,0 +1,34 @@
+<div class="page">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo-img">
+          <img src="assets/favicon.png" alt="Logo Helha Fresh" />
+        </div>
+        <h1 class="login-title">Helha Fresh</h1>
+        <p class="login-subtitle">Manager Section</p>
+      </div>
+      <form class="login-form" (ngSubmit)="onLogin()">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input [(ngModel)]="username" name="username" type="text" id="username" placeholder="Enter your username" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input [(ngModel)]="password" name="password" type="password" id="password" placeholder="Enter your password" class="form-input">
+        </div>
+        <button type="submit" class="btn-login">
+          Login
+
+
+        </button>
+      </form>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div class="login-footer">
+        <p>
+          <a routerLink="/forgot-password" class="forgot-password-link">Forgot password?</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

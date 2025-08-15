@@ -1,0 +1,303 @@
+<!-- ===== DASHBOARD MANAGER ESTIVAL ===== -->
+<div class="container">
+  <div class="dashboard-bg-center">
+    <!-- Dashboard header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-section">
+          <img src="assets/favicon.png" alt="Helha Fresh" class="logo-img">
+          <h1>Helha Fresh</h1>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="header-time">
+          <div class="current-time">{{ getCurrentTime() }}</div>
+          <div class="current-date">{{ getCurrentDate() }}</div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="btn-icon notification-btn" (click)="showNotifications()" title="Notifications">
+          <span class="notification-icon">🔔</span>
+          <span class="notification-badge" *ngIf="activeAlerts.length > 0">{{ activeAlerts.length }}</span>
+        </button>
+
+        <button class="btn-icon settings-btn" (click)="showSettings()" title="Settings">
+          <span class="settings-icon">⚙️</span>
+        </button>
+
+
+
+        <button class="logout-btn" (click)="logout()">
+          <span class="logout-icon">🚪</span>
+          <span class="logout-text">Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Quick statistics section -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card stat-primary">
+          <div class="stat-icon">🍹</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getMocktailsStats().total }}</div>
+            <div class="stat-label">Total Mocktails</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-warning">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getOrdersStats().pending }}</div>
+            <div class="stat-label">Pending Orders</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-success">
+          <div class="stat-icon">💰</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getSalesStats().today }}</div>
+            <div class="stat-label">Today's Sales</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-secondary">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getIngredientsStats().critical }}</div>
+            <div class="stat-label">Critical Ingredients</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main modules section -->
+    <section class="menu-section">
+      <div class="menu-grid">
+                 <!-- Module Gestion Mocktails -->
+         <div class="menu-card card-primary"
+              *ngFor="let item of menuItems.slice(0,1)"
+              (click)="navigateTo(item.route)">
+           <div class="menu-card-header">
+             <div class="menu-icon">{{ item.icon }}</div>
+             <h3 class="menu-title">{{ item.title }}</h3>
+           </div>
+           <p class="menu-description">{{ item.description }}</p>
+
+           <div class="menu-stats">
+             <div class="stat-item">
+               <span class="stat-number">{{ getMocktailsStats().total }}</span>
+               <span class="stat-text">Total</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number available">{{ getMocktailsStats().available }}</span>
+               <span class="stat-text">Available</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number unavailable">{{ getMocktailsStats().unavailable }}</span>
+               <span class="stat-text">Unavailable</span>
+             </div>
+           </div>
+
+           <div class="menu-action">
+             <span>Access</span>
+             <span class="action-arrow">→</span>
+           </div>
+         </div>
+
+                          <!-- Sales History Module -->
+         <div class="menu-card card-warning"
+              *ngFor="let item of menuItems.slice(1,2)"
+              (click)="navigateTo(item.route)">
+           <div class="menu-card-header">
+             <div class="menu-icon">{{ item.icon }}</div>
+             <h3 class="menu-title">{{ item.title }}</h3>
+           </div>
+           <p class="menu-description">{{ item.description }}</p>
+
+           <div class="menu-stats">
+             <div class="stat-item">
+               <span class="stat-number good">{{ getIngredientsStats().good }}</span>
+               <span class="stat-text">OK</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number warning">{{ getIngredientsStats().warning }}</span>
+               <span class="stat-text">Warning</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number critical">{{ getIngredientsStats().critical }}</span>
+               <span class="stat-text">Critical</span>
+             </div>
+           </div>
+
+           <div class="menu-action">
+             <span>Access</span>
+             <span class="action-arrow">→</span>
+           </div>
+         </div>
+
+         <!-- Order Ingredient Module -->
+         <div class="menu-card card-secondary"
+              *ngFor="let item of menuItems.slice(2,3)"
+              (click)="navigateTo(item.route)">
+           <div class="menu-card-header">
+             <div class="menu-icon">{{ item.icon }}</div>
+             <h3 class="menu-title">{{ item.title }}</h3>
+           </div>
+           <p class="menu-description">{{ item.description }}</p>
+
+           <div class="menu-stats">
+             <div class="stat-item">
+               <span class="stat-number">{{ item.stats.today }}</span>
+               <span class="stat-text">Today</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number">{{ item.stats.week }}</span>
+               <span class="stat-text">This Week</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number">{{ item.stats.month }}</span>
+               <span class="stat-text">This Month</span>
+             </div>
+           </div>
+
+           <div class="menu-action">
+             <span>Access</span>
+             <span class="action-arrow">→</span>
+           </div>
+         </div>
+
+                 <!-- Order Management Module -->
+         <div class="menu-card card-success"
+              *ngFor="let item of menuItems.slice(3,4)"
+              (click)="navigateTo(item.route)">
+           <div class="menu-card-header">
+             <div class="menu-icon">{{ item.icon }}</div>
+             <h3 class="menu-title">{{ item.title }}</h3>
+           </div>
+           <p class="menu-description">{{ item.description }}</p>
+
+           <div class="menu-stats">
+             <div class="stat-item">
+               <span class="stat-number pending">{{ item.stats.pending }}</span>
+               <span class="stat-text">Pending</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number preparing">{{ item.stats.preparing }}</span>
+               <span class="stat-text">Preparing</span>
+             </div>
+             <div class="stat-item">
+               <span class="stat-number ready">{{ item.stats.ready }}</span>
+               <span class="stat-text">Ready</span>
+             </div>
+           </div>
+
+           <div class="menu-action">
+             <span>Access</span>
+             <span class="action-arrow">→</span>
+           </div>
+         </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal Notifications -->
+  <div class="modal-backdrop" *ngIf="showNotificationsModal" (click)="closeNotifications()">
+    <div class="modal notifications-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>🔔 Notifications</h2>
+        <button class="modal-close" (click)="closeNotifications()" title="Close">✕</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="notifications-list" *ngIf="activeAlerts.length > 0">
+          <div class="notification-item"
+               *ngFor="let alert of activeAlerts"
+               [class]="getAlertSeverityClass(alert.severity)">
+            <div class="notification-icon">{{ alert.icon }}</div>
+            <div class="notification-content">
+              <p class="notification-message">{{ alert.message }}</p>
+              <span class="notification-time">5 minutes ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-notifications" *ngIf="activeAlerts.length === 0">
+          <span class="no-notifications-icon">✅</span>
+          <p>No active notifications</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Parameter -->
+  <div class="modal-backdrop" *ngIf="showSettingsModal" (click)="closeSettings()">
+    <div class="modal settings-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>⚙️ Settings</h2>
+        <button class="modal-close" (click)="closeSettings()" title="Close">✕</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="settings-section">
+          <h3>Change Password</h3>
+          <form class="password-form" (ngSubmit)="changePassword()">
+
+            <!-- Current Password -->
+            <div class="form-group">
+              <label for="current-password">Current Password</label>
+              <input type="password" id="current-password" [(ngModel)]="passwordForm.currentPassword"
+                     name="currentPassword" class="form-input" required>
+            </div>
+
+            <!-- New Password -->
+            <div class="form-group">
+              <label for="new-password">New Password</label>
+              <input type="password" id="new-password"
+                     [ngModel]="passwordForm.newPassword"
+                     (ngModelChange)="onNewPasswordChange($event)"
+                     name="newPassword" class="form-input" required>
+            </div>
+
+            <!-- Password Criteria -->
+            <ul class="password-requirements" *ngIf="passwordForm.newPassword && !allCriteriaValid">
+              <li [class.valid]="passwordCriteria.minLength" [class.invalid]="!passwordCriteria.minLength">
+                At least 8 characters
+              </li>
+              <li [class.valid]="passwordCriteria.uppercase" [class.invalid]="!passwordCriteria.uppercase">
+                At least one uppercase letter
+              </li>
+              <li [class.valid]="passwordCriteria.lowercase" [class.invalid]="!passwordCriteria.lowercase">
+                At least one lowercase letter
+              </li>
+              <li [class.valid]="passwordCriteria.number" [class.invalid]="!passwordCriteria.number">
+                At least one number
+              </li>
+              <li [class.valid]="passwordCriteria.specialChar" [class.invalid]="!passwordCriteria.specialChar">
+                At least one special character (@$!%*?&)
+              </li>
+            </ul>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+              <label for="confirm-password">Confirm New Password</label>
+              <input type="password" id="confirm-password" [(ngModel)]="passwordForm.confirmPassword"
+                     name="confirmPassword" class="form-input" required>
+            </div>
+
+            <!-- Actions -->
+            <div class="modal-actions">
+              <button type="submit" class="btn btn-primary"
+                      [disabled]="!allCriteriaValid || passwordForm.newPassword !== passwordForm.confirmPassword">
+                Change Password
+              </button>
+              <button type="button" class="btn btn-outline" (click)="closeSettings()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

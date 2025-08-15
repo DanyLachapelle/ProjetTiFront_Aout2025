@@ -1,0 +1,87 @@
+<!-- ===== TABLE NUMBER SELECTION PAGE ===== -->
+<div class="table-container">
+  <!-- Main card -->
+  <div class="table-card">
+    <!-- Header with icon -->
+    <div class="table-header">
+      <div class="table-icon-container">
+        <div class="table-icon">
+          🍽️
+        </div>
+        <div class="table-icon-glow"></div>
+      </div>
+      <h1 class="table-title">Table Number</h1>
+    </div>
+
+    <!-- Session information message -->
+    <div class="session-info">
+      <div class="session-icon">
+        ⏰
+      </div>
+      <div class="session-content">
+        <h3 class="session-title">Limited Session</h3>
+        <p class="session-text">
+          Your session will be active for <strong>15 minutes</strong> after validation. 
+          This allows us to ensure security and service fluidity.
+        </p>
+      </div>
+    </div>
+
+    <!-- Table selection form -->
+    <div class="table-form">
+      <div class="input-group">
+        <label for="tableSelect" class="input-label">Select your table</label>
+        <div class="input-container">
+          <select 
+            id="tableSelect" 
+            [(ngModel)]="selectedTableNumber" 
+            class="table-select"
+            [disabled]="isLoadingTables">
+            
+            <option value="" disabled *ngIf="isLoadingTables">
+              Loading tables...
+            </option>
+            
+            <option 
+              *ngFor="let table of availableTables" 
+              [value]="table.tableNumber"
+              [disabled]="!table.isAvailable">
+              {{ table.displayName }}
+            </option>
+          </select>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="input-hint">
+          <span class="hint-icon">📍</span>
+          <span class="hint-text">Choose your table from the list</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation button -->
+    <div class="table-action">
+      <button 
+        class="table-btn" 
+        (click)="validateAndContinue()" 
+        [disabled]="loading || !selectedTableNumber || isLoadingTables"
+        [class.loading]="loading">
+        
+        <div class="btn-content" *ngIf="!loading">
+          <span class="btn-icon">✅</span>
+          <span class="btn-text">Confirm and Continue</span>
+        </div>
+        
+        <div class="btn-loading" *ngIf="loading">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">Validating...</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="error" class="table-error">
+      <div class="error-icon">❌</div>
+      <p class="error-text">{{ error }}</p>
+    </div>
+  </div>
+</div>

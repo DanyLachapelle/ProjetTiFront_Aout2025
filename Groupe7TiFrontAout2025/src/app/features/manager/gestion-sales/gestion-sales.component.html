@@ -1,0 +1,451 @@
+<div class="sales-container" xmlns="http://www.w3.org/1999/html">
+  <!-- Header avec navigation -->
+  <header class="sales-header">
+    <div class="header-left">
+      <button class="btn btn-outline back-btn" (click)="goBack()">
+        <span class="back-icon">←</span>
+        Back
+      </button>
+    </div>
+
+    <div class="header-center">
+      <div class="logo-section">
+        <img src="assets/favicon.png" alt="Logo Helha Fresh" class="logo-img" />
+        <h1>Sales History</h1>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total Sales</span>
+          <span class="stat-value">€{{ getTotalSales().toFixed(2) }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Orders</span>
+          <span class="stat-value">{{ filteredSales.length   }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+
+  <!-- Filtres de date -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="date-filters">
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'all'"
+          (click)="setFilter('all')"
+        >
+          All Time
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'today'"
+          (click)="setFilter('today')"
+        >
+          Today
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'week'"
+          (click)="setFilter('week')"
+        >
+          This Week
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'month'"
+          (click)="setFilter('month')"
+        >
+          This Month
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="selectedFilter === 'custom'"
+          (click)="setFilter('custom')"
+        >
+          Custom Range
+        </button>
+      </div>
+
+      <div class="custom-date-range" *ngIf="selectedFilter === 'custom'">
+        <div class="date-inputs">
+          <div class="date-input-group">
+            <label>From</label>
+            <input type="date" [(ngModel)]="customDateRange.start" class="date-input">
+          </div>
+          <div class="date-input-group">
+            <label>To</label>
+            <input type="date" [(ngModel)]="customDateRange.end" class="date-input">
+          </div>
+          <button class="btn btn-primary apply-btn" (click)="applyCustomFilter()">
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistiques rapides -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <h3>Total Revenue</h3>
+          <p class="stat-amount">€{{ getFilteredTotal().toFixed(2) }}</p>
+          <span class="stat-period">{{ getFilterPeriodText() }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+          <h3>Orders</h3>
+          <p class="stat-amount">{{ filteredSales.length  }}</p>
+          <span class="stat-period">{{ getFilterPeriodText() }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🍹</div>
+        <div class="stat-content">
+          <h3>Mocktails Sold</h3>
+          <p class="stat-amount">{{ getTotalMocktailsSold() }}</p>
+          <span class="stat-period">{{ getFilterPeriodText() }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <h3>Average Order</h3>
+          <p class="stat-amount">€{{ getAverageOrderValue().toFixed(2) }}</p>
+          <span class="stat-period">{{ getFilterPeriodText() }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sélecteur de mode d'affichage -->
+  <section class="display-mode-section">
+    <div class="mode-selector">
+      <button
+        class="mode-btn"
+        [class.active]="displayMode === 'list'"
+        (click)="setDisplayMode('list')"
+      >
+        <span class="mode-icon">📋</span>
+        Sales List
+      </button>
+      <button
+        class="mode-btn"
+        [class.active]="displayMode === 'statistics'"
+        (click)="setDisplayMode('statistics')"
+      >
+        <span class="mode-icon">📊</span>
+        Statistics & Charts
+      </button>
+    </div>
+  </section>
+
+  <!-- Zone de contenu dynamique -->
+  <section class="content-section">
+         <!-- Mode Liste des ventes -->
+     <div class="sales-content" *ngIf="displayMode === 'list'">
+       <div class="sales-header-row">
+         <h2>Sales History</h2>
+         <div class="sales-actions">
+           <button class="btn btn-outline" (click)="exportSales()">
+             <span class="action-icon">📄</span>
+             Export
+           </button>
+           <button class="btn btn-outline" (click)="refreshData()">
+             <span class="action-icon">🔄</span>
+             Refresh
+           </button>
+         </div>
+       </div>
+
+       <!-- Barre de recherche pour les mocktails -->
+       <div class="search-section">
+         <div class="search-container">
+           <div class="search-box">
+             <input
+               type="text"
+               [(ngModel)]="searchTerm"
+               placeholder="🔍 Search by mocktail name..."
+               class="search-input"
+               (input)="onSearchChange()"
+               (focus)="showSuggestions = true"
+               (blur)="onSearchBlur()"
+             >
+             <span class="search-icon">🍹</span>
+           </div>
+
+           <!-- Suggestions d'autocomplétion -->
+           <div class="suggestions-dropdown" *ngIf="showSuggestions && filteredSuggestions.length > 0">
+             <div
+               class="suggestion-item"
+               *ngFor="let suggestion of filteredSuggestions"
+               (click)="selectSuggestion(suggestion)"
+             >
+               {{ suggestion }}
+             </div>
+           </div>
+         </div>
+
+         <div class="search-info">
+           <span class="search-results" *ngIf="searchTerm.trim()">
+             {{ filteredSales.length }} sale(s) found for "{{ searchTerm }}"
+           </span>
+         </div>
+       </div>
+
+      <div class="sales-list" *ngIf="getFilteredSales().length > 0; else noSales">
+        <div class="sale-item" *ngFor="let sale of getFilteredSales(); let i = index"
+             [class.expanded]="expandedSaleIndex === i"
+             (click)="toggleSaleDetail(i)">
+
+          <div class="sale-main">
+            <div class="sale-info">
+              <div class="sale-date-time">
+                <span class="sale-date">{{ sale.saleDate  | date:'MMM dd, yyyy' }}</span>
+                <span class="sale-time">{{ sale.saleDate | date:'HH:mm' }}</span>
+              </div>
+                             <div class="sale-summary">
+                 <span class="sale-items-count">{{ getSaleItemsCount(sale) }} items</span>
+                 <span class="sale-mocktails">{{ getSaleMocktailsSummary(sale) }}</span>
+                 <span class="sale-table" *ngIf="sale.tableNumber">🪑 {{ sale.tableNumber }}</span>
+               </div>
+            </div>
+
+            <div class="sale-amount">
+              <span class="amount-value">€{{ sale.totalAmount  !== undefined && sale.totalAmount !== null ? sale.totalAmount.toFixed(2) : '0.00' }}</span>
+              <span class="expand-icon">{{ expandedSaleIndex === i ? '▲' : '▼' }}</span>
+            </div>
+          </div>
+
+          <!-- Détails de la vente -->
+          <div class="sale-details" *ngIf="expandedSaleIndex === i">
+            <div class="details-header">
+              <h4>Order Details</h4>
+            </div>
+
+            <div class="mocktails-list">
+              <div class="mocktail-item" *ngFor="let mocktail of sale.items ">
+                <div class="mocktail-info">
+                  <span class="mocktail-name">{{ mocktail.mocktailName }}</span>
+                  <span class="mocktail-quantity">x{{ mocktail.quantity }}</span>
+                </div>
+                <div class="mocktail-price">
+                  <span class="total-price">€{{ (getMocktailUnitPrice(sale, mocktail) * mocktail.quantity).toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sale-footer">
+              <div class="sale-total">
+                <span class="total-label">Total</span>
+                <span class="total-amount">€{{ sale.totalAmount !== undefined && sale.totalAmount !== null ? sale.totalAmount.toFixed(2) : '0.00' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Message si aucune vente -->
+      <ng-template #noSales>
+        <div class="no-sales">
+          <div class="no-sales-icon">📊</div>
+          <h3>No sales found</h3>
+          <p>No sales match your current filters. Try adjusting your search criteria or date range.</p>
+        </div>
+      </ng-template>
+
+      <!-- Pagination -->
+      <section class="pagination-section" *ngIf="displayMode === 'list' && filteredSales.length > itemsPerPage">
+        <div class="pagination">
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage === 1"
+            (click)="previousPage()"
+          >
+            ← Previous
+          </button>
+
+          <div class="page-numbers">
+            <span class="page-info">
+              Page {{ currentPage }} of {{ getTotalPages() }}
+            </span>
+          </div>
+
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="nextPage()"
+          >
+            Next →
+          </button>
+        </div>
+      </section>
+
+
+    <!-- Mode Statistiques et Graphiques -->
+    <div class="statistics-content" *ngIf="displayMode === 'statistics'">
+      <div class="statistics-header">
+        <h2>Sales Analytics & Charts</h2>
+        <p class="statistics-subtitle">Visualize your sales performance with interactive charts and detailed analytics</p>
+      </div>
+
+      <!-- Grille des graphiques -->
+      <div class="charts-grid" [class.dark-theme]="chartSettings.theme === 'dark'">
+        <!-- Graphique des ventes par période -->
+        <div class="chart-container" id="sales-trend-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>📈 Sales Trend</h3>
+            <p>Revenue evolution over time</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="salesTrendChart.data"
+              [options]="salesTrendChart.options"
+              [type]="salesTrendChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('sales-trend-chart', 'Sales_Trend')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Graphique des mocktails les plus vendus -->
+        <div class="chart-container" id="top-mocktails-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>🍹 Top Selling Mocktails</h3>
+            <p>Most popular drinks by quantity sold</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="topMocktailsChart.data"
+              [options]="topMocktailsChart.options"
+              [type]="topMocktailsChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('top-mocktails-chart', 'Top_Selling_Mocktails')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Graphique de répartition des ventes -->
+        <div class="chart-container" id="sales-distribution-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>🥧 Sales Distribution</h3>
+            <p>Revenue breakdown by mocktail category</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="salesDistributionChart.data"
+              [options]="salesDistributionChart.options"
+              [type]="salesDistributionChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('sales-distribution-chart', 'Sales_Distribution')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Graphique des heures de pointe -->
+        <div class="chart-container" id="peak-hours-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>⏰ Peak Hours Analysis</h3>
+            <p>Sales activity by time of day</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="peakHoursChart.data"
+              [options]="peakHoursChart.options"
+              [type]="peakHoursChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('peak-hours-chart', 'Peak_Hours_Analysis')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+
+                 <!-- Graphique des ventes par table -->
+         <div class="chart-container" id="sales-by-table-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+           <div class="chart-header">
+             <h3>🪑 Sales by Table</h3>
+             <p>Revenue distribution by table number</p>
+           </div>
+           <div class="chart-wrapper">
+             <canvas baseChart
+               [data]="salesByTableChart.data"
+               [options]="salesByTableChart.options"
+               [type]="salesByTableChart.type">
+             </canvas>
+           </div>
+           <div class="chart-actions">
+             <button class="btn btn-outline btn-sm" (click)="exportChart('sales-by-table-chart', 'Sales_by_Table')">
+               📄 Export
+             </button>
+           </div>
+         </div>
+
+        <!-- Graphique de comparaison -->
+        <div class="chart-container" id="period-comparison-chart" [class.dark-theme]="chartSettings.theme === 'dark'">
+          <div class="chart-header">
+            <h3>📊 Period Comparison</h3>
+            <p>Compare performance across different time periods</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="periodComparisonChart.data"
+              [options]="periodComparisonChart.options"
+              [type]="periodComparisonChart.type">
+            </canvas>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" (click)="exportChart('period-comparison-chart', 'Period_Comparison')">
+              📄 Export
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions pour les statistiques -->
+      <div class="statistics-actions" [class.dark-theme]="chartSettings.theme === 'dark'">
+        <button class="btn btn-outline" (click)="exportAllCharts()">
+          <span class="action-icon">📄</span>
+          Export All Charts
+        </button>
+        <button class="btn btn-outline" (click)="openChartSettings()">
+          <span class="action-icon">⚙️</span>
+          Chart Settings
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal des paramètres des graphiques -->
+  <app-chart-settings-modal
+    [isOpen]="showSettingsModal"
+    [settings]="chartSettings"
+    (settingsChange)="onSettingsChange($event)"
+    (close)="closeChartSettings()">
+  </app-chart-settings-modal>
+</div>
+

@@ -1,13 +1,88 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>Groupe7TiFrontAout2025</title>
+  <title>Helha Fresh</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Meta tags critiques -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+
+  <!-- Préchargement des polices et assets critiques -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap"></noscript>
+
+  <!-- Préchargement des fichiers JS -->
+  <link rel="preload" href="runtime.js" as="script">
+  <link rel="preload" href="polyfills.js" as="script">
+  <link rel="preload" href="main.js" as="script">
+
+  <!-- CSS initial critique -->
+  <style>
+    /* Style minimal pour éviter le FOUC (Flash of Unstyled Content) */
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background: #f5f5f5;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .app-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ffe066 0%, #ffb347 50%, #ff7e5f 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+  </style>
 </head>
 <body>
-  <app-root></app-root>
+<!-- Contenu de chargement initial -->
+<div class="app-loading">
+  <div style="color: white; text-align: center;">
+    <h1>Helha Fresh</h1>
+    <p>Chargement en cours...</p>
+  </div>
+</div>
+
+<app-root></app-root>
+
+<!-- Scripts avec fallback -->
+<script>
+  // Gestion du loader
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      document.body.style.opacity = '1';
+      document.querySelector('.app-loading').style.display = 'none';
+    }, 300);
+  });
+
+  // Fallback si les scripts échouent
+  window.addEventListener('error', function() {
+    document.querySelector('.app-loading').innerHTML =
+      '<div style="color: white; padding: 20px; text-align: center;">' +
+      '<h2>Erreur de chargement</h2>' +
+      '<p>Veuillez rafraîchir la page ou vérifier votre connexion</p>' +
+      '<button onclick="window.location.reload()">Réessayer</button>' +
+      '</div>';
+  });
+</script>
+
+<!-- Chargement asynchrone des scripts -->
+<script src="runtime.js" defer></script>
+<script src="polyfills.js" defer></script>
+<script src="main.js" defer></script>
 </body>
 </html>

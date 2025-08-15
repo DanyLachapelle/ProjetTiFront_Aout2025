@@ -1,0 +1,155 @@
+<!-- ===== ORDER TRACKING PAGE ===== -->
+<div class="tracking-container">
+  <!-- Header with session info -->
+  <header class="tracking-header">
+    <div class="session-info">
+      <div class="table-info">
+        <span class="table-label">Table</span>
+        <span class="table-number">{{ getTableNumber() }}</span>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshOrder()" title="Refresh">
+        🔄
+      </button>
+      <button class="btn-back" (click)="goBackToMenu()" title="Back to menu">
+        ← Menu
+      </button>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="tracking-main">
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading your order...</p>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error && !isLoading" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h2>Error</h2>
+      <p>{{ error }}</p>
+      <button class="btn-primary" (click)="goBackToMenu()">
+        Back to menu
+      </button>
+    </div>
+
+    <!-- Tracking content -->
+    <div *ngIf="order && !isLoading" class="tracking-content">
+      <!-- Order header -->
+      <div class="order-header">
+        <h1>Track your order</h1>
+        <div class="order-meta">
+          <span class="order-id">Order #{{ order.id }}</span>
+          <span class="order-date">{{ getFormattedDate(order.saleDate) }}</span>
+        </div>
+        <div class="last-update">
+          Last update: {{ getLastUpdateTime() }}
+        </div>
+      </div>
+
+      <!-- Current status -->
+      <div class="current-status" *ngIf="getCurrentStatus()">
+        <div class="status-card" [style.border-color]="getCurrentStatus()?.color">
+          <div class="status-icon" [style.color]="getCurrentStatus()?.color">
+            {{ getCurrentStatus()?.icon }}
+          </div>
+          <div class="status-info">
+            <h2 class="status-label">{{ getCurrentStatus()?.label }}</h2>
+            <p class="status-message">{{ getCurrentStatus()?.message }}</p>
+            <div class="estimated-time">
+              <span class="time-icon">⏱️</span>
+              <span class="time-text">{{ getEstimatedTimeRemaining() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <h3>Your order progress</h3>
+          <span class="progress-percentage">{{ getProgressPercentage() }}%</span>
+        </div>
+        
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+        </div>
+
+        <!-- Timeline steps -->
+        <div class="timeline">
+          <div class="timeline-step" 
+               *ngFor="let status of ['PENDING', 'IN_PREPARATION', 'READY', 'DELIVERED']; let i = index"
+               [class.active]="getCurrentStatus()?.status === status"
+               [class.completed]="getProgressPercentage() > STATUS_CONFIG[status].progress">
+            <div class="step-icon" [style.background-color]="STATUS_CONFIG[status].color">
+              {{ STATUS_CONFIG[status].icon }}
+            </div>
+            <div class="step-label">{{ STATUS_CONFIG[status].label }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order details -->
+      <div class="order-details">
+        <h3>Your order details</h3>
+        
+        <div class="order-items">
+          <div *ngIf="order.items.length === 0" class="order-item empty">
+            <div class="item-info">
+              <span class="item-name">No details available</span>
+            </div>
+          </div>
+          <div class="order-item" *ngFor="let item of order.items">
+            <div class="item-info">
+              <span class="item-name">{{ item.mocktailName }}</span>
+              <span class="item-quantity">x{{ item.quantity }}</span>
+            </div>
+            <div class="item-price">
+              <span class="unit-price">{{ item.unitPrice.toFixed(2) }}€</span>
+              <span class="total-price">{{ item.itemTotal.toFixed(2) }}€</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{ order.totalAmount.toFixed(2) }}€</span>
+        </div>
+      </div>
+
+      <!-- Encouragement message -->
+      <div class="encouragement-message" *ngIf="getCurrentStatus()">
+        <div class="message-icon">💬</div>
+        <p>{{ getCurrentStatus()?.message }}</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Live region for screen readers -->
+  <div class="sr-only" aria-live="polite" aria-atomic="true">
+    <span *ngIf="getCurrentStatus()">
+      Order status: {{ getCurrentStatus()?.label }}
+    </span>
+  </div>
+
+  <!-- Modal de confirmation de sortie -->
+  <div class="exit-confirmation-overlay" *ngIf="showExitConfirmationModal">
+    <div class="exit-confirmation-modal">
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-text">
+          <h3>Do you really want to quit?</h3>
+          <p>You will be disconnected.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-no" (click)="cancelExit()">No</button>
+          <button class="modal-btn modal-btn-yes" (click)="confirmExit()">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

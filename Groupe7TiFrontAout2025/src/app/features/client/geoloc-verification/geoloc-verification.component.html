@@ -1,0 +1,120 @@
+<!-- ===== GEOLOCATION VERIFICATION PAGE ===== -->
+<div class="geoloc-container">
+  <!-- Main card -->
+  <div class="geoloc-card">
+    <!-- Header with icon -->
+    <div class="geoloc-header">
+      <div class="geoloc-icon-container">
+        <div class="geoloc-icon">
+          📍
+        </div>
+        <div class="geoloc-icon-glow"></div>
+      </div>
+      <h1 class="geoloc-title">Location Verification</h1>
+      <p class="geoloc-subtitle">Please confirm you are inside our establishment</p>
+    </div>
+
+    <!-- Explanation message -->
+    <div class="geoloc-message">
+      <div class="message-icon">
+        ⚠️
+      </div>
+      <p class="message-text">
+        For security reasons, we need to verify your location.
+      </p>
+    </div>
+
+    <!-- Authorization button -->
+    <div class="geoloc-action">
+      <button 
+        class="geoloc-btn" 
+        (click)="requestGeolocation()" 
+        [disabled]="loading"
+        [class.loading]="loading">
+        
+        <div class="btn-content" *ngIf="!loading">
+          <span class="btn-icon">📍</span>
+          <span class="btn-text">Allow Location Access</span>
+        </div>
+        
+        <div class="btn-loading" *ngIf="loading">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">Verifying location...</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Location Information Display (for demonstration) -->
+    <div *ngIf="locationResult && !error" class="location-info">
+      <div class="info-header">
+        <span class="info-icon">🎯</span>
+        <span class="info-title">Establishment Access Verified</span>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Your Position:</span>
+          <span class="info-value">{{ getFormattedCoordinates() }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Distance from Establishment:</span>
+          <span class="info-value">{{ getFormattedDistance() }}</span>
+        </div>
+        
+        <div class="info-item" *ngIf="getAccuracyInfo()">
+          <span class="info-label">GPS Accuracy:</span>
+          <span class="info-value">{{ getAccuracyInfo() }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Access Status:</span>
+          <span class="info-value status-success">
+            ✅ Access Granted - You're in our establishment!
+          </span>
+        </div>
+      </div>
+
+      <!-- Interactive Map -->
+      <div class="map-section">
+        <div class="map-header">
+          <span class="map-icon">🗺️</span>
+          <span class="map-title">Location Map</span>
+        </div>
+        <app-location-map 
+          [userLatitude]="locationResult.userPosition.latitude"
+          [userLongitude]="locationResult.userPosition.longitude"
+          [establishmentLatitude]="locationResult.establishmentPosition.latitude"
+          [establishmentLongitude]="locationResult.establishmentPosition.longitude">
+        </app-location-map>
+        <div class="map-legend">
+          <div class="legend-item">
+            <div class="legend-marker user-marker"></div>
+            <span class="legend-text">Your Location</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-marker establishment-marker"></div>
+            <span class="legend-text">Our Establishment</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="success-action">
+        <button class="success-btn" (click)="proceedToMenu()">
+          <span class="btn-icon">🍹</span>
+          <span class="btn-text">Continue to Menu</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="error" class="geoloc-error">
+      <div class="error-icon">❌</div>
+      <p class="error-text">{{ error }}</p>
+      <button class="error-retry-btn" (click)="requestGeolocation()">
+        Try Again
+      </button>
+    </div>
+  </div>
+</div>

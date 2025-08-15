@@ -1,0 +1,94 @@
+<!-- ===== PROFESSIONAL HOME PAGE - HELHA FRESH ===== -->
+<div class="home-container">
+  <!-- Animated background particles -->
+  <div class="particles">
+    <div class="particle" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]"></div>
+  </div>
+
+  <!-- Main card -->
+  <div class="home-card">
+    <!-- Left section - QR Code -->
+    <div class="home-left">
+      <div class="left-header">
+        <div class="logo-container">
+          <img src="assets/favicon.png" alt="Helha Fresh" class="home-logo">
+          <div class="logo-glow"></div>
+        </div>
+        <div class="title-section">
+          <h2 class="home-title">Client Access</h2>
+          <p class="home-subtitle">Scan to order</p>
+        </div>
+      </div>
+
+      <div class="qr-section">
+        <div class="qr-container">
+          <div class="qr-card">
+            <img [src]="qrCodeUrl || placeholderPixel" alt="QR Code" class="qr-code" />
+            <div class="qr-overlay">
+              <button
+                class="qr-refresh-btn"
+                (click)="onRefreshQR()"
+                title="Refresh QR Code">
+                <span class="refresh-icon">🔄</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="timer-section">
+          <div class="timer-card">
+            <div class="timer-icon">⏰</div>
+            <div class="timer-content">
+              <span class="timer-label">Renewal in:</span>
+              <span class="timer-value">{{ formatTime(timeLeft) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right section - Marketing -->
+    <div class="home-right">
+      <div class="right-content">
+        <div class="slogan-section">
+          <h1 class="home-slogan">
+            Savor every sip —
+            <span class="home-slogan-accent">summer's too short to be bored.</span>
+          </h1>
+        </div>
+
+        <div class="features-section">
+          <div class="feature-item">
+            <span class="feature-icon">🍹</span>
+            <span class="feature-text">Wide selection of mocktails</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✅</span>
+            <span class="feature-text">Guaranteed alcohol-free</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📱</span>
+            <span class="feature-text">Real-time order tracking</span>
+          </div>
+        </div>
+
+        <div class="actions-section">
+          <button class="btn-home-menu" (click)="onAccessMenu()">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">Access Menu</span>
+            <span class="btn-arrow">→</span>
+          </button>
+          
+          <!-- Manager area button -->
+          <button class="btn-manager-area" (click)="onAccessDashboard()">
+            <span class="btn-icon">👨‍💼</span>
+            <span class="btn-text">Manager Area</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
