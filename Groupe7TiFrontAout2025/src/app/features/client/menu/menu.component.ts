@@ -160,7 +160,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     // Récupérer le numéro de table depuis localStorage
     if (typeof window !== 'undefined' && window.localStorage) {
       const tableNumber = localStorage.getItem('table_number');
-      //console.log('Numéro de table récupéré:', tableNumber);
       return tableNumber || 'T01';
     }
     return 'T01';
@@ -179,11 +178,6 @@ export class MenuComponent implements OnInit, OnDestroy {
         this.mocktails = mocktails;
         this.extractAllIngredients();
 
-        console.log('Mocktails chargés du backend:', this.mocktails.map(m => ({
-          name: m.name,
-          available: m.available,
-          forceAvailable: (m as any).forceAvailable
-        })));
 
         this.filterMocktails();
         this.isLoading = false;
@@ -340,7 +334,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     }
 
     const tableNumber = this.getTableNumber();
-    console.log('📍 Table number:', tableNumber);
 
     // Préparer les données pour l'API
     const saleData = {
@@ -352,32 +345,31 @@ export class MenuComponent implements OnInit, OnDestroy {
       }))
     };
 
-    console.log('🛒 Données de vente:', saleData);
+
 
     this.saleService.createSale(saleData).subscribe({
       next: (response) => {
-        console.log('✅ Order created successfully:', response);
+
 
         // Store the active order ID for tracking
         if (response && response.id) {
           localStorage.setItem('activeOrderId', response.id.toString());
-          console.log('💾 Active order ID stored:', response.id);
+
         }
 
 
         // --- Décrémenter les quantités d'ingrédients ---
         for (const orderItem of this.orderList) {
           const mocktail = orderItem.mocktail;
-          console.log(`\n🍹 Processing mocktail: ${mocktail.name} x${orderItem.quantity}`);
+
           for (const ingredient of mocktail.ingredients) {
             const quantityToDecrease = ingredient.quantity * orderItem.quantity;
 
-            console.log(`\n🍹 Processing mocktail: ${mocktail.name} x${orderItem.quantity}`);
-            console.log(`🔧 Decreasing ingredient: ${ingredient.id} }`);
+
             this.ingredientService.DecreaseQuantity(ingredient.id, quantityToDecrease)
               .subscribe({
                 next: () => {
-                  console.log(`Ingredient ${ingredient.name} decreased by ${quantityToDecrease}`);
+
                 },
                 error: (error) => {
                   console.error(`Erreur lors de la décrémentation de ${ingredient.name}:`, error);
@@ -441,7 +433,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.allergenService.getAvailableAllergens().subscribe({
       next: (allergens) => {
         this.availableAllergens = allergens;
-        console.log('Tous les allergènes disponibles:', allergens);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des allergènes:', error);
@@ -452,7 +443,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.allergenService.getUsedAllergens().subscribe({
       next: (usedAllergens) => {
         this.usedAllergens = usedAllergens.map(a => a.name);
-        console.log('Allergènes actuellement utilisés:', this.usedAllergens);
+
       },
       error: (error) => {
         console.error('Erreur lors du chargement des allergènes utilisés:', error);

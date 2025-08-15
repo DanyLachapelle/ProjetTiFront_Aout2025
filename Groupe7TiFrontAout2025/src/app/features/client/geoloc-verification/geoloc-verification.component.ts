@@ -53,10 +53,8 @@ export class GeolocVerificationComponent {
         this.locationResult = result;
 
         if (result.isWithinEstablishment) {
-          console.log('✅ Utilisateur dans l\'établissement - Accès accordé');
           this.loading = false;
         } else {
-          console.log('❌ Utilisateur hors de l\'établissement');
           this.error = `You are too far from our establishment (${this.geolocationService.formatDistance(result.distance)} away). Please come to our establishment to access our services.`;
           this.loading = false;
         }
@@ -70,7 +68,6 @@ export class GeolocVerificationComponent {
   }
 
   proceedToMenu() {
-    console.log('🍹 Redirection vers le menu');
     this.qrService.setStep(ClientStep.GEOLOC);
     this.router.navigate(['/table']);
   }
