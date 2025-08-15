@@ -97,12 +97,9 @@ export class GestionSalesComponent implements OnInit {
 
 // Modifiez loadSales()
   loadSales(): void {
-    console.log('🔄 Chargement des ventes...');
     this.saleService.getAllSales().subscribe({
       next: (response) => {
-        console.log('✅ Réponse getAllSales:', response);
-        console.log('✅ Type de response:', typeof response);
-        console.log('✅ Keys de response:', Object.keys(response));
+
 
         // Le backend renvoie { Sales: [...] } avec S majuscule
         const backendSales = response.Sales || response.sales || [];
@@ -124,8 +121,7 @@ export class GestionSalesComponent implements OnInit {
         this.extractMocktailNames(); // Extraire les noms de mocktails pour l'autocomplétion
         this.applyFilters();
 
-        console.log('📊 Total commandes:', this.totalAllOrders);
-        console.log('📋 Sales array:', this.sales);
+
       },
       error: (err) => {
         console.error('❌ Erreur chargement ventes:', err);
@@ -446,17 +442,14 @@ export class GestionSalesComponent implements OnInit {
 
 
   openChartSettings(): void {
-    console.log('Opening chart settings modal');
     this.showSettingsModal = true;
   }
 
   closeChartSettings(): void {
-    console.log('Closing chart settings modal');
     this.showSettingsModal = false;
   }
 
   onSettingsChange(settings: ChartSettings): void {
-    console.log('Settings changed:', settings);
     this.chartSettings = { ...settings };
     this.chartExportService.saveChartSettings(settings);
     // Appliquer les nouveaux paramètres aux graphiques

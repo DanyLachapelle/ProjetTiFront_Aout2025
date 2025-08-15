@@ -582,14 +582,7 @@ export class GestionMocktailsComponent implements OnInit {
       this.hasValidIngredients()
     );
 
-    console.log('Validation du formulaire:', {
-      name: this.mocktailForm.name,
-      description: this.mocktailForm.description,
-      price: this.mocktailForm.price,
-      image: this.mocktailForm.image,
-      hasValidIngredients: this.hasValidIngredients(),
-      isValid: isValid
-    });
+
 
     return isValid;
   }
@@ -599,16 +592,13 @@ export class GestionMocktailsComponent implements OnInit {
     this.showErrors = true;
 
     if (!this.validateForm()) {
-      console.log('Formulaire invalide');
       return;
     }
 
     this.isSaving = true;
-    console.log('Début de la sauvegarde...');
 
     if (this.editingMocktail) {
       // Edit mode - update existing mocktail
-      console.log('Mode édition pour:', this.editingMocktail.name);
       const updateRequest: UpdateMocktailRequest = {
         name: this.mocktailForm.name,
         description: this.mocktailForm.description,
