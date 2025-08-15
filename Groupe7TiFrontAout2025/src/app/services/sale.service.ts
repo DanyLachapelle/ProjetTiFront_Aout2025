@@ -34,7 +34,6 @@ export class SaleService {
   }
 
   getAllSales(): Observable<any> {
-    console.log('🌐 Appel getAllSales vers:', `${this.baseUrl}/SaleQuery/GetAllSales`);
     return this._http.get<any>(`${this.baseUrl}/SaleQuery/GetAllSales`);
   }
 
