@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import {MocktailService, Mocktail} from '../../../services/mocktail.service';
 import {Ingredient, IngredientService} from '../../../services/ingredient.service';
 import {SaleService} from '../../../services/sale.service';
+import {UserService} from '../login-page/user.service';
 
 
 @Component({
@@ -46,6 +47,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     newPassword: '',
     confirmPassword: ''
   };
+
+  // Password change validation
+  passwordCriteria = {
+    minLength: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false
+  };
+
+  successMessage = '';
+  errorMessage = '';
+
+  allCriteriaValid = false;
 
   // Navigation menu
   menuItems = [
@@ -113,7 +128,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private mocktailService: MocktailService,
     private ingredientService: IngredientService,
-    private saleService: SaleService
+    private saleService: SaleService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -222,20 +238,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   }
 
+  onNewPasswordChange(value: string): void {
+    this.passwordForm.newPassword = value;
+    this.passwordCriteria.minLength = value.length >= 8;
+    this.passwordCriteria.uppercase = /[A-Z]/.test(value);
+    this.passwordCriteria.lowercase = /[a-z]/.test(value);
+    this.passwordCriteria.number = /\d/.test(value);
+    this.passwordCriteria.specialChar = /[@$!%*?&]/.test(value);
+
+    this.allCriteriaValid = Object.values(this.passwordCriteria).every(Boolean);
+  }
+
   // Change password
   changePassword(): void {
+    if (!this.allCriteriaValid) {
+      alert('New password does not meet security criteria.');
+      return;
+    }
+
     if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
       alert('Passwords do not match');
       return;
     }
 
-    if (this.passwordForm.newPassword.length < 6) {
-      alert('New password must contain at least 6 characters');
-      return;
-    }
-
-    // TODO: Implement password change logic
     console.log('Password change requested');
+
+    this.userService.changePassword({
+      oldPassword: this.passwordForm.currentPassword,
+      newPassword: this.passwordForm.newPassword
+    }).subscribe({
+      next: (res: any) => {
+        this.successMessage = res.message || 'Password updated successfully.';
+        this.closeSettings();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error during password change.';
+      }
+    });
+
     alert('Password changed successfully!');
     this.closeSettings();
   }

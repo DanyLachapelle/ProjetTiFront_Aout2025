@@ -15,13 +15,22 @@ import {UserService} from '../login-page/user.service';
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css']
 })
+
 export class ResetPasswordComponent implements OnInit {
   resetForm!: FormGroup;
   token!: string;
   successMessage = '';
   errorMessage = '';
 
+  passwordCriteria = {
+    minLength: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false
+  };
 
+  allCriteriaValid = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -35,7 +44,23 @@ export class ResetPasswordComponent implements OnInit {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
 
     this.resetForm = this.fb.group({
-      newPassword: ['', [Validators.required, Validators.minLength(6)]]
+      newPassword: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$')
+        ]
+      ]
+    });
+
+    this.resetForm.get('newPassword')?.valueChanges.subscribe(value => {
+      this.passwordCriteria.minLength = value?.length >= 8;
+      this.passwordCriteria.uppercase = /[A-Z]/.test(value);
+      this.passwordCriteria.lowercase = /[a-z]/.test(value);
+      this.passwordCriteria.number = /\d/.test(value);
+      this.passwordCriteria.specialChar = /[@$!%*?&]/.test(value);
+
+      this.allCriteriaValid = Object.values(this.passwordCriteria).every(Boolean);
     });
   }
 

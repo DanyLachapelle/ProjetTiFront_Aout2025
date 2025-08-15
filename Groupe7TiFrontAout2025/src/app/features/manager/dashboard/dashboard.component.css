@@ -9,11 +9,11 @@
   --error-color: #ff6f91;
   --dark-color: #2d3436;
   --light-color: #fff8e7;
-  
+
   --gradient-primary: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   --gradient-secondary: linear-gradient(135deg, #43cea2 0%, #7ee8fa 100%);
   --gradient-card: rgba(255, 255, 255, 0.95);
-  
+
   --border-radius: 20px;
   --box-shadow: 0 8px 32px rgba(255, 126, 95, 0.15);
   --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -722,15 +722,15 @@
     max-width: 95vw;
     margin: 1rem;
   }
-  
+
   .notification-item {
     padding: 0.8rem;
   }
-  
+
   .notification-message {
     font-size: 0.9rem;
   }
-  
+
   .password-form {
     gap: 1rem;
   }
@@ -815,7 +815,7 @@
     min-width: 220px;
     max-width: 98vw;
   }
-  
+
   .menu-grid {
     max-width: 100%;
     gap: 2rem;
@@ -1001,3 +1001,19 @@
   border-color: var(--primary-color);
   transform: translateY(-2px);
 }
+
+.password-requirements {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.password-requirements li.valid {
+  color: green;
+}
+
+.password-requirements li.invalid {
+  color: red;
+}
+
