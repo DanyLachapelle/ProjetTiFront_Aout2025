@@ -43,7 +43,7 @@ export class GeolocationService {
       map(position => {
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
-        
+
         const distance = this.calculateDistance(
           userLat, userLng,
           ESTABLISHMENT_CONFIG.latitude,
@@ -58,24 +58,14 @@ export class GeolocationService {
           timestamp: new Date(position.timestamp)
         } : undefined;
 
-        console.log('📍 Vérification géolocalisation:', {
-          userPosition: { latitude: userLat, longitude: userLng },
-          establishmentPosition: { 
-            latitude: ESTABLISHMENT_CONFIG.latitude, 
-            longitude: ESTABLISHMENT_CONFIG.longitude 
-          },
-          distance: `${Math.round(distance/1000)}km`,
-          isWithinEstablishment,
-          demoInfo
-        });
 
         return {
           isWithinEstablishment,
           distance,
           userPosition: { latitude: userLat, longitude: userLng },
-          establishmentPosition: { 
-            latitude: ESTABLISHMENT_CONFIG.latitude, 
-            longitude: ESTABLISHMENT_CONFIG.longitude 
+          establishmentPosition: {
+            latitude: ESTABLISHMENT_CONFIG.latitude,
+            longitude: ESTABLISHMENT_CONFIG.longitude
           },
           demoInfo
         };

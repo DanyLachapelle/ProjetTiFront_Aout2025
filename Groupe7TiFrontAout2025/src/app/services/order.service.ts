@@ -42,10 +42,8 @@ export class OrderService {
 
   // Get all orders
   getAllOrders(): Observable<OrdersResponse> {
-    console.log('🔍 API call getAllOrders to:', `${this.baseUrl}/SaleQuery/GetAllSales`);
     return this.http.get<OrdersResponse>(`${this.baseUrl}/SaleQuery/GetAllSales`).pipe(
       map(response => {
-        console.log('📊 Raw backend response:', response);
         return response;
       })
     );
@@ -53,11 +51,9 @@ export class OrderService {
 
   // Get order by ID
   getOrderById(id: number): Observable<Order> {
-    console.log('🔍 API call getOrderById for ID:', id);
     // First try to get the specific order by ID
     return this.http.get<Order>(`${this.baseUrl}/SaleQuery/GetSaleById?id=${id}`).pipe(
       map(order => {
-        console.log('📊 Direct order response:', order);
         if (!order) {
           throw new Error(`Order with ID ${id} not found`);
         }
@@ -65,15 +61,12 @@ export class OrderService {
       }),
       // If direct call fails, fallback to GetAllSales and filter
       catchError(() => {
-        console.log('⚠️ Direct order fetch failed, falling back to GetAllSales');
         return this.http.get<OrdersResponse>(`${this.baseUrl}/SaleQuery/GetAllSales`).pipe(
           map(response => {
-            console.log('📊 Fallback getAllSales response for getOrderById:', response);
             const order = response.sales.find(sale => sale.id === id);
             if (!order) {
               throw new Error(`Order with ID ${id} not found`);
             }
-            console.log('📊 Order found by ID (fallback):', order);
             return order;
           })
         );
@@ -101,7 +94,7 @@ export class OrderService {
   // Get orders by status
   getOrdersByStatus(status: 'PENDING' | 'IN_PREPARATION' | 'READY' | 'DELIVERED'): Observable<Order[]> {
     return this.getAllOrders().pipe(
-      map(response => response.sales.filter(order => 
+      map(response => response.sales.filter(order =>
         order.status === status || (status === 'PENDING' && order.status === 'Pending')
       ))
     );
@@ -110,10 +103,10 @@ export class OrderService {
   // Normalize order status
   normalizeStatus(status: string): 'PENDING' | 'IN_PREPARATION' | 'READY' | 'DELIVERED' {
     if (!status) return 'PENDING';
-    
+
     // Normalize different variations of status strings
     const normalizedStatus = status.trim().toUpperCase();
-    
+
     switch (normalizedStatus) {
       case 'PENDING':
       case 'Pending':
